@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    background-color: #f8fafc;
+    color: #1e293b;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+  }
+}
+
+/* AICTE Custom Color Tokens for Tailwind v4 */
+@theme {
+  --color-aicte-navy-50: #f0f4f9;
+  --color-aicte-navy-100: #dce5f1;
+  --color-aicte-navy-200: #bdcfe3;
+  --color-aicte-navy-300: #8eb3d1;
+  --color-aicte-navy-400: #5891bc;
+  --color-aicte-navy-500: #3473a5;
+  --color-aicte-navy-600: #265b87;
+  --color-aicte-navy-700: #1e486d;
+  --color-aicte-navy-800: #193957;
+  --color-aicte-navy-900: #0f2942;
+  --color-aicte-navy-950: #0a1a2c;
+}
+
+/* Custom subtle administrative scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
