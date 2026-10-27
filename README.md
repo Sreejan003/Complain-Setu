@@ -147,17 +147,40 @@ NEW COMPLAINT SUBMITTED
 
 ---
 
-## 🗄️ Database Architecture & Supabase Compatibility
+## 🗄️ Database Architecture & Migrations
 
-The project includes production-ready PostgreSQL schemas and Row Level Security (RLS) policies:
+The project features a dual persistence architecture adhering to the `IRepository` abstraction contract:
 
-* `database/01_schema.sql`: 11 normalized tables (`institutions`, `complaints`, `overlap_alerts`, `case_history`, `case_transfers`, `related_cases`, `notifications`, `audit_logs`, etc.) with foreign keys, checks, and performance indexes.
-* `database/02_rls_policies.sql`: Granular Row Level Security policies enforcing data isolation by bureau and role.
+* **Production Target (PostgreSQL / Supabase)**:
+  * `database/migrations/001_initial_schema.sql`: 12 normalized relational tables with full referential integrity, foreign key constraints, indexes, and automated timestamp triggers.
+  * `database/migrations/002_rls_policies.sql`: Granular Row Level Security (RLS) policies enforcing multi-tenant isolation by bureau and territorial jurisdiction.
+  * To run migrations against a live database:
+    ```bash
+    npm run migrate:backend
+    ```
+    Or from the `backend/` directory:
+    ```bash
+    npm run migrate
+    ```
 
-### Local Zero-Friction Development
-When external Supabase credentials are not provided, the application automatically operates using an ACID in-process JSON persistent store (`backend/src/data/db.json`). This ensures that:
-* The application runs out of the box with zero external dependencies.
-* Realistic synthetic data is preserved across server restarts.
+* **Development & Offline Adapter (ACID JSON Store)**:
+  * When `PERSISTENCE_DRIVER=json` (or when `DATABASE_URL` is omitted in development), the application automatically operates using the local file-backed JSON repository (`backend/src/data/db.json`).
+  * Features file-integrity checksums, real-time metrics, and live health reporting.
+
+---
+
+## 🧪 Automated Testing & Verification
+
+The project includes an extensive test suite verifying 23 statutory, cryptographic, and algorithmic criteria:
+
+```bash
+# Run backend verification suite
+npm test --prefix backend
+
+# Execute clean builds across the monorepo
+npm run build:backend
+npm run build:frontend
+```
 * The Administrator can reset to baseline seed data anytime via the Administration panel.
 
 ---

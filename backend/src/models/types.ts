@@ -8,6 +8,8 @@ export interface Profile {
   role: UserRole;
   bureauId?: string;
   region?: string;
+  institutionId?: string;
+  institutionName?: string;
   designation?: string;
   isActive: boolean;
   createdAt: string;
@@ -56,6 +58,7 @@ export interface Complaint {
   hasOverlapAlert: boolean;
   disposalDate?: string;
   disposalRemarks?: string;
+  slaTargetDays?: number;
   createdBy?: string;
   createdByName?: string;
   createdAt: string;
@@ -117,6 +120,38 @@ export interface RelatedCase {
   createdAt: string;
 }
 
+export interface OverlapExplanation {
+  institutionMatch: {
+    matched: boolean;
+    score: number;
+    details: string;
+  };
+  crossBureauMatch: {
+    isCrossBureau: boolean;
+    bureauA: string;
+    bureauB: string;
+    details: string;
+  };
+  categoryMatch: {
+    exactMatch: boolean;
+    categoryA: string;
+    categoryB: string;
+    details: string;
+  };
+  keywordMatch: {
+    matchedTerms: string[];
+    score: number;
+    details: string;
+  };
+  semanticMatch: {
+    score: number;
+    engine: string;
+    details: string;
+  };
+  summary: string;
+  recommendation: string;
+}
+
 export interface OverlapAlert {
   id: string;
   alertId: string;
@@ -140,11 +175,14 @@ export interface OverlapAlert {
   ruleMatchScore: number;
   semanticSimilarityScore?: number;
   matchReasons: string[];
+  explanation?: OverlapExplanation;
   alertStatus: OverlapStatus;
   recommendedAction: string;
   reviewedBy?: string;
   reviewedByName?: string;
   reviewedAt?: string;
+  confidenceCategory?: "High-Confidence Duplicate" | "Related Grievance" | "Low-Confidence Match";
+  detectionMethod?: string;
   reviewRemarks?: string;
   createdAt: string;
   updatedAt: string;
@@ -175,6 +213,21 @@ export interface AuditLog {
   createdAt: string;
 }
 
+export interface ComplaintDocument {
+  id: string;
+  complaintId: string;
+  institutionId?: string;
+  fileName: string;
+  originalName: string;
+  fileSize: number;
+  mimeType: string;
+  fileUrl: string;
+  documentType: string;
+  uploadedBy: string;
+  uploadedByName: string;
+  uploadedAt: string;
+}
+
 export interface DetectionResult {
   hasOverlap: boolean;
   candidateAlerts: {
@@ -183,6 +236,7 @@ export interface DetectionResult {
     semanticScore?: number;
     combinedScore: number;
     reasons: string[];
+    explanation?: OverlapExplanation;
     isCrossBureau: boolean;
     recommendation: string;
   }[];

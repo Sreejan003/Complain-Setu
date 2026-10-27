@@ -21,19 +21,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     async function initAuth() {
       try {
-        const accounts = await api.getDemoAccounts();
+        const accounts = await api.getDemoAccounts().catch(() => []);
         setDemoAccounts(accounts);
 
         const token = localStorage.getItem("aicte_token");
         if (token) {
-          const profile = await api.getCurrentUser();
-          setUser(profile);
-        } else if (accounts.length > 0) {
-          // Default auto-login as Dr. Rajeshwar Sharma (Administrator) for smooth demo experience
-          const defaultAdmin = accounts[0];
-          const res = await api.login(defaultAdmin.email, "Aicte@2026");
-          localStorage.setItem("aicte_token", res.token);
-          setUser(res.user);
+          try {
+            const profile = await api.getCurrentUser();
+            setUser(profile);
+          } catch (err) {
+            console.warn("Session expired or token invalid, clearing local storage.");
+            localStorage.removeItem("aicte_token");
+            setUser(null);
+          }
         }
       } catch (err) {
         console.error("Auth init error:", err);

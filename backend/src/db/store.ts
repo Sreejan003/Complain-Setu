@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { v4 as uuidv4 } from "uuid";
 import {
   Profile,
   Institution,
@@ -10,10 +11,12 @@ import {
   CaseTransfer,
   RelatedCase,
   Notification,
-  AuditLog
+  AuditLog,
+  ComplaintDocument
 } from "../models/types.js";
+import type { IRepository, DatabaseHealthResult } from "./repository.js";
 import { generateSeedData } from "./seedData.js";
-import { detectOverlapsForComplaint, evaluateComplaintPair } from "../services/overlapEngine.js";
+import { detectOverlapsForComplaint, evaluateComplaintPair, fuzzyMatchInstitution } from "../services/overlapEngine.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -30,17 +33,43 @@ interface DatabaseSchema {
   relatedCases: RelatedCase[];
   notifications: Notification[];
   auditLogs: AuditLog[];
+  documents?: ComplaintDocument[];
   meta: {
     lastReset: string;
     version: string;
   };
 }
 
-class Store {
+export class Store implements IRepository {
+  public readonly mode = "Local Persistent JSON Store (ACID)";
   private data: DatabaseSchema;
 
   constructor() {
     this.data = this.loadData();
+  }
+
+  public async healthCheck(): Promise<DatabaseHealthResult> {
+    try {
+      const exists = fs.existsSync(DB_FILE);
+      const stats = exists ? fs.statSync(DB_FILE) : null;
+      return {
+        connected: exists,
+        mode: "Local Persistent JSON Store (ACID)",
+        details: {
+          file: DB_FILE,
+          sizeBytes: stats?.size || 0,
+          totalComplaints: this.data.complaints.length,
+          totalInstitutions: this.data.institutions.length,
+          lastReset: this.data.meta.lastReset
+        }
+      };
+    } catch (err: any) {
+      return {
+        connected: false,
+        mode: "Local Persistent JSON Store (ACID)",
+        error: err.message
+      };
+    }
   }
 
   private loadData(): DatabaseSchema {
@@ -51,7 +80,11 @@ class Store {
     if (fs.existsSync(DB_FILE)) {
       try {
         const raw = fs.readFileSync(DB_FILE, "utf-8");
-        return JSON.parse(raw);
+        const parsed: DatabaseSchema = JSON.parse(raw);
+        if (!parsed.documents) {
+          parsed.documents = [];
+        }
+        return parsed;
       } catch (err) {
         console.error("Error reading db.json, generating fresh seed data:", err);
       }
@@ -73,6 +106,36 @@ class Store {
       relatedCases: [],
       notifications: seed.notifications,
       auditLogs: [],
+      documents: [
+        {
+          id: "doc-seed-001",
+          complaintId: seed.complaints[0]?.id || "c-001",
+          institutionId: seed.complaints[0]?.institutionId,
+          fileName: "Inspection_Report_Preliminary.pdf",
+          originalName: "Inspection_Report_Preliminary.pdf",
+          fileSize: 245800,
+          mimeType: "application/pdf",
+          fileUrl: "/uploads/Inspection_Report_Preliminary.pdf",
+          documentType: "Investigation Report",
+          uploadedBy: seed.profiles[0]?.id || "admin",
+          uploadedByName: seed.profiles[0]?.fullName || "AICTE Official",
+          uploadedAt: new Date(Date.now() - 5 * 86400000).toISOString()
+        },
+        {
+          id: "doc-seed-002",
+          complaintId: seed.complaints[0]?.id || "c-001",
+          institutionId: seed.complaints[0]?.institutionId,
+          fileName: "Petitioner_Grievance_Annexure.pdf",
+          originalName: "Petitioner_Grievance_Annexure.pdf",
+          fileSize: 154200,
+          mimeType: "application/pdf",
+          fileUrl: "/uploads/Petitioner_Grievance_Annexure.pdf",
+          documentType: "Complaint Evidence",
+          uploadedBy: seed.profiles[1]?.id || "officer",
+          uploadedByName: seed.profiles[1]?.fullName || "Desk Officer",
+          uploadedAt: new Date(Date.now() - 7 * 86400000).toISOString()
+        }
+      ],
       meta: {
         lastReset: new Date().toISOString(),
         version: "1.0.0"
@@ -193,6 +256,25 @@ class Store {
     return inst;
   }
 
+  public findInstitutionsByFuzzyName(query: string): { institution: Institution; score: number }[] {
+    if (!query || query.trim().length === 0) return [];
+    const results: { institution: Institution; score: number }[] = [];
+    const qClean = query.toLowerCase().trim();
+
+    for (const inst of this.data.institutions) {
+      if (inst.aictePermanentId.toLowerCase() === qClean) {
+        results.push({ institution: inst, score: 100 });
+        continue;
+      }
+      const matchRes = fuzzyMatchInstitution(query, inst.name);
+      if (matchRes.match || matchRes.score >= 40) {
+        results.push({ institution: inst, score: matchRes.score });
+      }
+    }
+
+    return results.sort((a, b) => b.score - a.score);
+  }
+
   public createInstitution(data: Omit<Institution, "id" | "totalComplaintsCount" | "activeComplaintsCount" | "overlapCount" | "createdAt" | "updatedAt">): Institution {
     const exists = this.data.institutions.some(i => i.aictePermanentId === data.aictePermanentId);
     if (exists) {
@@ -226,8 +308,14 @@ class Store {
     category?: string;
     status?: string;
     priority?: string;
+    assignedOfficerId?: string;
     isOverdue?: boolean;
+    isDueSoon?: boolean;
     hasOverlap?: boolean;
+    receivedFrom?: string;
+    receivedTo?: string;
+    lastActionFrom?: string;
+    lastActionTo?: string;
     page?: number;
     limit?: number;
     sortBy?: string;
@@ -249,8 +337,10 @@ class Store {
         c =>
           c.complaintId.toLowerCase().includes(q) ||
           c.title.toLowerCase().includes(q) ||
+          (c.description && c.description.toLowerCase().includes(q)) ||
           c.institutionName.toLowerCase().includes(q) ||
-          c.aictePermanentId.toLowerCase().includes(q)
+          c.aictePermanentId.toLowerCase().includes(q) ||
+          (c.category && c.category.toLowerCase().includes(q))
       );
     }
 
@@ -270,6 +360,10 @@ class Store {
       result = result.filter(c => c.priority === params.priority);
     }
 
+    if (params.assignedOfficerId) {
+      result = result.filter(c => c.assignedOfficerId === params.assignedOfficerId);
+    }
+
     if (params.hasOverlap !== undefined) {
       result = result.filter(c => c.hasOverlapAlert === params.hasOverlap);
     }
@@ -277,14 +371,45 @@ class Store {
     if (params.isOverdue) {
       const today = new Date().toISOString().split("T")[0];
       result = result.filter(
-        c => ["Pending", "Under Process"].includes(c.status) && c.expectedDisposalDate < today
+        c => ["Pending", "Under Process", "Escalated"].includes(c.status) && c.expectedDisposalDate < today
       );
+    }
+
+    if ((params as any).isDueSoon) {
+      const today = new Date().toISOString().split("T")[0];
+      const dueSoonTarget = new Date(Date.now() + 5 * 86400000).toISOString().split("T")[0];
+      result = result.filter(
+        c => ["Pending", "Under Process"].includes(c.status) && c.expectedDisposalDate >= today && c.expectedDisposalDate <= dueSoonTarget
+      );
+    }
+
+    // Date-range filters on receivedDate (ISO date string comparison)
+    if (params.receivedFrom) {
+      result = result.filter(c => c.receivedDate >= params.receivedFrom!);
+    }
+    if (params.receivedTo) {
+      result = result.filter(c => c.receivedDate <= params.receivedTo!);
+    }
+
+    // Date-range filters on last action (updatedAt)
+    if (params.lastActionFrom) {
+      result = result.filter(c => c.updatedAt.split("T")[0] >= params.lastActionFrom!);
+    }
+    if (params.lastActionTo) {
+      result = result.filter(c => c.updatedAt.split("T")[0] <= params.lastActionTo!);
     }
 
     const sortBy = params.sortBy || "receivedDate";
     const sortOrder = params.sortOrder === "asc" ? 1 : -1;
 
+    const PRIORITY_ORDER: Record<string, number> = { Critical: 4, High: 3, Medium: 2, Low: 1 };
+
     result.sort((a: any, b: any) => {
+      if (sortBy === "priority") {
+        const pA = PRIORITY_ORDER[a.priority] || 0;
+        const pB = PRIORITY_ORDER[b.priority] || 0;
+        return (pA - pB) * sortOrder;
+      }
       if (a[sortBy] < b[sortBy]) return -1 * sortOrder;
       if (a[sortBy] > b[sortBy]) return 1 * sortOrder;
       return 0;
@@ -336,7 +461,7 @@ class Store {
     const today = new Date().toISOString().split("T")[0];
 
     // Calculate default SLA expected disposal date if not given
-    const slaDays = data.priority === "Critical" ? 7 : data.priority === "High" ? 15 : 30;
+    const slaDays = data.priority === "Critical" ? 7 : data.priority === "High" ? 15 : data.priority === "Medium" ? 30 : 45;
     const expDate = data.expectedDisposalDate || new Date(Date.now() + slaDays * 86400000).toISOString().split("T")[0];
 
     let assignedOfficerName = "";
@@ -359,6 +484,7 @@ class Store {
       description: data.description,
       receivedDate: today,
       expectedDisposalDate: expDate,
+      slaTargetDays: slaDays,
       receivingBureauId: data.receivingBureauId,
       currentBureauId: data.receivingBureauId,
       assignedOfficerId: data.assignedOfficerId,
@@ -378,8 +504,19 @@ class Store {
     if (detectionResult.hasOverlap) {
       newComplaint.hasOverlapAlert = true;
 
-      // Create Overlap Alert records
+      // Create Overlap Alert records with deduplication
       detectionResult.candidateAlerts.forEach((cand, idx) => {
+        const alreadyExists = this.data.overlapAlerts.some(
+          o =>
+            (o.complaintIdA === cand.existingComplaint.id && o.complaintIdB === newComplaint.id) ||
+            (o.complaintIdA === newComplaint.id && o.complaintIdB === cand.existingComplaint.id)
+        );
+        if (alreadyExists) return;
+
+        const combinedScore = Math.min(100, Math.round(cand.ruleScore * 0.6 + (cand.semanticScore || 0) * 0.4));
+        const confidenceCategory: "High-Confidence Duplicate" | "Related Grievance" | "Low-Confidence Match" =
+          combinedScore >= 80 ? "High-Confidence Duplicate" : combinedScore >= 50 ? "Related Grievance" : "Low-Confidence Match";
+
         const alertId = `OVL-2026-${String(this.data.overlapAlerts.length + idx + 1).padStart(4, "0")}`;
         const alert: OverlapAlert = {
           id: `ovl-${Date.now()}-${idx}`,
@@ -404,6 +541,9 @@ class Store {
           ruleMatchScore: cand.ruleScore,
           semanticSimilarityScore: cand.semanticScore,
           matchReasons: cand.reasons,
+          explanation: cand.explanation,
+          confidenceCategory,
+          detectionMethod: cand.explanation?.semanticMatch?.engine || "Rule & Cosine Fallback",
           alertStatus: "Pending Review",
           recommendedAction: cand.recommendation,
           createdAt: new Date().toISOString(),
@@ -484,6 +624,29 @@ class Store {
     const fromStatus = comp.status;
     let actionType = "Status Update";
 
+    // Validate permitted transitions
+    const VALID_TRANSITIONS: Record<string, string[]> = {
+      "Pending": ["Under Process", "Escalated", "Transferred"],
+      "Under Process": ["Disposed", "Escalated", "Transferred", "Pending"],
+      "Escalated": ["Under Process", "Disposed", "Transferred"],
+      "Transferred": ["Under Process", "Pending", "Escalated"],
+      "Disposed": ["Under Process"] // Reopen, admin only
+    };
+
+    if (updates.status && updates.status !== fromStatus) {
+      const allowed = VALID_TRANSITIONS[fromStatus] || [];
+      if (!allowed.includes(updates.status)) {
+        throw new Error(`Invalid status transition: Cannot transition complaint from "${fromStatus}" to "${updates.status}". Permitted transitions: ${allowed.join(", ")}`);
+      }
+    }
+
+    if (fromStatus === "Disposed" && updates.status && updates.status !== "Disposed") {
+      if (user.role !== "Administrator") {
+        throw new Error("Disposed cases are closed and can only be reopened by an Administrator.");
+      }
+      actionType = "Case Reopened";
+    }
+
     if (updates.status) {
       comp.status = updates.status;
       if (updates.status === "Disposed") {
@@ -552,7 +715,12 @@ class Store {
     const comp = this.getComplaintById(complaintId);
     if (!comp) throw new Error("Complaint not found");
 
+    if (transferData.toBureauId === comp.currentBureauId) {
+      throw new Error(`Cannot transfer case to the same bureau (${transferData.toBureauId}). Destination must be different.`);
+    }
+
     const fromBureau = comp.currentBureauId;
+    const fromStatus = comp.status;
     const fromOfficerId = comp.assignedOfficerId;
     const fromOfficerName = comp.assignedOfficerName;
 
@@ -593,7 +761,7 @@ class Store {
       id: `hist-${Date.now()}`,
       complaintId: comp.id,
       actionType: "Case Transferred",
-      fromStatus: "Under Process",
+      fromStatus,
       toStatus: "Transferred",
       remarks: `Transferred from ${fromBureau} to ${transferData.toBureauId}. Reason: ${transferData.transferReason}`,
       performedBy: user.id,
@@ -631,6 +799,12 @@ class Store {
     return this.data.caseHistory
       .filter(h => h.complaintId === comp.id || h.complaintId === comp.complaintId)
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  }
+
+  public addCaseHistory(history: CaseHistory): CaseHistory {
+    this.data.caseHistory.push(history);
+    this.persist();
+    return history;
   }
 
   // ====================================================================
@@ -755,8 +929,74 @@ class Store {
       });
     }
 
+    // Add Audit Log entry for review
+    this.data.auditLogs.push({
+      id: `audit-${Date.now()}`,
+      userId: user.id,
+      userName: user.fullName,
+      action: "REVIEW_OVERLAP_ALERT",
+      entityType: "OverlapAlert",
+      entityId: alert.alertId,
+      details: {
+        decision: reviewData.decision,
+        remarks: reviewData.remarks,
+        ruleScore: alert.ruleMatchScore,
+        semanticScore: alert.semanticSimilarityScore,
+        complaintRefA: alert.complaintRefA,
+        complaintRefB: alert.complaintRefB,
+        detectionMethod: alert.detectionMethod || alert.explanation?.semanticMatch?.engine || "TF-IDF Fallback"
+      },
+      createdAt: new Date().toISOString()
+    });
+
     this.persist();
     return alert;
+  }
+
+  public overrideSlaDeadline(
+    complaintId: string,
+    newDeadline: string,
+    overrideReason: string,
+    user: Profile
+  ): Complaint {
+    const comp = this.getComplaintById(complaintId);
+    if (!comp) throw new Error("Complaint not found");
+
+    if (!overrideReason || overrideReason.trim().length < 5) {
+      throw new Error("A comprehensive administrative reason (at least 5 characters) is required to override SLA deadlines.");
+    }
+
+    const oldDeadline = comp.expectedDisposalDate;
+    comp.expectedDisposalDate = newDeadline;
+    comp.updatedAt = new Date().toISOString();
+
+    // Case History
+    this.data.caseHistory.push({
+      id: `hist-${Date.now()}`,
+      complaintId: comp.id,
+      actionType: "SLA Deadline Overridden",
+      fromStatus: comp.status,
+      toStatus: comp.status,
+      remarks: `Statutory deadline adjusted from ${oldDeadline} to ${newDeadline}. Official Justification: ${overrideReason}`,
+      performedBy: user.id,
+      performedByName: user.fullName,
+      createdAt: new Date().toISOString()
+    });
+
+    // Audit Log
+    this.data.auditLogs.push({
+      id: `audit-${Date.now()}`,
+      userId: user.id,
+      userName: user.fullName,
+      action: "SLA_DEADLINE_OVERRIDDEN",
+      entityType: "Complaint",
+      entityId: comp.complaintId,
+      details: { previousDeadline: oldDeadline, newDeadline, reason: overrideReason },
+      createdAt: new Date().toISOString()
+    });
+
+    this.persist();
+    return comp;
   }
 
   public getRelatedCases(complaintId: string): RelatedCase[] {
@@ -795,11 +1035,29 @@ class Store {
     this.persist();
   }
 
+  public addNotification(notification: Notification): Notification {
+    if (!this.data.notifications) this.data.notifications = [];
+    this.data.notifications.unshift(notification);
+    this.persist();
+    return notification;
+  }
+
   // ====================================================================
   // AUDIT LOGS
   // ====================================================================
   public getAuditLogs() {
     return [...this.data.auditLogs].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  }
+
+  public addAuditLog(log: Omit<AuditLog, "id" | "createdAt">): AuditLog {
+    const entry: AuditLog = {
+      id: uuidv4(),
+      createdAt: new Date().toISOString(),
+      ...log
+    };
+    this.data.auditLogs.push(entry);
+    this.persist();
+    return entry;
   }
 
   // ====================================================================
@@ -932,7 +1190,180 @@ class Store {
       criticalAlerts
     };
   }
+
+  // ====================================================================
+  // SUPPORTING DOCUMENTS
+  // ====================================================================
+  public getDocuments(params: { complaintId?: string; institutionId?: string }): ComplaintDocument[] {
+    if (!this.data.documents) {
+      this.data.documents = [];
+    }
+    return this.data.documents.filter(doc => {
+      if (params.complaintId && doc.complaintId !== params.complaintId) return false;
+      if (params.institutionId && doc.institutionId !== params.institutionId) return false;
+      return true;
+    });
+  }
+
+  public getDocumentById(id: string): ComplaintDocument | undefined {
+    if (!this.data.documents) this.data.documents = [];
+    return this.data.documents.find(d => d.id === id);
+  }
+
+  public addDocument(doc: ComplaintDocument): ComplaintDocument {
+    if (!this.data.documents) this.data.documents = [];
+    this.data.documents.unshift(doc);
+    this.persist();
+    return doc;
+  }
+
+  public deleteDocument(id: string): boolean {
+    if (!this.data.documents) this.data.documents = [];
+    const idx = this.data.documents.findIndex(d => d.id === id);
+    if (idx !== -1) {
+      this.data.documents.splice(idx, 1);
+      this.persist();
+      return true;
+    }
+    return false;
+  }
+
+  // ====================================================================
+  // COMPREHENSIVE PERFORMANCE & STATUTORY REPORTS
+  // ====================================================================
+  public getPerformanceReport(params?: { period?: string; bureau?: string }) {
+    let complaints = [...this.data.complaints];
+    const now = new Date();
+
+    if (params?.period === "30d") {
+      const cutoff = new Date(now.getTime() - 30 * 86400000).toISOString().split("T")[0];
+      complaints = complaints.filter(c => c.receivedDate >= cutoff);
+    } else if (params?.period === "90d") {
+      const cutoff = new Date(now.getTime() - 90 * 86400000).toISOString().split("T")[0];
+      complaints = complaints.filter(c => c.receivedDate >= cutoff);
+    } else if (params?.period === "q1") {
+      complaints = complaints.filter(c => c.receivedDate >= "2026-01-01" && c.receivedDate <= "2026-03-31");
+    }
+
+    if (params?.bureau) {
+      complaints = complaints.filter(c => c.currentBureauId === params.bureau || c.receivingBureauId === params.bureau);
+    }
+
+    const total = complaints.length;
+    const disposed = complaints.filter(c => c.status === "Disposed").length;
+    const pending = complaints.filter(c => c.status === "Pending").length;
+    const underProcess = complaints.filter(c => c.status === "Under Process").length;
+    const escalated = complaints.filter(c => c.status === "Escalated").length;
+    const overdue = complaints.filter(
+      c => c.status !== "Disposed" && c.expectedDisposalDate && c.expectedDisposalDate < now.toISOString().split("T")[0]
+    ).length;
+
+    // Bureau detailed breakdown
+    const bureaus = ["RB", "PGRC", "RO", "AB", "PB"];
+    const bureauPerformance = bureaus.map(bId => {
+      const bCases = complaints.filter(c => c.currentBureauId === bId || c.receivingBureauId === bId);
+      const bDisposed = bCases.filter(c => c.status === "Disposed");
+      const bOverdue = bCases.filter(
+        c => c.status !== "Disposed" && c.expectedDisposalDate && c.expectedDisposalDate < now.toISOString().split("T")[0]
+      ).length;
+
+      let totalDays = 0;
+      bDisposed.forEach(c => {
+        if (c.disposalDate && c.receivedDate) {
+          const days = Math.max(1, Math.round((new Date(c.disposalDate).getTime() - new Date(c.receivedDate).getTime()) / 86400000));
+          totalDays += days;
+        }
+      });
+      const avgDisposalDays = bDisposed.length > 0 ? Math.round((totalDays / bDisposed.length) * 10) / 10 : 0;
+      const bOverlaps = this.data.overlapAlerts.filter(o => o.bureauA === bId || o.bureauB === bId).length;
+
+      return {
+        bureau: bId,
+        total: bCases.length,
+        disposed: bDisposed.length,
+        active: bCases.length - bDisposed.length,
+        overdue: bOverdue,
+        avgDisposalDays,
+        disposalRate: bCases.length > 0 ? Math.round((bDisposed.length / bCases.length) * 100) : 0,
+        overlapsCount: bOverlaps
+      };
+    });
+
+    // Overlap alert breakdown
+    const overlapStatusCounts: Record<string, number> = {
+      "Pending Review": 0,
+      "Confirmed Related": 0,
+      "Confirmed Duplicate": 0,
+      "Marked Unrelated": 0,
+      "Resolved": 0
+    };
+    this.data.overlapAlerts.forEach(o => {
+      overlapStatusCounts[o.alertStatus] = (overlapStatusCounts[o.alertStatus] || 0) + 1;
+    });
+
+    // Regional breakdown
+    const regionMap: Record<string, { total: number; disposed: number; active: number }> = {};
+    complaints.forEach(c => {
+      const inst = this.getInstitutionById(c.institutionId);
+      const reg = inst?.region || "Other";
+      if (!regionMap[reg]) regionMap[reg] = { total: 0, disposed: 0, active: 0 };
+      regionMap[reg].total++;
+      if (c.status === "Disposed") regionMap[reg].disposed++;
+      else regionMap[reg].active++;
+    });
+
+    const regionalCompliance = Object.entries(regionMap)
+      .map(([region, stats]) => ({
+        region,
+        total: stats.total,
+        disposed: stats.disposed,
+        active: stats.active,
+        complianceRate: stats.total > 0 ? Math.round((stats.disposed / stats.total) * 100) : 0
+      }))
+      .sort((a, b) => b.total - a.total);
+
+    // Top institutions by complaint volume
+    const instComplaintsMap: Record<string, { name: string; permId: string; total: number; active: number; overlapCount: number }> = {};
+    complaints.forEach(c => {
+      if (!instComplaintsMap[c.institutionId]) {
+        instComplaintsMap[c.institutionId] = {
+          name: c.institutionName,
+          permId: c.aictePermanentId,
+          total: 0,
+          active: 0,
+          overlapCount: this.data.overlapAlerts.filter(o => o.institutionId === c.institutionId).length
+        };
+      }
+      instComplaintsMap[c.institutionId].total++;
+      if (c.status !== "Disposed") instComplaintsMap[c.institutionId].active++;
+    });
+
+    const topInstitutions = Object.values(instComplaintsMap)
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 10);
+
+    return {
+      period: params?.period || "all",
+      kpi: {
+        totalComplaints: total,
+        disposedComplaints: disposed,
+        pendingComplaints: pending,
+        underProcessComplaints: underProcess,
+        escalatedComplaints: escalated,
+        overdueComplaints: overdue,
+        disposalRatePercentage: total > 0 ? Math.round((disposed / total) * 100) : 0,
+        totalOverlapAlerts: this.data.overlapAlerts.length,
+        unresolvedOverlapAlerts: this.data.overlapAlerts.filter(o => o.alertStatus === "Pending Review").length
+      },
+      bureauPerformance,
+      overlapStatusCounts: Object.entries(overlapStatusCounts).map(([status, count]) => ({ status, count })),
+      regionalCompliance,
+      topInstitutions
+    };
+  }
 }
 
 // Export singleton instance
 export const store = new Store();
+export const JsonRepository = Store;
+

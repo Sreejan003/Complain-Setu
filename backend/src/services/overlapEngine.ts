@@ -1,4 +1,4 @@
-import { Complaint, Institution, OverlapAlert, DetectionResult } from "../models/types.js";
+import { Complaint, Institution, OverlapAlert, DetectionResult, OverlapExplanation } from "../models/types.js";
 import { DEFAULT_DETECTION_CONFIG } from "../config/constants.js";
 
 interface KeywordDictionary {
@@ -65,6 +65,90 @@ export function computeInProcessCosineSimilarity(textA: string, textB: string): 
 }
 
 /**
+ * Normalizes institution name for fuzzy discrimination
+ */
+export function normalizeInstitutionName(name: string): string {
+  if (!name) return "";
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\buniv\b/g, "university")
+    .replace(/\btech\b/g, "technology")
+    .replace(/\btechnological\b/g, "technology")
+    .replace(/\bengg\b/g, "engineering")
+    .replace(/\binst\b/g, "institute")
+    .replace(/\bmgmt\b/g, "management")
+    .replace(/\b(college|institute|technology|engineering|university|polytechnic|of|and|for|the|national|indian)\b/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/**
+ * Fuzzy matching between searched institution name and database institution candidate
+ */
+export function fuzzyMatchInstitution(query: string, candidate: string): { match: boolean; score: number } {
+  if (!query || !candidate) return { match: false, score: 0 };
+  const qClean = query.toLowerCase().trim();
+  const cClean = candidate.toLowerCase().trim();
+
+  if (qClean === cClean) return { match: true, score: 100 };
+
+  if (cClean.includes(qClean) || qClean.includes(cClean)) {
+    const ratio = Math.min(qClean.length, cClean.length) / Math.max(qClean.length, cClean.length);
+    return { match: true, score: Math.round(75 + ratio * 25) };
+  }
+
+  // Canonical expansion for common educational abbreviations
+  const expand = (s: string) =>
+    s
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, " ")
+      .replace(/\buniv\b/g, "university")
+      .replace(/\btech\b/g, "technology")
+      .replace(/\btechnological\b/g, "technology")
+      .replace(/\bengg\b/g, "engineering")
+      .replace(/\binst\b/g, "institute")
+      .replace(/\bmgmt\b/g, "management")
+      .replace(/\s+/g, " ")
+      .trim();
+
+  const expQ = expand(query);
+  const expC = expand(candidate);
+
+  if (expQ === expC) return { match: true, score: 95 };
+  if (expC.includes(expQ) || expQ.includes(expC)) {
+    return { match: true, score: 85 };
+  }
+
+  const normQ = normalizeInstitutionName(query);
+  const normC = normalizeInstitutionName(candidate);
+  if (normQ && normC && (normC.includes(normQ) || normQ.includes(normC))) {
+    return { match: true, score: 80 };
+  }
+
+  const tokensQ = (normQ || expQ).split(" ").filter(Boolean);
+  const tokensC = (normC || expC).split(" ").filter(Boolean);
+  if (tokensQ.length === 0 || tokensC.length === 0) return { match: false, score: 0 };
+
+  let matchCount = 0;
+  for (const tQ of tokensQ) {
+    for (const tC of tokensC) {
+      if (tQ === tC || (tQ.length >= 3 && tC.startsWith(tQ)) || (tC.length >= 3 && tQ.startsWith(tC))) {
+        matchCount++;
+        break;
+      }
+    }
+  }
+
+  const jaccard = (matchCount / Math.max(tokensQ.length, tokensC.length)) * 100;
+
+  return {
+    match: jaccard >= 40,
+    score: Math.round(jaccard)
+  };
+}
+
+/**
  * Query external Python AI Service (Sentence Transformers) if running
  */
 export async function querySemanticService(textA: string, textB: string): Promise<{ score: number; engine: string } | null> {
@@ -101,6 +185,7 @@ export interface OverlapEvaluation {
   combinedScore: number;
   semanticEngine: string;
   reasons: string[];
+  explanation: OverlapExplanation;
   recommendation: string;
   isCrossBureau: boolean;
 }
@@ -133,6 +218,15 @@ export async function evaluateComplaintPair(
       combinedScore: 0,
       semanticEngine: "None",
       reasons: ["Different institutions: Overlap detection restricted to same institution"],
+      explanation: {
+        institutionMatch: { matched: false, score: 0, details: "Different institutions: Cross-institution isolation enforced." },
+        crossBureauMatch: { isCrossBureau: false, bureauA: "", bureauB: "", details: "N/A" },
+        categoryMatch: { exactMatch: false, categoryA: "", categoryB: "", details: "N/A" },
+        keywordMatch: { matchedTerms: [], score: 0, details: "N/A" },
+        semanticMatch: { score: 0, engine: "None", details: "N/A" },
+        summary: "Zero overlap: Complaints belong to distinct technical institutions.",
+        recommendation: "No action required."
+      },
       recommendation: "No action required.",
       isCrossBureau: false
     };
@@ -232,6 +326,44 @@ export async function evaluateComplaintPair(
     }
   }
 
+  const explanation: OverlapExplanation = {
+    institutionMatch: {
+      matched: Boolean(isSameInstitution),
+      score: config.exactInstitutionWeight,
+      details: `Verified AICTE Permanent ID: ${institution.aictePermanentId} (${institution.name})`
+    },
+    crossBureauMatch: {
+      isCrossBureau,
+      bureauA: newBureau || "RB",
+      bureauB: existingBureau || "PGRC",
+      details: isCrossBureau
+        ? `Complaints active in separate bureaus (${newBureau} and ${existingBureau}). Joint coordination required.`
+        : `Complaints processed within same bureau (${newBureau || existingBureau}).`
+    },
+    categoryMatch: {
+      exactMatch: Boolean(sameCategory),
+      categoryA: newComplaint.category || "",
+      categoryB: existingCase.category || "",
+      details: sameCategory
+        ? `Identical grievance classification: "${newComplaint.category}"`
+        : `Categorized under "${newComplaint.category}" and "${existingCase.category}"`
+    },
+    keywordMatch: {
+      matchedTerms: sharedTokens.slice(0, 8),
+      score: Math.min(config.keywordOverlapWeight, sharedTokens.length * 4),
+      details: sharedTokens.length >= 3
+        ? `Identified common grievance terminology: [${sharedTokens.slice(0, 6).join(", ")}]`
+        : "Standard lexical vocabulary distribution."
+    },
+    semanticMatch: {
+      score: semanticScore || 0,
+      engine: semanticEngine,
+      details: `${semanticScore}% semantic contextual correlation computed via ${semanticEngine}`
+    },
+    summary: `${combinedScore}% composite overlap probability based on institution identity, regulatory category, shared keywords, and AI semantic vector distance.`,
+    recommendation
+  };
+
   return {
     isOverlap,
     ruleScore,
@@ -239,6 +371,7 @@ export async function evaluateComplaintPair(
     combinedScore,
     semanticEngine,
     reasons,
+    explanation,
     recommendation,
     isCrossBureau
   };
@@ -270,6 +403,7 @@ export async function detectOverlapsForComplaint(
         semanticScore: evalResult.semanticScore,
         combinedScore: evalResult.combinedScore,
         reasons: evalResult.reasons,
+        explanation: evalResult.explanation,
         isCrossBureau: evalResult.isCrossBureau,
         recommendation: evalResult.recommendation
       });

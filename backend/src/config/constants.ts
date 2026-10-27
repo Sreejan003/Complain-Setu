@@ -43,7 +43,8 @@ export const USER_ROLES = [
   "Regulation Bureau Officer",
   "PGRC Officer",
   "Regional Officer",
-  "Senior Management"
+  "Senior Management",
+  "Institutional User"
 ] as const;
 
 export type UserRole = typeof USER_ROLES[number];
@@ -113,4 +114,18 @@ export const DEFAULT_DETECTION_CONFIG = {
   ruleThreshold: 50,    // Minimum rule score to flag potential overlap
   semanticSimilarityThreshold: 65.0, // Minimum semantic similarity % to flag
   highConfidenceThreshold: 80.0
+};
+
+export interface EscalationConfig {
+  approachingDeadlineDays: number;
+  autoEscalateOverdueDays: number;
+  reminderIntervalHours: number;
+  seniorManagementNotifyDays: number;
+}
+
+export const DEFAULT_ESCALATION_CONFIG: EscalationConfig = {
+  approachingDeadlineDays: 3,
+  autoEscalateOverdueDays: 5,
+  reminderIntervalHours: 24,
+  seniorManagementNotifyDays: 7
 };

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import {
   FilePlus2,
   Building2,
@@ -10,7 +10,12 @@ import {
   ShieldAlert,
   ArrowRight,
   Info,
-  X
+  X,
+  Upload,
+  Paperclip,
+  ChevronLeft,
+  Clock,
+  Shield
 } from "lucide-react";
 import { api } from "../services/api.js";
 import { Institution } from "../services/types.js";
@@ -31,6 +36,8 @@ export const ComplaintRegister: React.FC = () => {
   const [receivingBureau, setReceivingBureau] = useState<string>("RB");
   const [priority, setPriority] = useState<"Low" | "Medium" | "High" | "Critical">("High");
   const [expectedDisposalDate, setExpectedDisposalDate] = useState<string>("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [documentType, setDocumentType] = useState<string>("Complaint Evidence");
 
   // Live Overlap Detection State
   const [checkingOverlap, setCheckingOverlap] = useState(false);
@@ -123,14 +130,12 @@ export const ComplaintRegister: React.FC = () => {
         setDetectedOverlaps(checkRes.candidateAlerts);
         setOverlapModalOpen(true);
         setCheckingOverlap(false);
-        return; // Pause for user review modal
+        return;
       }
 
-      // No overlap detected, proceed directly
       await finalizeRegistration();
     } catch (err: any) {
       console.error("Overlap check error:", err);
-      // Fallback: proceed to finalize if check service errored
       await finalizeRegistration();
     } finally {
       setCheckingOverlap(false);
@@ -150,6 +155,14 @@ export const ComplaintRegister: React.FC = () => {
         expectedDisposalDate
       });
 
+      if (selectedFile) {
+        try {
+          await api.uploadComplaintDocument(res.complaint.id, selectedFile, documentType);
+        } catch (uploadErr) {
+          console.error("Document upload failed after complaint creation:", uploadErr);
+        }
+      }
+
       setOverlapModalOpen(false);
       navigate(`/cases/${res.complaint.id}`);
     } catch (err: any) {
@@ -159,176 +172,182 @@ export const ComplaintRegister: React.FC = () => {
     }
   };
 
+  const priorityDays = priority === "Critical" ? 7 : priority === "High" ? 15 : priority === "Medium" ? 30 : 45;
+
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
-      {/* Header */}
-      <div>
-        <h1 className="text-xl sm:text-2xl font-bold text-aicte-navy-900 tracking-tight">
-          Register Technical Education Institution Grievance
-        </h1>
-        <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-          Submit complaints with automated institution resolution, SLA computation, and real-time cross-Bureau overlap checking.
-        </p>
+    <div className="space-y-3.5 max-w-5xl mx-auto">
+      {/* 1. Official Breadcrumb */}
+      <div className="text-[11px] text-slate-500 flex items-center space-x-1.5 font-medium">
+        <Link to="/" className="hover:text-[#003366] hover:underline">Home</Link>
+        <span>&rsaquo;</span>
+        <Link to="/cases" className="hover:text-[#003366] hover:underline">Complaint Register</Link>
+        <span>&rsaquo;</span>
+        <span className="text-slate-700 font-semibold">New Grievance Registration</span>
+      </div>
+
+      {/* 2. Official Header */}
+      <div className="bg-white border border-slate-300 rounded-xs p-3.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h1 className="text-base sm:text-lg font-bold text-[#003366] tracking-tight">
+            Register Technical Education Institution Grievance
+          </h1>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Statutory complaint intake form with AICTE institution resolution and real-time inter-bureau overlap verification.
+          </p>
+        </div>
+        <div className="flex items-center space-x-2">
+          <Link
+            to="/cases"
+            className="inline-flex items-center space-x-1 px-3 py-1.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-xs text-xs font-semibold transition"
+          >
+            <ChevronLeft className="w-3.5 h-3.5" />
+            <span>Cancel & Return</span>
+          </Link>
+        </div>
       </div>
 
       {formError && (
-        <div className="p-3.5 bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg flex items-center space-x-2">
+        <div className="p-3 bg-red-50 border border-red-300 text-red-800 text-xs rounded-xs flex items-center space-x-2">
           <AlertTriangle className="w-4 h-4 shrink-0 text-red-600" />
           <span>{formError}</span>
         </div>
       )}
 
-      {/* Form Card */}
-      <div className="bg-white border border-slate-200 rounded-lg p-6 shadow-xs">
-        <form onSubmit={handleFormSubmit} className="space-y-5">
-          {/* Section 1: Institution Selection */}
-          <div className="border-b border-slate-100 pb-5 space-y-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center space-x-1.5">
-              <Building2 className="w-4 h-4 text-aicte-navy-800" />
-              <span>1. Target Institution Identification</span>
-            </h3>
+      {/* 3. Form Grid */}
+      <form onSubmit={handleFormSubmit}>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3.5 items-start">
+          {/* Main Column (2/3 width) */}
+          <div className="lg:col-span-2 space-y-3.5">
+            {/* Section 1: Target Institution */}
+            <div className="bg-white border border-slate-300 rounded-xs p-4 space-y-3">
+              <div className="flex items-center space-x-1.5 text-xs font-bold text-slate-800 uppercase tracking-wider pb-2 border-b border-slate-200">
+                <Building2 className="w-4 h-4 text-[#003366]" />
+                <span>1. Target AICTE Approved Institution</span>
+              </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Select Approved Institution <span className="text-red-500">*</span>
+                  Select Approved Institution <span className="text-red-600">*</span>
                 </label>
                 <select
                   required
                   value={selectedInstId}
                   onChange={e => handleInstitutionChange(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-md px-3 py-2 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-aicte-navy-700"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xs px-2.5 py-1.5 text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#003366] focus:border-[#003366]"
                 >
-                  <option value="">-- Choose Institution from Directory --</option>
+                  <option value="">-- Select Technical Institution from AICTE Directory --</option>
                   {institutions.map(inst => (
                     <option key={inst.id} value={inst.id}>
-                      {inst.name} ({inst.city}, {inst.state})
+                      {inst.name} ({inst.city}, {inst.state}) - [{inst.aictePermanentId}]
                     </option>
                   ))}
                 </select>
               </div>
 
+              {selectedInst && (
+                <div className="p-2.5 bg-slate-50 border border-slate-200 rounded-xs text-xs space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-slate-800">{selectedInst.name}</span>
+                    <span className="font-mono text-[11px] font-bold text-[#003366] bg-slate-200/80 px-1.5 py-0.2 rounded-xs border border-slate-300">
+                      ID: {selectedInst.aictePermanentId}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-[11px] text-slate-600 pt-0.5">
+                    <span><strong>Location:</strong> {selectedInst.city}, {selectedInst.state}</span>
+                    <span><strong>Type:</strong> {selectedInst.institutionType}</span>
+                    <span><strong>Region:</strong> {selectedInst.region.split("(")[0]}</span>
+                    <span><strong>Accreditation:</strong> {selectedInst.accreditationStatus}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Section 2: Grievance Particulars */}
+            <div className="bg-white border border-slate-300 rounded-xs p-4 space-y-3">
+              <div className="flex items-center space-x-1.5 text-xs font-bold text-slate-800 uppercase tracking-wider pb-2 border-b border-slate-200">
+                <FilePlus2 className="w-4 h-4 text-[#003366]" />
+                <span>2. Grievance Particulars & Classification</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Violation Category <span className="text-red-600">*</span>
+                  </label>
+                  <select
+                    required
+                    value={category}
+                    onChange={e => setCategory(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xs px-2.5 py-1.5 text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#003366] focus:border-[#003366]"
+                  >
+                    {categories.map(c => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Receiving Bureau / Desk <span className="text-red-600">*</span>
+                  </label>
+                  <select
+                    required
+                    value={receivingBureau}
+                    onChange={e => setReceivingBureau(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xs px-2.5 py-1.5 text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#003366] focus:border-[#003366]"
+                  >
+                    {bureaus.map(b => (
+                      <option key={b.id} value={b.id}>{b.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Verified AICTE Permanent ID
+                  Grievance Subject / Title <span className="text-red-600">*</span>
                 </label>
                 <input
                   type="text"
-                  disabled
-                  value={selectedInst?.aictePermanentId || "Auto-populated upon institution selection"}
-                  className="w-full bg-slate-100 border border-slate-200 text-slate-600 rounded-md px-3 py-2 text-xs font-mono font-medium"
+                  required
+                  value={title}
+                  onChange={e => setTitle(e.target.value)}
+                  placeholder="Concise summary of alleged irregularity, non-compliance, or infraction..."
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xs px-2.5 py-1.5 text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#003366] focus:border-[#003366]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Detailed Grievance Narrative <span className="text-red-600">*</span>
+                </label>
+                <textarea
+                  rows={5}
+                  required
+                  value={description}
+                  onChange={e => setDescription(e.target.value)}
+                  placeholder="Detail dates, faculty names, departments, affected student cohorts, fee receipts, or relevant approval norms violated..."
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xs px-2.5 py-1.5 text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#003366] focus:border-[#003366] leading-relaxed"
                 />
               </div>
             </div>
-
-            {selectedInst && (
-              <div className="p-3 bg-slate-50 border border-slate-200 rounded-md text-xs flex flex-wrap gap-4 text-slate-600">
-                <span>
-                  <strong>Type:</strong> {selectedInst.institutionType}
-                </span>
-                <span>
-                  <strong>Region:</strong> {selectedInst.region.split("(")[0]}
-                </span>
-                <span>
-                  <strong>Accreditation:</strong> {selectedInst.accreditationStatus}
-                </span>
-                <span>
-                  <strong>Existing Complaints:</strong> {selectedInst.totalComplaintsCount}
-                </span>
-              </div>
-            )}
           </div>
 
-          {/* Section 2: Grievance Details */}
-          <div className="border-b border-slate-100 pb-5 space-y-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center space-x-1.5">
-              <FilePlus2 className="w-4 h-4 text-aicte-navy-800" />
-              <span>2. Complaint Classification & Particulars</span>
-            </h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Violation Category <span className="text-red-500">*</span>
-                </label>
-                <select
-                  required
-                  value={category}
-                  onChange={e => setCategory(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-md px-3 py-2 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-aicte-navy-700"
-                >
-                  {categories.map(c => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
-                  ))}
-                </select>
+          {/* Sidebar Column (1/3 width) */}
+          <div className="space-y-3.5">
+            {/* Priority & Statutory SLA */}
+            <div className="bg-white border border-slate-300 rounded-xs p-3.5 space-y-2.5">
+              <div className="flex items-center space-x-1.5 text-xs font-bold text-slate-800 uppercase tracking-wider pb-2 border-b border-slate-200">
+                <Clock className="w-3.5 h-3.5 text-[#003366]" />
+                <span>Priority & Statutory SLA</span>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Receiving Bureau / Cell <span className="text-red-500">*</span>
-                </label>
-                <select
-                  required
-                  value={receivingBureau}
-                  onChange={e => setReceivingBureau(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-md px-3 py-2 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-aicte-navy-700"
-                >
-                  {bureaus.map(b => (
-                    <option key={b.id} value={b.id}>
-                      {b.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Grievance Subject / Title <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                required
-                value={title}
-                onChange={e => setTitle(e.target.value)}
-                placeholder="Brief summary of the alleged irregularity or deficiency..."
-                className="w-full bg-slate-50 border border-slate-300 rounded-md px-3 py-2 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-aicte-navy-700"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Detailed Grievance Description <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                rows={5}
-                required
-                value={description}
-                onChange={e => setDescription(e.target.value)}
-                placeholder="Include specific dates, departments, faculty names, or fee amounts involved. This text will be processed by the Sentence Transformer semantic similarity engine."
-                className="w-full bg-slate-50 border border-slate-300 rounded-md px-3 py-2 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-aicte-navy-700 leading-relaxed"
-              />
-            </div>
-          </div>
-
-          {/* Section 3: SLA & Assignment */}
-          <div className="pb-2 space-y-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center space-x-1.5">
-              <Calendar className="w-4 h-4 text-aicte-navy-800" />
-              <span>3. Priority & Statutory SLA Deadlines</span>
-            </h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Priority Level <span className="text-red-500">*</span>
-                </label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Priority Category</label>
                 <select
                   value={priority}
                   onChange={e => setPriority(e.target.value as any)}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-md px-3 py-2 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-aicte-navy-700"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xs px-2 py-1.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#003366]"
                 >
                   <option value="Critical">Critical (7-Day Statutory SLA)</option>
                   <option value="High">High (15-Day SLA)</option>
@@ -337,146 +356,176 @@ export const ComplaintRegister: React.FC = () => {
                 </select>
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Expected Disposal SLA Date
-                </label>
-                <input
-                  type="date"
-                  value={expectedDisposalDate}
-                  onChange={e => setExpectedDisposalDate(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-md px-3 py-2 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-aicte-navy-700"
-                />
+              <div className="p-2.5 bg-slate-50 border border-slate-200 rounded-xs text-xs space-y-1">
+                <div className="text-[11px] text-slate-500 font-medium">Computed Statutory Window:</div>
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-slate-800">{priorityDays} Calendar Days</span>
+                  <span className="font-mono font-bold text-[#003366]">{expectedDisposalDate}</span>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Submit Actions */}
-          <div className="pt-4 border-t border-slate-200 flex items-center justify-between">
-            <span className="text-[11px] text-slate-500 flex items-center space-x-1">
-              <Info className="w-3.5 h-3.5 text-blue-600" />
-              <span>AICTE Overlap Engine will scrutinize against active cases before final save.</span>
-            </span>
+            {/* Supporting Evidence */}
+            <div className="bg-white border border-slate-300 rounded-xs p-3.5 space-y-2.5">
+              <div className="flex items-center space-x-1.5 text-xs font-bold text-slate-800 uppercase tracking-wider pb-2 border-b border-slate-200">
+                <Paperclip className="w-3.5 h-3.5 text-[#003366]" />
+                <span>Supporting Annexure</span>
+              </div>
 
-            <div className="flex items-center space-x-3">
-              <button
-                type="button"
-                onClick={() => navigate("/cases")}
-                className="px-4 py-2 border border-slate-300 text-slate-700 rounded-md text-xs font-medium hover:bg-slate-50"
-              >
-                Cancel
-              </button>
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Document Type</label>
+                <select
+                  value={documentType}
+                  onChange={e => setDocumentType(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xs px-2 py-1 text-xs text-slate-700 focus:outline-none"
+                >
+                  <option value="Complaint Evidence">Complaint Evidence / Affidavit</option>
+                  <option value="Fee Receipts">Fee Receipts / Bank Records</option>
+                  <option value="Infrastructure Photos">Infrastructure Proof</option>
+                  <option value="Inspection Report">Inspection Report</option>
+                  <option value="Other">Other Supporting Document</option>
+                </select>
+              </div>
+
+              <div className="border border-dashed border-slate-300 rounded-xs p-3 text-center bg-slate-50">
+                <input
+                  type="file"
+                  id="reg-file-input"
+                  onChange={e => {
+                    if (e.target.files && e.target.files[0]) {
+                      setSelectedFile(e.target.files[0]);
+                    }
+                  }}
+                  className="hidden"
+                />
+                {!selectedFile ? (
+                  <label htmlFor="reg-file-input" className="cursor-pointer block">
+                    <Upload className="w-5 h-5 text-slate-400 mx-auto mb-1" />
+                    <span className="text-xs font-semibold text-[#003366] hover:underline block">Attach Supporting File</span>
+                    <span className="text-[10px] text-slate-400">PDF, JPG, PNG &lt; 10MB</span>
+                  </label>
+                ) : (
+                  <div className="flex items-center justify-between text-xs text-left bg-white p-2 border border-slate-300 rounded-xs">
+                    <div className="truncate max-w-[160px]">
+                      <span className="font-semibold text-slate-800 block truncate">{selectedFile.name}</span>
+                      <span className="text-[10px] text-slate-400 font-mono">{(selectedFile.size / 1024).toFixed(0)} KB</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedFile(null);
+                        const inp = document.getElementById("reg-file-input") as HTMLInputElement;
+                        if (inp) inp.value = "";
+                      }}
+                      className="text-red-700 hover:text-red-900 p-0.5"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Official Submit Card */}
+            <div className="bg-white border border-slate-300 rounded-xs p-3.5 space-y-2">
               <button
                 type="submit"
                 disabled={checkingOverlap || submitting}
-                className="px-5 py-2 bg-aicte-navy-900 hover:bg-aicte-navy-800 text-white rounded-md text-xs font-semibold transition shadow-xs flex items-center space-x-1.5 disabled:opacity-50"
+                className="w-full py-2 bg-[#003366] hover:bg-[#002855] text-white rounded-xs text-xs font-semibold transition border border-[#002147] shadow-xs flex items-center justify-center space-x-1.5 disabled:opacity-50 cursor-pointer"
               >
                 {checkingOverlap ? (
-                  <span>Checking Overlaps...</span>
+                  <>
+                    <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Verifying Overlaps...</span>
+                  </>
                 ) : submitting ? (
-                  <span>Saving Complaint...</span>
+                  <span>Registering Case...</span>
                 ) : (
                   <>
-                    <span>Submit & Run Overlap Engine</span>
+                    <span>Submit & Run Overlap Check</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </>
                 )}
               </button>
+
+              <button
+                type="button"
+                onClick={() => navigate("/cases")}
+                className="w-full py-1.5 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-xs text-xs font-medium transition cursor-pointer"
+              >
+                Cancel
+              </button>
+
+              <div className="text-[10px] text-slate-500 text-center pt-1 border-t border-slate-100 flex items-center justify-center space-x-1">
+                <Info className="w-3 h-3 text-[#003366]" />
+                <span>Pre-submission duplicate screening is enforced</span>
+              </div>
             </div>
           </div>
-        </form>
-      </div>
+        </div>
+      </form>
 
-      {/* OVERLAP DETECTION ALERT MODAL / PRE-SUBMISSION WARNING */}
+      {/* Restrained Overlap Detection Alert Modal */}
       {overlapModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full overflow-hidden border border-amber-300 animate-in fade-in zoom-in-95 duration-150">
-            {/* Modal Header */}
-            <div className="bg-amber-500 text-white px-6 py-4 flex items-center justify-between">
-              <div className="flex items-center space-x-2.5">
-                <ShieldAlert className="w-6 h-6 text-white" />
+        <div className="fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xs shadow-lg max-w-2xl w-full border border-amber-400 overflow-hidden">
+            <div className="bg-amber-600 text-white px-4 py-2.5 flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <ShieldAlert className="w-5 h-5" />
                 <div>
-                  <h3 className="text-base font-bold">Potential Complaint Overlap Detected</h3>
-                  <p className="text-xs text-amber-100">
-                    AICTE Intelligent Overlap Engine identified {detectedOverlaps.length} potentially related active case(s).
+                  <h3 className="text-xs font-bold uppercase tracking-wider">Potential Complaint Overlap Detected</h3>
+                  <p className="text-[10px] text-amber-100">
+                    {detectedOverlaps.length} companion complaint(s) found active for this institution.
                   </p>
                 </div>
               </div>
-              <button
-                onClick={() => setOverlapModalOpen(false)}
-                className="text-white hover:text-amber-100"
-              >
-                <X className="w-5 h-5" />
+              <button onClick={() => setOverlapModalOpen(false)} className="text-white hover:text-amber-100 cursor-pointer">
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Modal Body */}
-            <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
-              <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-900 leading-relaxed">
-                <strong>Attention Official:</strong> Potentially related active cases were found for{" "}
-                <strong>{selectedInst?.name}</strong> across AICTE divisions. Please review existing cases
-                to avoid duplicate investigations and ensure cross-Bureau coordination.
+            <div className="p-4 space-y-2.5 max-h-[55vh] overflow-y-auto text-xs">
+              <div className="p-2.5 bg-amber-50 border border-amber-300 rounded-xs text-amber-900 text-[11px] leading-relaxed">
+                <strong>Attention Officer:</strong> Multiple active complaints are already registered against{" "}
+                <strong>{selectedInst?.name}</strong>. Please review to avoid duplicate departmental proceedings.
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {detectedOverlaps.map((cand, idx) => (
-                  <div
-                    key={idx}
-                    className="p-4 border border-slate-200 rounded-lg bg-slate-50 space-y-2 hover:border-amber-400 transition"
-                  >
+                  <div key={idx} className="p-2.5 border border-slate-300 rounded-xs bg-slate-50 space-y-1">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <span className="font-mono text-xs font-bold text-aicte-navy-900">
-                          {cand.existingComplaint.complaintId}
-                        </span>
-                        <span className="text-[10px] bg-blue-100 text-blue-800 font-semibold px-2 py-0.5 rounded">
-                          Bureau: {cand.existingComplaint.currentBureauId}
-                        </span>
-                        <span className="text-[10px] bg-slate-200 text-slate-700 font-medium px-2 py-0.5 rounded">
-                          Status: {cand.existingComplaint.status}
-                        </span>
+                      <div className="flex items-center space-x-1.5 font-mono">
+                        <span className="font-bold text-[#003366]">{cand.existingComplaint.complaintId}</span>
+                        <span className="text-[10px] bg-slate-200 px-1 py-0.2 rounded-xs">Bureau: {cand.existingComplaint.currentBureauId}</span>
+                        <span className="text-[10px] bg-slate-200 px-1 py-0.2 rounded-xs">Status: {cand.existingComplaint.status}</span>
                       </div>
-                      <span className="text-xs font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">
-                        {cand.combinedScore}% Match
+                      <span className="text-[10px] font-bold text-amber-800 bg-amber-100 border border-amber-300 px-1.5 py-0.2 rounded-xs">
+                        {cand.combinedScore}% Similarity
                       </span>
                     </div>
-
-                    <div className="text-xs font-semibold text-slate-800">
-                      {cand.existingComplaint.title}
-                    </div>
-
-                    <div className="text-[11px] text-slate-600 line-clamp-2">
-                      {cand.existingComplaint.description}
-                    </div>
-
-                    <div className="pt-2 border-t border-slate-200/80 text-[11px] text-slate-500">
-                      <strong>Reasons:</strong> {cand.reasons.slice(0, 3).join("; ")}
-                    </div>
+                    <div className="font-semibold text-slate-800 text-[11px]">{cand.existingComplaint.title}</div>
+                    <div className="text-[11px] text-slate-600 line-clamp-2">{cand.existingComplaint.description}</div>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Modal Footer / User Decision */}
-            <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="px-4 py-2.5 bg-slate-100 border-t border-slate-200 flex items-center justify-between text-xs">
               <button
                 type="button"
                 onClick={() => setOverlapModalOpen(false)}
-                className="w-full sm:w-auto px-4 py-2 border border-slate-300 text-slate-700 text-xs font-medium rounded-md hover:bg-slate-100"
+                className="px-3 py-1 bg-white border border-slate-300 text-slate-700 font-semibold rounded-xs hover:bg-slate-50 cursor-pointer"
               >
-                Cancel & Review Form
+                Review Intake Form
               </button>
-
-              <div className="flex items-center space-x-2 w-full sm:w-auto justify-end">
-                <button
-                  type="button"
-                  onClick={() => finalizeRegistration()}
-                  disabled={submitting}
-                  className="w-full sm:w-auto px-4 py-2 bg-aicte-navy-900 hover:bg-aicte-navy-800 text-white text-xs font-semibold rounded-md shadow-xs transition"
-                >
-                  {submitting ? "Registering..." : "Confirm & Proceed to Register Case"}
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => finalizeRegistration()}
+                disabled={submitting}
+                className="px-3 py-1 bg-[#003366] hover:bg-[#002855] text-white font-semibold rounded-xs border border-[#002147] cursor-pointer"
+              >
+                {submitting ? "Registering..." : "Confirm & Register Record"}
+              </button>
             </div>
           </div>
         </div>

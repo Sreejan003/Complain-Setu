@@ -110,22 +110,23 @@ export const InstitutionDirectory: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="space-y-4">
+      {/* Official Header */}
+      <div className="bg-white border border-[#cbd5e1] rounded-xs p-4 shadow-none flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-aicte-navy-900 tracking-tight">
-            AICTE Approved Institutions Directory
+          <div className="text-[11px] font-bold uppercase tracking-wider text-[#003366]">Government of India &bull; AICTE Institutional Directory</div>
+          <h1 className="text-base sm:text-lg font-bold text-[#002147] tracking-tight">
+            AICTE Approved Institutions Master Directory
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-            Central repository of 30+ technical institutions, AICTE Permanent IDs, and cross-bureau complaint tallies.
+          <p className="text-xs text-slate-500 mt-0.5">
+            Central repository of technical institutions, AICTE Permanent IDs, and multi-bureau grievance histories.
           </p>
         </div>
 
         {["Administrator", "Regulation Bureau Officer", "PGRC Officer"].includes(user?.role || "") && (
           <button
             onClick={() => setShowRegisterModal(true)}
-            className="flex items-center space-x-1.5 px-3.5 py-1.5 bg-aicte-navy-900 hover:bg-aicte-navy-800 text-white rounded-md text-xs font-medium transition shadow-xs self-start sm:self-auto"
+            className="flex items-center space-x-1.5 px-3 py-1.5 bg-[#003366] hover:bg-[#002147] text-white rounded-xs text-xs font-semibold shadow-none self-start sm:self-auto transition cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Register New Institution</span>
@@ -134,9 +135,9 @@ export const InstitutionDirectory: React.FC = () => {
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-xs flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
+      <div className="bg-white border border-[#cbd5e1] rounded-xs p-3 shadow-none flex flex-col md:flex-row gap-2.5 items-stretch md:items-center justify-between text-xs">
         <div className="relative flex-1">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={search}
@@ -145,21 +146,21 @@ export const InstitutionDirectory: React.FC = () => {
               setPage(1);
             }}
             placeholder="Search by Institution Name, Permanent ID (e.g. 1-3324510001), or City..."
-            className="w-full bg-slate-50 border border-slate-300 rounded-md pl-9 pr-4 py-2 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-aicte-navy-700"
+            className="w-full bg-white border border-[#cbd5e1] rounded-xs pl-8 pr-3 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#003366]"
           />
         </div>
 
         <div className="flex items-center space-x-2">
-          <Filter className="w-4 h-4 text-slate-400" />
+          <Filter className="w-3.5 h-3.5 text-slate-500" />
           <select
             value={regionFilter}
             onChange={e => {
               setRegionFilter(e.target.value);
               setPage(1);
             }}
-            className="bg-slate-50 border border-slate-300 rounded-md px-3 py-2 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-aicte-navy-700"
+            className="bg-white border border-[#cbd5e1] rounded-xs px-2.5 py-1.5 text-xs text-slate-700 focus:outline-none focus:border-[#003366]"
           >
-            <option value="">All AICTE Regions</option>
+            <option value="">All AICTE Regional Jurisdictions</option>
             {regionsList.map(r => (
               <option key={r} value={r}>
                 {r}
@@ -174,32 +175,32 @@ export const InstitutionDirectory: React.FC = () => {
                 setRegionFilter("");
                 setPage(1);
               }}
-              className="text-xs text-slate-500 hover:text-slate-800 underline px-2"
+              className="text-xs text-[#003366] hover:underline px-2 cursor-pointer font-medium"
             >
-              Reset
+              Reset Filters
             </button>
           )}
         </div>
       </div>
 
       {/* Institutions Table */}
-      <div className="bg-white border border-slate-200 rounded-lg shadow-xs overflow-hidden">
+      <div className="bg-white border border-[#cbd5e1] rounded-xs shadow-none overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-slate-700 divide-y divide-slate-200">
-            <thead className="bg-slate-50 text-slate-600 font-semibold uppercase text-[10px] tracking-wider">
+          <table className="gov-table w-full text-left text-xs">
+            <thead>
               <tr>
-                <th className="py-3 px-4">AICTE Permanent ID</th>
-                <th className="py-3 px-4">Institution Name</th>
-                <th className="py-3 px-4">Type</th>
-                <th className="py-3 px-4">State & Region</th>
-                <th className="py-3 px-3 text-center">Total Cases</th>
-                <th className="py-3 px-3 text-center">Active Cases</th>
-                <th className="py-3 px-3 text-center">Overlaps</th>
-                <th className="py-3 px-4">Latest Complaint</th>
-                <th className="py-3 px-4 text-right">Actions</th>
+                <th>AICTE Permanent ID</th>
+                <th>Institution Name</th>
+                <th>Type</th>
+                <th>State & Region</th>
+                <th className="text-center">Total Cases</th>
+                <th className="text-center">Active Cases</th>
+                <th className="text-center">Overlaps</th>
+                <th>Latest Grievance</th>
+                <th className="text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody>
               {loading ? (
                 <tr>
                   <td colSpan={9} className="py-8 text-center text-slate-500">
@@ -214,62 +215,62 @@ export const InstitutionDirectory: React.FC = () => {
                 </tr>
               ) : (
                 institutions.map(inst => (
-                  <tr key={inst.id} className="hover:bg-slate-50/80 transition">
-                    <td className="py-3 px-4 font-mono font-semibold text-aicte-navy-900 whitespace-nowrap">
+                  <tr key={inst.id}>
+                    <td className="font-mono font-bold text-[#002147] whitespace-nowrap">
                       {inst.aictePermanentId}
                     </td>
-                    <td className="py-3 px-4">
+                    <td>
                       <Link
                         to={`/institutions/${inst.id}`}
-                        className="font-semibold text-blue-700 hover:underline hover:text-blue-900"
+                        className="font-semibold text-[#003366] hover:underline"
                       >
                         {inst.name}
                       </Link>
-                      <div className="text-[11px] text-slate-400">{inst.city}</div>
+                      <div className="text-[11px] text-slate-500">{inst.city}</div>
                     </td>
-                    <td className="py-3 px-4">
-                      <span className="bg-slate-100 text-slate-700 px-2 py-0.5 rounded text-[11px] font-medium">
+                    <td>
+                      <span className="bg-[#f1f5f9] text-slate-700 border border-[#cbd5e1] px-1.5 py-0.2 rounded-xs text-[10px] font-medium">
                         {inst.institutionType}
                       </span>
                     </td>
-                    <td className="py-3 px-4 whitespace-nowrap">
+                    <td className="whitespace-nowrap">
                       <div className="font-medium text-slate-800">{inst.state}</div>
-                      <div className="text-[10px] text-slate-400">{inst.region.split("(")[0]}</div>
+                      <div className="text-[10px] text-slate-500">{inst.region.split("(")[0]}</div>
                     </td>
-                    <td className="py-3 px-3 text-center font-bold text-slate-800">
+                    <td className="text-center font-bold text-slate-800 font-mono">
                       {inst.totalComplaintsCount}
                     </td>
-                    <td className="py-3 px-3 text-center">
+                    <td className="text-center font-mono">
                       <span
-                        className={`font-semibold px-2 py-0.5 rounded text-[11px] ${
+                        className={`font-semibold px-1.5 py-0.2 rounded-xs text-[10px] border ${
                           inst.activeComplaintsCount > 0
-                            ? "bg-amber-100 text-amber-800"
-                            : "bg-slate-100 text-slate-600"
+                            ? "bg-[#fffbeb] text-[#92400e] border-[#fde68a]"
+                            : "bg-[#f8fafc] text-slate-600 border-[#cbd5e1]"
                         }`}
                       >
                         {inst.activeComplaintsCount}
                       </span>
                     </td>
-                    <td className="py-3 px-3 text-center">
+                    <td className="text-center font-mono">
                       {inst.overlapCount > 0 ? (
-                        <span className="inline-flex items-center space-x-1 bg-amber-500/10 text-amber-800 border border-amber-300 font-bold px-2 py-0.5 rounded text-[11px]">
-                          <GitMerge className="w-3 h-3 text-amber-600" />
+                        <span className="inline-flex items-center space-x-1 bg-[#fffbeb] text-[#92400e] border border-[#fde68a] font-bold px-1.5 py-0.2 rounded-xs text-[10px]">
+                          <GitMerge className="w-3 h-3 text-[#b45309]" />
                           <span>{inst.overlapCount}</span>
                         </span>
                       ) : (
                         <span className="text-slate-400 text-[11px]">—</span>
                       )}
                     </td>
-                    <td className="py-3 px-4 text-slate-500 text-[11px] whitespace-nowrap">
+                    <td className="text-slate-500 text-[11px] font-mono whitespace-nowrap">
                       {inst.latestComplaintDate || "None"}
                     </td>
-                    <td className="py-3 px-4 text-right whitespace-nowrap space-x-2">
+                    <td className="text-right whitespace-nowrap space-x-2">
                       <Link
                         to={`/institutions/${inst.id}`}
-                        className="inline-flex items-center text-xs text-aicte-navy-700 hover:text-aicte-navy-900 font-medium hover:underline"
+                        className="inline-flex items-center text-xs text-[#003366] font-semibold hover:underline"
                       >
-                        <span>Profile</span>
-                        <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
+                        <span>Single Window</span>
+                        <ChevronRight className="w-3 h-3 ml-0.5" />
                       </Link>
                     </td>
                   </tr>
@@ -280,7 +281,7 @@ export const InstitutionDirectory: React.FC = () => {
         </div>
 
         {/* Pagination Bar */}
-        <div className="px-4 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs text-slate-600">
+        <div className="px-4 py-2.5 bg-[#f8fafc] border-t border-[#cbd5e1] flex items-center justify-between text-xs text-slate-600">
           <div>
             Showing <span className="font-semibold text-slate-900">{institutions.length}</span> of{" "}
             <span className="font-semibold text-slate-900">{totalRecords}</span> institutions
@@ -289,18 +290,18 @@ export const InstitutionDirectory: React.FC = () => {
             <button
               disabled={page <= 1}
               onClick={() => setPage(page - 1)}
-              className="px-2.5 py-1 bg-white border border-slate-300 rounded text-xs hover:bg-slate-50 disabled:opacity-50 transition"
+              className="px-2.5 py-1 bg-white border border-[#cbd5e1] rounded-xs text-xs hover:bg-slate-50 disabled:opacity-40 transition cursor-pointer"
             >
               <ChevronLeft className="w-3.5 h-3.5 inline mr-1" />
               Previous
             </button>
-            <span className="px-2 py-1 font-medium">
+            <span className="px-2 py-1 font-mono font-medium">
               Page {page} of {totalPages || 1}
             </span>
             <button
               disabled={page >= totalPages}
               onClick={() => setPage(page + 1)}
-              className="px-2.5 py-1 bg-white border border-slate-300 rounded text-xs hover:bg-slate-50 disabled:opacity-50 transition"
+              className="px-2.5 py-1 bg-white border border-[#cbd5e1] rounded-xs text-xs hover:bg-slate-50 disabled:opacity-40 transition cursor-pointer"
             >
               Next
               <ChevronRight className="w-3.5 h-3.5 inline ml-1" />
@@ -311,46 +312,46 @@ export const InstitutionDirectory: React.FC = () => {
 
       {/* Register Institution Modal */}
       {showRegisterModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full overflow-hidden border border-slate-200">
-            <div className="px-5 py-4 bg-aicte-navy-900 text-white flex items-center justify-between">
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-xs shadow-lg max-w-lg w-full overflow-hidden border border-[#cbd5e1]">
+            <div className="px-4 py-3 bg-[#f8fafc] border-b border-[#cbd5e1] flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <Building2 className="w-5 h-5 text-amber-400" />
-                <h3 className="text-sm font-bold">Register New Approved Institution</h3>
+                <Building2 className="w-4 h-4 text-[#003366]" />
+                <h3 className="text-sm font-bold text-[#002147]">Register New Approved Institution</h3>
               </div>
               <button
                 onClick={() => setShowRegisterModal(false)}
-                className="text-slate-300 hover:text-white"
+                className="text-slate-400 hover:text-slate-700 cursor-pointer"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleRegisterInstitution} className="p-5 space-y-4">
+            <form onSubmit={handleRegisterInstitution} className="p-4 space-y-3.5">
               {regError && (
-                <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded">
+                <div className="p-2.5 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xs">
                   {regError}
                 </div>
               )}
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Institution Name <span className="text-red-500">*</span>
+                  Institution Name <span className="text-red-600">*</span>
                 </label>
                 <input
                   type="text"
                   required
                   value={formName}
                   onChange={e => setFormName(e.target.value)}
-                  placeholder="e.g. Indraprastha Institute of Technology"
-                  className="w-full bg-slate-50 border border-slate-300 rounded px-3 py-2 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-aicte-navy-700"
+                  placeholder="e.g. National Institute of Science and Technology"
+                  className="w-full bg-white border border-[#cbd5e1] rounded-xs px-3 py-1.5 text-xs focus:border-[#003366] focus:outline-none"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    AICTE Permanent ID <span className="text-red-500">*</span>
+                    AICTE Permanent ID <span className="text-red-600">*</span>
                   </label>
                   <input
                     type="text"
@@ -358,9 +359,9 @@ export const InstitutionDirectory: React.FC = () => {
                     value={formPermId}
                     onChange={e => setFormPermId(e.target.value)}
                     placeholder="e.g. 1-9988776655"
-                    className="w-full bg-slate-50 border border-slate-300 rounded px-3 py-2 text-xs font-mono focus:bg-white focus:outline-none focus:ring-1 focus:ring-aicte-navy-700"
+                    className="w-full bg-white border border-[#cbd5e1] rounded-xs px-3 py-1.5 text-xs font-mono focus:border-[#003366] focus:outline-none"
                   />
-                  <span className="text-[10px] text-slate-400">Must be unique across AICTE database</span>
+                  <span className="text-[10px] text-slate-400">Unique alphanumeric AICTE identifier</span>
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
@@ -369,7 +370,7 @@ export const InstitutionDirectory: React.FC = () => {
                   <select
                     value={formType}
                     onChange={e => setFormType(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-300 rounded px-3 py-2 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-aicte-navy-700"
+                    className="w-full bg-white border border-[#cbd5e1] rounded-xs px-3 py-1.5 text-xs focus:border-[#003366] focus:outline-none"
                   >
                     <option value="Engineering">Engineering</option>
                     <option value="Management">Management</option>
@@ -383,7 +384,7 @@ export const InstitutionDirectory: React.FC = () => {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    City <span className="text-red-500">*</span>
+                    City <span className="text-red-600">*</span>
                   </label>
                   <input
                     type="text"
@@ -391,12 +392,12 @@ export const InstitutionDirectory: React.FC = () => {
                     value={formCity}
                     onChange={e => setFormCity(e.target.value)}
                     placeholder="City"
-                    className="w-full bg-slate-50 border border-slate-300 rounded px-3 py-2 text-xs"
+                    className="w-full bg-white border border-[#cbd5e1] rounded-xs px-3 py-1.5 text-xs focus:border-[#003366] focus:outline-none"
                   />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    State <span className="text-red-500">*</span>
+                    State <span className="text-red-600">*</span>
                   </label>
                   <input
                     type="text"
@@ -404,19 +405,19 @@ export const InstitutionDirectory: React.FC = () => {
                     value={formState}
                     onChange={e => setFormState(e.target.value)}
                     placeholder="State"
-                    className="w-full bg-slate-50 border border-slate-300 rounded px-3 py-2 text-xs"
+                    className="w-full bg-white border border-[#cbd5e1] rounded-xs px-3 py-1.5 text-xs focus:border-[#003366] focus:outline-none"
                   />
                 </div>
               </div>
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  AICTE Regional Jurisdiction <span className="text-red-500">*</span>
+                  AICTE Regional Jurisdiction <span className="text-red-600">*</span>
                 </label>
                 <select
                   value={formRegion}
                   onChange={e => setFormRegion(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-300 rounded px-3 py-2 text-xs"
+                  className="w-full bg-white border border-[#cbd5e1] rounded-xs px-3 py-1.5 text-xs focus:border-[#003366] focus:outline-none"
                 >
                   {regionsList.map(r => (
                     <option key={r} value={r}>
@@ -426,20 +427,20 @@ export const InstitutionDirectory: React.FC = () => {
                 </select>
               </div>
 
-              <div className="pt-3 border-t border-slate-200 flex justify-end space-x-2">
+              <div className="pt-3 border-t border-[#e2e8f0] flex justify-end space-x-2">
                 <button
                   type="button"
                   onClick={() => setShowRegisterModal(false)}
-                  className="px-3.5 py-1.5 border border-slate-300 rounded text-xs text-slate-700 hover:bg-slate-50"
+                  className="px-3 py-1.5 border border-[#cbd5e1] rounded-xs text-xs text-slate-700 hover:bg-slate-50 cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={regSubmitting}
-                  className="px-4 py-1.5 bg-aicte-navy-900 text-white rounded text-xs font-semibold hover:bg-aicte-navy-800 disabled:opacity-50"
+                  className="px-3.5 py-1.5 bg-[#003366] text-white rounded-xs text-xs font-semibold hover:bg-[#002147] disabled:opacity-50 cursor-pointer"
                 >
-                  {regSubmitting ? "Registering..." : "Confirm & Save Institution"}
+                  {regSubmitting ? "Registering..." : "Confirm & Save Record"}
                 </button>
               </div>
             </form>

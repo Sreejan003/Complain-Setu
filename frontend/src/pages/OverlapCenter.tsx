@@ -45,7 +45,7 @@ export const OverlapCenter: React.FC = () => {
   // Decision Modal State
   const [decisionModalOpen, setDecisionModalOpen] = useState(false);
   const [targetAlert, setTargetAlert] = useState<OverlapAlert | null>(null);
-  const [decisionType, setDecisionType] = useState<"Confirmed Related" | "Confirmed Duplicate" | "Marked Unrelated" | "Resolved">("Confirmed Related");
+  const [decisionType, setDecisionType] = useState<"Confirmed Related" | "Confirmed Duplicate" | "Marked Unrelated" | "Dismissed" | "Resolved">("Confirmed Related");
   const [reviewRemarks, setReviewRemarks] = useState("");
   const [linkAsRelated, setLinkAsRelated] = useState(true);
   const [submittingDecision, setSubmittingDecision] = useState(false);
@@ -88,7 +88,7 @@ export const OverlapCenter: React.FC = () => {
     }
   };
 
-  const handleOpenDecision = (alert: OverlapAlert, type: "Confirmed Related" | "Confirmed Duplicate" | "Marked Unrelated") => {
+  const handleOpenDecision = (alert: OverlapAlert, type: "Confirmed Related" | "Confirmed Duplicate" | "Marked Unrelated" | "Dismissed" | "Resolved") => {
     setTargetAlert(alert);
     setDecisionType(type);
     setReviewRemarks(
@@ -96,6 +96,8 @@ export const OverlapCenter: React.FC = () => {
         ? "Cross-Bureau overlap verified. Both files require joint inquiry between Regulation Bureau and PGRC."
         : type === "Confirmed Duplicate"
         ? "Duplicate petition submitted by same aggrieved party regarding identical violation."
+        : type === "Dismissed"
+        ? "Reviewed and dismissed: coincidental phrasing with distinct institutional substance."
         : "Examined case records: distinct complaints involving different departments within the institution."
     );
     setDecisionModalOpen(true);
@@ -128,29 +130,29 @@ export const OverlapCenter: React.FC = () => {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white border border-[#cbd5e1] rounded-xs p-3.5">
         <div>
           <div className="flex items-center space-x-2">
-            <h1 className="text-xl sm:text-2xl font-bold text-aicte-navy-900 tracking-tight">
-              Cross-Bureau Overlap Detection Center
-            </h1>
-            <span className="text-[11px] bg-amber-500/10 text-amber-900 font-bold px-2.5 py-0.5 rounded-full border border-amber-300">
-              Core Innovation Hub
+            <span className="text-[10px] uppercase tracking-wider font-bold text-[#003366] bg-[#e8eef5] border border-[#b8c9dc] px-2 py-0.5 rounded-xs">
+              Automated Regulatory Cross-Check
             </span>
           </div>
-          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-            Intelligent detection of simultaneous complaints concerning the same institution across Regulation Bureau, PGRC, and Regional Offices.
+          <h1 className="text-lg font-bold text-slate-900 mt-1">
+            Cross-Bureau Overlap Detection & Joint Adjudication Center
+          </h1>
+          <p className="text-xs text-slate-600 mt-0.5">
+            Intelligent detection of concurrent grievances concerning identical institutions across Regulation Bureau (RB), PGRC, and Regional Offices.
           </p>
         </div>
       </div>
 
       {/* Filter Bar */}
-      <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-xs flex flex-wrap items-center justify-between gap-3 text-xs">
+      <div className="bg-white border border-[#cbd5e1] rounded-xs p-3 flex flex-wrap items-center justify-between gap-3 text-xs">
         <div className="flex flex-wrap items-center gap-2">
-          <Filter className="w-4 h-4 text-slate-400" />
-          <span className="font-semibold text-slate-700">Filter Alerts:</span>
+          <Filter className="w-3.5 h-3.5 text-slate-500" />
+          <span className="font-bold text-slate-700">Filter Alerts:</span>
 
           <select
             value={statusFilter}
@@ -158,7 +160,7 @@ export const OverlapCenter: React.FC = () => {
               setStatusFilter(e.target.value);
               setPage(1);
             }}
-            className="bg-slate-50 border border-slate-300 rounded px-2.5 py-1.5 text-slate-800 font-medium"
+            className="bg-white border border-slate-300 rounded-xs px-2.5 py-1 text-slate-900 font-medium"
           >
             <option value="">All Review Statuses</option>
             <option value="Pending Review">Pending Review (Action Needed)</option>
@@ -174,7 +176,7 @@ export const OverlapCenter: React.FC = () => {
               setBureauFilter(e.target.value);
               setPage(1);
             }}
-            className="bg-slate-50 border border-slate-300 rounded px-2.5 py-1.5 text-slate-800"
+            className="bg-white border border-slate-300 rounded-xs px-2.5 py-1 text-slate-900"
           >
             <option value="">All Bureaus Involved</option>
             <option value="RB">Regulation Bureau (RB)</option>
@@ -191,7 +193,7 @@ export const OverlapCenter: React.FC = () => {
               setBureauFilter("");
               setPage(1);
             }}
-            className="flex items-center space-x-1 text-slate-500 hover:text-slate-800 underline text-xs"
+            className="flex items-center space-x-1 text-[#003366] hover:underline text-xs font-semibold"
           >
             <RotateCcw className="w-3 h-3" />
             <span>Reset Filters</span>
@@ -200,13 +202,13 @@ export const OverlapCenter: React.FC = () => {
       </div>
 
       {/* Overlap Cards Grid */}
-      <div className="space-y-4">
+      <div className="space-y-3">
         {loading ? (
-          <div className="bg-white border border-slate-200 rounded-lg p-12 text-center text-slate-500 text-xs">
+          <div className="bg-white border border-[#cbd5e1] rounded-xs p-10 text-center text-slate-500 text-xs">
             Loading cross-bureau overlap intelligence records...
           </div>
         ) : alerts.length === 0 ? (
-          <div className="bg-white border border-slate-200 rounded-lg p-12 text-center text-slate-500 text-xs">
+          <div className="bg-white border border-[#cbd5e1] rounded-xs p-10 text-center text-slate-500 text-xs">
             No overlap alerts found matching your filter criteria.
           </div>
         ) : (
@@ -214,41 +216,50 @@ export const OverlapCenter: React.FC = () => {
             <div
               key={alert.id}
               className={`bg-white border ${
-                alert.alertStatus === "Pending Review" ? "border-amber-300 ring-1 ring-amber-100" : "border-slate-200"
-              } rounded-lg p-5 shadow-xs hover:shadow-md transition space-y-4`}
+                alert.alertStatus === "Pending Review" ? "border-[#f59e0b]" : "border-[#cbd5e1]"
+              } rounded-xs p-4 space-y-3`}
             >
               {/* Card Header */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-2.5">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-mono text-xs font-bold text-amber-950 bg-amber-100 px-2.5 py-0.5 rounded border border-amber-300">
+                  <span className="font-mono text-xs font-bold text-[#003366] bg-[#e8eef5] px-2 py-0.5 rounded-xs border border-[#b8c9dc]">
                     {alert.alertId}
                   </span>
                   <span
-                    className={`text-[10px] font-bold px-2 py-0.5 rounded ${
+                    className={`text-[10px] font-bold px-2 py-0.5 rounded-xs border ${
                       alert.alertStatus === "Pending Review"
-                        ? "bg-amber-500 text-white"
+                        ? "bg-[#fef3c7] text-[#92400e] border-[#fcd34d]"
                         : alert.alertStatus === "Confirmed Related"
-                        ? "bg-blue-600 text-white"
+                        ? "bg-[#eff6ff] text-[#1e40af] border-[#bfdbfe]"
                         : alert.alertStatus === "Confirmed Duplicate"
-                        ? "bg-purple-600 text-white"
-                        : "bg-slate-200 text-slate-700"
+                        ? "bg-[#f5f3ff] text-[#5b21b6] border-[#ddd6fe]"
+                        : "bg-slate-100 text-slate-700 border-slate-300"
                     }`}
                   >
                     {alert.alertStatus}
                   </span>
-                  <span className="text-xs text-slate-500">
-                    Detected on: {new Date(alert.createdAt).toLocaleDateString()}
+                  {alert.confidenceCategory && (
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-xs bg-slate-100 text-slate-700 border border-slate-300">
+                      {alert.confidenceCategory}
+                    </span>
+                  )}
+                  {alert.detectionMethod && (
+                    <span className="text-[10px] bg-slate-50 text-slate-600 px-2 py-0.5 rounded-xs font-mono border border-slate-200">
+                      {alert.detectionMethod}
+                    </span>
+                  )}
+                  <span className="text-xs text-slate-500 font-mono">
+                    Detected: {new Date(alert.createdAt).toLocaleDateString()}
                   </span>
                 </div>
 
                 <div className="flex items-center space-x-2">
-                  <span className="text-xs font-bold bg-amber-50 text-amber-900 border border-amber-200 px-2 py-0.5 rounded">
-                    Rule Score: {alert.ruleMatchScore}%
+                  <span className="text-xs font-bold bg-[#fffbeb] text-[#92400e] border border-[#fcd34d] px-2 py-0.5 rounded-xs">
+                    Rule Match: {alert.ruleMatchScore}%
                   </span>
                   {alert.semanticSimilarityScore !== undefined && (
-                    <span className="text-xs font-bold bg-blue-50 text-blue-900 border border-blue-200 px-2 py-0.5 rounded flex items-center space-x-1">
-                      <Sparkles className="w-3 h-3 text-blue-600" />
-                      <span>AI Similarity: {alert.semanticSimilarityScore}%</span>
+                    <span className="text-xs font-bold bg-[#eff6ff] text-[#1e40af] border border-[#bfdbfe] px-2 py-0.5 rounded-xs flex items-center space-x-1">
+                      <span>Semantic Score: {alert.semanticSimilarityScore}%</span>
                     </span>
                   )}
                 </div>
@@ -256,61 +267,108 @@ export const OverlapCenter: React.FC = () => {
 
               {/* Institution Row */}
               <div className="flex items-center space-x-2 text-xs">
-                <Building2 className="w-4 h-4 text-aicte-navy-800" />
+                <Building2 className="w-4 h-4 text-[#003366]" />
                 <span className="font-bold text-slate-900 text-sm">{alert.institutionName}</span>
                 <span className="font-mono text-slate-500 text-[11px]">({alert.aictePermanentId})</span>
               </div>
 
               {/* Cross-Bureau Complaints Comparison Row */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {/* Case A Box */}
-                <div className="bg-slate-50 border border-slate-200 rounded-md p-3.5 space-y-2">
+                <div className="bg-[#f8fafc] border border-slate-200 rounded-xs p-3 space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <span className="font-mono font-bold text-xs text-blue-700">
+                    <span className="font-mono font-bold text-xs text-[#003366]">
                       {alert.complaintRefA}
                     </span>
-                    <span className="text-[10px] bg-blue-100 text-blue-900 font-semibold px-2 py-0.5 rounded">
+                    <span className="text-[10px] bg-white text-[#003366] border border-slate-300 font-bold px-1.5 py-0.2 rounded-xs">
                       Bureau: {alert.bureauA}
                     </span>
                   </div>
-                  <div className="text-xs font-semibold text-slate-800">{alert.complaintTitleA}</div>
-                  <div className="text-[11px] text-slate-600 line-clamp-2">{alert.complaintDescA}</div>
-                  <div className="text-[10px] text-slate-400">
-                    Category: <span className="font-medium text-slate-600">{alert.categoryA}</span>
+                  <div className="text-xs font-semibold text-slate-900">{alert.complaintTitleA}</div>
+                  <div className="text-[11px] text-slate-700 line-clamp-2">{alert.complaintDescA}</div>
+                  <div className="text-[10px] text-slate-500">
+                    Category: <span className="font-medium text-slate-800">{alert.categoryA}</span>
                   </div>
                 </div>
 
                 {/* Case B Box */}
-                <div className="bg-slate-50 border border-slate-200 rounded-md p-3.5 space-y-2">
+                <div className="bg-[#f8fafc] border border-slate-200 rounded-xs p-3 space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <span className="font-mono font-bold text-xs text-purple-700">
+                    <span className="font-mono font-bold text-xs text-[#003366]">
                       {alert.complaintRefB}
                     </span>
-                    <span className="text-[10px] bg-purple-100 text-purple-900 font-semibold px-2 py-0.5 rounded">
+                    <span className="text-[10px] bg-white text-[#003366] border border-slate-300 font-bold px-1.5 py-0.2 rounded-xs">
                       Bureau: {alert.bureauB}
                     </span>
                   </div>
-                  <div className="text-xs font-semibold text-slate-800">{alert.complaintTitleB}</div>
-                  <div className="text-[11px] text-slate-600 line-clamp-2">{alert.complaintDescB}</div>
-                  <div className="text-[10px] text-slate-400">
-                    Category: <span className="font-medium text-slate-600">{alert.categoryB}</span>
+                  <div className="text-xs font-semibold text-slate-900">{alert.complaintTitleB}</div>
+                  <div className="text-[11px] text-slate-700 line-clamp-2">{alert.complaintDescB}</div>
+                  <div className="text-[10px] text-slate-500">
+                    Category: <span className="font-medium text-slate-800">{alert.categoryB}</span>
                   </div>
                 </div>
               </div>
 
               {/* Reasons & Recommended Action */}
-              <div className="bg-amber-50/50 border border-amber-200/80 rounded-md p-3 text-xs space-y-1.5">
-                <div className="text-slate-700">
-                  <span className="font-semibold text-amber-900">Explainable Match Factors: </span>
-                  {alert.matchReasons.join(" • ")}
+              <div className="bg-[#fffbeb] border border-[#fcd34d] rounded-xs p-3 text-xs space-y-2">
+                {alert.explanation ? (
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
+                      <div className="bg-white p-2 rounded-xs border border-amber-200">
+                        <span className="text-slate-500 block text-[10px] font-bold uppercase">Institution Match</span>
+                        <span className="font-bold text-slate-900">100% Verified</span>
+                      </div>
+                      <div className="bg-white p-2 rounded-xs border border-amber-200">
+                        <span className="text-slate-500 block text-[10px] font-bold uppercase">Bureau Boundary</span>
+                        <span className="font-bold text-[#003366]">
+                          {alert.explanation.crossBureauMatch.isCrossBureau ? "Cross-Bureau Overlap" : "Intra-Bureau Case"}
+                        </span>
+                      </div>
+                      <div className="bg-white p-2 rounded-xs border border-amber-200">
+                        <span className="text-slate-500 block text-[10px] font-bold uppercase">Category Alignment</span>
+                        <span className="font-bold text-slate-900">
+                          {alert.explanation.categoryMatch.exactMatch ? "Identical Category" : "Related Category"}
+                        </span>
+                      </div>
+                      <div className="bg-white p-2 rounded-xs border border-amber-200">
+                        <span className="text-slate-500 block text-[10px] font-bold uppercase">Semantic Alignment</span>
+                        <span className="font-bold text-[#003366]">
+                          {alert.explanation.semanticMatch.score}% ({alert.explanation.semanticMatch.engine.split(" ")[0]})
+                        </span>
+                      </div>
+                    </div>
+
+                    {alert.explanation.keywordMatch.matchedTerms.length > 0 && (
+                      <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                        <span className="text-slate-600 text-[11px] font-bold">Matched Keywords:</span>
+                        {alert.explanation.keywordMatch.matchedTerms.map((kw, i) => (
+                          <span key={i} className="bg-white text-slate-800 border border-slate-300 font-mono text-[10px] px-1.5 py-0.5 rounded-xs">
+                            {kw}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    <div className="text-slate-800 text-[11px]">
+                      <span className="font-bold text-[#92400e]">Redressal Assessment: </span>
+                      {alert.matchReasons.join(" • ")}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-slate-800">
+                    <span className="font-bold text-[#92400e]">Redressal Assessment: </span>
+                    {alert.matchReasons.join(" • ")}
+                  </div>
+                )}
+
+                <div className="text-slate-800 pt-1 border-t border-[#fed7aa] flex items-start space-x-1.5">
+                  <span className="font-bold text-slate-900 shrink-0">Recommended Action:</span>
+                  <span className="text-slate-800 font-medium">{alert.recommendedAction}</span>
                 </div>
-                <div className="text-slate-700">
-                  <span className="font-semibold text-slate-900">Recommended Coordination Step: </span>
-                  <span className="italic">{alert.recommendedAction}</span>
-                </div>
+
                 {alert.reviewRemarks && (
-                  <div className="text-slate-700 pt-1 border-t border-amber-200/60">
-                    <span className="font-semibold text-blue-900">
+                  <div className="text-slate-800 pt-1 border-t border-[#fed7aa]">
+                    <span className="font-bold text-[#003366]">
                       Review Record ({alert.reviewedByName || "Officer"} on{" "}
                       {alert.reviewedAt ? new Date(alert.reviewedAt).toLocaleDateString() : "Recent"}):{" "}
                     </span>
@@ -320,37 +378,43 @@ export const OverlapCenter: React.FC = () => {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
                 <button
                   onClick={() => handleOpenSideBySide(alert)}
-                  className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded text-xs font-medium transition inline-flex items-center space-x-1.5 border border-slate-300"
+                  className="px-2.5 py-1 bg-white hover:bg-[#f1f5f9] text-[#003366] rounded-xs text-xs font-semibold transition inline-flex items-center space-x-1.5 border border-[#cbd5e1]"
                 >
-                  <Eye className="w-3.5 h-3.5 text-blue-600" />
-                  <span>Open Side-by-Side Comparison</span>
+                  <Eye className="w-3.5 h-3.5 text-[#003366]" />
+                  <span>Inspect Side-by-Side</span>
                 </button>
 
                 {canReview && alert.alertStatus === "Pending Review" && (
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-1.5">
                     <button
                       onClick={() => handleOpenDecision(alert, "Confirmed Related")}
-                      className="px-3 py-1.5 bg-blue-700 hover:bg-blue-800 text-white rounded text-xs font-semibold shadow-xs flex items-center space-x-1"
+                      className="px-2.5 py-1 bg-[#003366] hover:bg-[#002147] text-white rounded-xs text-xs font-semibold flex items-center space-x-1 border border-[#002147]"
                     >
                       <Link2 className="w-3.5 h-3.5" />
                       <span>Confirm Related</span>
                     </button>
                     <button
                       onClick={() => handleOpenDecision(alert, "Confirmed Duplicate")}
-                      className="px-3 py-1.5 bg-purple-700 hover:bg-purple-800 text-white rounded text-xs font-semibold shadow-xs flex items-center space-x-1"
+                      className="px-2.5 py-1 bg-slate-700 hover:bg-slate-800 text-white rounded-xs text-xs font-semibold flex items-center space-x-1 border border-slate-800"
                     >
                       <Copy className="w-3.5 h-3.5" />
                       <span>Mark Duplicate</span>
                     </button>
                     <button
                       onClick={() => handleOpenDecision(alert, "Marked Unrelated")}
-                      className="px-3 py-1.5 border border-slate-300 hover:bg-red-50 hover:border-red-300 hover:text-red-700 text-slate-700 rounded text-xs font-medium transition flex items-center space-x-1"
+                      className="px-2.5 py-1 border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-xs text-xs font-semibold transition flex items-center space-x-1"
                     >
-                      <XCircle className="w-3.5 h-3.5 text-red-500" />
+                      <XCircle className="w-3.5 h-3.5 text-slate-500" />
                       <span>Reject Overlap</span>
+                    </button>
+                    <button
+                      onClick={() => handleOpenDecision(alert, "Dismissed")}
+                      className="px-2 py-1 border border-slate-300 hover:bg-slate-100 text-slate-500 rounded-xs text-xs font-medium transition"
+                    >
+                      Dismiss
                     </button>
                   </div>
                 )}
@@ -362,36 +426,32 @@ export const OverlapCenter: React.FC = () => {
 
       {/* MODAL 1: SIDE-BY-SIDE COMPLAINT COMPARISON */}
       {compareModalOpen && selectedAlert && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-5xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-slate-200">
+        <div className="fixed inset-0 z-50 bg-slate-900/60 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xs shadow-xl max-w-5xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-slate-300">
             {/* Modal Header */}
-            <div className="px-6 py-4 bg-aicte-navy-900 text-white flex items-center justify-between">
+            <div className="px-4 py-2.5 bg-[#003366] text-white flex items-center justify-between">
               <div>
                 <div className="flex items-center space-x-2">
-                  <GitMerge className="w-5 h-5 text-amber-400" />
-                  <h3 className="text-base font-bold">Side-by-Side Cross-Bureau Grievance Comparison</h3>
+                  <GitMerge className="w-4 h-4 text-[#ff9933]" />
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-white">Side-by-Side Grievance Comparison</h3>
                 </div>
-                <div className="text-xs text-slate-300 mt-0.5">
-                  Institution: {selectedAlert.institutionName} ({selectedAlert.aictePermanentId})
+                <div className="text-[10px] text-slate-300">
+                  {selectedAlert.institutionName} • PID: {selectedAlert.aictePermanentId}
                 </div>
               </div>
-              <button
-                onClick={() => setCompareModalOpen(false)}
-                className="text-slate-300 hover:text-white"
-              >
-                <X className="w-5 h-5" />
+              <button onClick={() => setCompareModalOpen(false)} className="text-slate-300 hover:text-white">
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Modal Subheader / AI Intelligence Badge */}
-            <div className="px-6 py-3 bg-amber-50 border-b border-amber-200 flex flex-wrap items-center justify-between gap-2 text-xs">
+            <div className="px-4 py-2 bg-[#fffbeb] border-b border-[#fed7aa] flex flex-wrap items-center justify-between gap-2 text-xs">
               <div className="flex items-center space-x-3">
-                <span className="font-bold text-amber-900">
-                  Rule Score: {selectedAlert.ruleMatchScore}%
+                <span className="font-bold text-[#92400e]">
+                  Rule Match: {selectedAlert.ruleMatchScore}%
                 </span>
                 <span className="text-slate-300">|</span>
-                <span className="font-bold text-blue-900 flex items-center space-x-1">
-                  <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+                <span className="font-bold text-[#003366] flex items-center space-x-1">
                   <span>
                     Semantic Score:{" "}
                     {liveCompareData ? `${liveCompareData.semanticScore}% (${liveCompareData.engine})` : "Calculating..."}
@@ -400,9 +460,9 @@ export const OverlapCenter: React.FC = () => {
               </div>
 
               {liveCompareData && liveCompareData.commonKeywords.length > 0 && (
-                <div className="text-[11px] text-slate-600">
-                  <strong>Common Lexical Keywords:</strong>{" "}
-                  <span className="text-blue-800 font-mono">
+                <div className="text-[11px] text-slate-700">
+                  <strong className="text-slate-900 font-bold">Common Keywords:</strong>{" "}
+                  <span className="text-[#003366] font-mono font-semibold">
                     [{liveCompareData.commonKeywords.slice(0, 7).join(", ")}]
                   </span>
                 </div>
@@ -410,42 +470,42 @@ export const OverlapCenter: React.FC = () => {
             </div>
 
             {/* Side by side columns */}
-            <div className="p-6 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-6 divide-y md:divide-y-0 md:divide-x divide-slate-200">
+            <div className="p-4 overflow-y-auto flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
               {/* Complaint A */}
-              <div className="space-y-3 pr-0 md:pr-4">
-                <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <div className="bg-[#f8fafc] border border-slate-200 rounded-xs p-3 space-y-2">
+                <div className="flex items-center justify-between pb-1.5 border-b border-slate-200">
                   <div>
-                    <span className="text-[10px] uppercase font-bold text-slate-400">Case A Reference</span>
-                    <div className="font-mono text-sm font-bold text-blue-700">
+                    <span className="text-[10px] uppercase font-bold text-slate-500">Case A Reference</span>
+                    <div className="font-mono text-sm font-bold text-[#003366]">
                       {selectedAlert.complaintRefA}
                     </div>
                   </div>
-                  <span className="text-xs font-semibold bg-blue-100 text-blue-900 px-2.5 py-1 rounded">
+                  <span className="text-[10px] font-bold bg-white text-[#003366] border border-slate-300 px-1.5 py-0.2 rounded-xs">
                     Bureau: {selectedAlert.bureauA}
                   </span>
                 </div>
 
                 <div>
-                  <span className="text-[11px] text-slate-400 block">Category</span>
+                  <span className="text-[10px] text-slate-500 uppercase font-bold block">Category</span>
                   <span className="text-xs font-semibold text-slate-800">{selectedAlert.categoryA}</span>
                 </div>
 
                 <div>
-                  <span className="text-[11px] text-slate-400 block">Grievance Title</span>
+                  <span className="text-[10px] text-slate-500 uppercase font-bold block">Grievance Title</span>
                   <span className="text-xs font-bold text-slate-900">{selectedAlert.complaintTitleA}</span>
                 </div>
 
                 <div>
-                  <span className="text-[11px] text-slate-400 block mb-1">Grievance Description Text</span>
-                  <div className="p-3 bg-slate-50 border border-slate-200 rounded text-xs text-slate-700 leading-relaxed max-h-56 overflow-y-auto whitespace-pre-wrap">
+                  <span className="text-[10px] text-slate-500 uppercase font-bold block mb-1">Grievance Description Text</span>
+                  <div className="p-2.5 bg-white border border-slate-200 rounded-xs text-xs text-slate-800 leading-relaxed max-h-56 overflow-y-auto whitespace-pre-wrap">
                     {selectedAlert.complaintDescA}
                   </div>
                 </div>
 
-                <div className="pt-2">
+                <div className="pt-1">
                   <Link
                     to={`/cases/${selectedAlert.complaintIdA}`}
-                    className="text-xs text-blue-600 hover:underline font-semibold"
+                    className="text-xs text-[#003366] hover:underline font-semibold"
                   >
                     View Full Case A File &rarr;
                   </Link>
@@ -453,40 +513,40 @@ export const OverlapCenter: React.FC = () => {
               </div>
 
               {/* Complaint B */}
-              <div className="space-y-3 pt-4 md:pt-0 pl-0 md:pl-6">
-                <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <div className="bg-[#f8fafc] border border-slate-200 rounded-xs p-3 space-y-2">
+                <div className="flex items-center justify-between pb-1.5 border-b border-slate-200">
                   <div>
-                    <span className="text-[10px] uppercase font-bold text-slate-400">Case B Reference</span>
-                    <div className="font-mono text-sm font-bold text-purple-700">
+                    <span className="text-[10px] uppercase font-bold text-slate-500">Case B Reference</span>
+                    <div className="font-mono text-sm font-bold text-[#003366]">
                       {selectedAlert.complaintRefB}
                     </div>
                   </div>
-                  <span className="text-xs font-semibold bg-purple-100 text-purple-900 px-2.5 py-1 rounded">
+                  <span className="text-[10px] font-bold bg-white text-[#003366] border border-slate-300 px-1.5 py-0.2 rounded-xs">
                     Bureau: {selectedAlert.bureauB}
                   </span>
                 </div>
 
                 <div>
-                  <span className="text-[11px] text-slate-400 block">Category</span>
+                  <span className="text-[10px] text-slate-500 uppercase font-bold block">Category</span>
                   <span className="text-xs font-semibold text-slate-800">{selectedAlert.categoryB}</span>
                 </div>
 
                 <div>
-                  <span className="text-[11px] text-slate-400 block">Grievance Title</span>
+                  <span className="text-[10px] text-slate-500 uppercase font-bold block">Grievance Title</span>
                   <span className="text-xs font-bold text-slate-900">{selectedAlert.complaintTitleB}</span>
                 </div>
 
                 <div>
-                  <span className="text-[11px] text-slate-400 block mb-1">Grievance Description Text</span>
-                  <div className="p-3 bg-slate-50 border border-slate-200 rounded text-xs text-slate-700 leading-relaxed max-h-56 overflow-y-auto whitespace-pre-wrap">
+                  <span className="text-[10px] text-slate-500 uppercase font-bold block mb-1">Grievance Description Text</span>
+                  <div className="p-2.5 bg-white border border-slate-200 rounded-xs text-xs text-slate-800 leading-relaxed max-h-56 overflow-y-auto whitespace-pre-wrap">
                     {selectedAlert.complaintDescB}
                   </div>
                 </div>
 
-                <div className="pt-2">
+                <div className="pt-1">
                   <Link
                     to={`/cases/${selectedAlert.complaintIdB}`}
-                    className="text-xs text-purple-600 hover:underline font-semibold"
+                    className="text-xs text-[#003366] hover:underline font-semibold"
                   >
                     View Full Case B File &rarr;
                   </Link>
@@ -495,36 +555,36 @@ export const OverlapCenter: React.FC = () => {
             </div>
 
             {/* Modal Footer Actions */}
-            <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3">
+            <div className="px-4 py-2.5 bg-[#f8fafc] border-t border-[#cbd5e1] flex flex-wrap items-center justify-between gap-2">
               <button
                 type="button"
                 onClick={() => setCompareModalOpen(false)}
-                className="px-4 py-2 border border-slate-300 rounded text-xs text-slate-700 hover:bg-slate-100"
+                className="px-3 py-1.5 border border-slate-300 rounded-xs text-xs text-slate-700 hover:bg-slate-100"
               >
                 Close Comparison
               </button>
 
               {canReview && selectedAlert.alertStatus === "Pending Review" && (
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-1.5">
                   <button
                     onClick={() => handleOpenDecision(selectedAlert, "Confirmed Related")}
-                    className="px-3.5 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded text-xs font-semibold shadow-xs flex items-center space-x-1.5"
+                    className="px-3 py-1.5 bg-[#003366] hover:bg-[#002147] text-white rounded-xs text-xs font-semibold flex items-center space-x-1 border border-[#002147]"
                   >
-                    <Link2 className="w-4 h-4" />
+                    <Link2 className="w-3.5 h-3.5" />
                     <span>Confirm Related</span>
                   </button>
                   <button
                     onClick={() => handleOpenDecision(selectedAlert, "Confirmed Duplicate")}
-                    className="px-3.5 py-2 bg-purple-700 hover:bg-purple-800 text-white rounded text-xs font-semibold shadow-xs flex items-center space-x-1.5"
+                    className="px-3 py-1.5 bg-slate-700 hover:bg-slate-800 text-white rounded-xs text-xs font-semibold flex items-center space-x-1 border border-slate-800"
                   >
-                    <Copy className="w-4 h-4" />
+                    <Copy className="w-3.5 h-3.5" />
                     <span>Mark Duplicate</span>
                   </button>
                   <button
                     onClick={() => handleOpenDecision(selectedAlert, "Marked Unrelated")}
-                    className="px-3 py-2 border border-red-300 text-red-700 bg-red-50 hover:bg-red-100 rounded text-xs font-semibold flex items-center space-x-1.5"
+                    className="px-3 py-1.5 border border-slate-300 text-slate-700 bg-white hover:bg-slate-100 rounded-xs text-xs font-semibold flex items-center space-x-1"
                   >
-                    <XCircle className="w-4 h-4" />
+                    <XCircle className="w-3.5 h-3.5 text-slate-500" />
                     <span>Reject Relationship</span>
                   </button>
                 </div>
@@ -536,35 +596,36 @@ export const OverlapCenter: React.FC = () => {
 
       {/* MODAL 2: OFFICIAL REVIEW DECISION FORM */}
       {decisionModalOpen && targetAlert && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-lg w-full overflow-hidden border border-slate-200">
-            <div className="px-5 py-4 bg-aicte-navy-900 text-white flex items-center justify-between">
-              <h3 className="text-sm font-bold">Record Overlap Review Decision</h3>
+        <div className="fixed inset-0 z-50 bg-slate-900/60 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xs shadow-xl max-w-lg w-full overflow-hidden border border-slate-300">
+            <div className="px-4 py-2.5 bg-[#003366] text-white flex items-center justify-between">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-white">Record Overlap Review Determination</h3>
               <button onClick={() => setDecisionModalOpen(false)} className="text-slate-300 hover:text-white">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleSubmitDecision} className="p-5 space-y-4">
+            <form onSubmit={handleSubmitDecision} className="p-4 space-y-3 text-xs">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Regulatory Determination Decision <span className="text-red-500">*</span>
+                <label className="block font-bold text-slate-700 mb-1">
+                  Regulatory Determination Decision <span className="text-[#b91c1c]">*</span>
                 </label>
                 <select
                   value={decisionType}
                   onChange={e => setDecisionType(e.target.value as any)}
-                  className="w-full bg-slate-50 border border-slate-300 rounded px-3 py-2 text-xs font-semibold"
+                  className="w-full bg-white border border-slate-300 rounded-xs px-2.5 py-1.5 text-xs font-semibold text-slate-900"
                 >
                   <option value="Confirmed Related">Confirmed Related (Link for Cross-Bureau Coordination)</option>
                   <option value="Confirmed Duplicate">Confirmed Duplicate (Merge Proceedings)</option>
-                  <option value="Marked Unrelated">Marked Unrelated (Dismiss Overlap Conflict)</option>
+                  <option value="Marked Unrelated">Marked Unrelated (Reject Overlap Conflict)</option>
+                  <option value="Dismissed">Dismissed (Coincidental wording / No Action Needed)</option>
                   <option value="Resolved">Resolved (Joint Hearing Concluded)</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Official Administrative Remarks & Review Notes <span className="text-red-500">*</span>
+                <label className="block font-bold text-slate-700 mb-1">
+                  Official Administrative Remarks & Review Notes <span className="text-[#b91c1c]">*</span>
                 </label>
                 <textarea
                   rows={4}
@@ -572,7 +633,7 @@ export const OverlapCenter: React.FC = () => {
                   value={reviewRemarks}
                   onChange={e => setReviewRemarks(e.target.value)}
                   placeholder="Record justification, cross-verification findings, and officer orders..."
-                  className="w-full bg-slate-50 border border-slate-300 rounded px-3 py-2 text-xs"
+                  className="w-full bg-white border border-slate-300 rounded-xs px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-[#003366]"
                 />
               </div>
 
@@ -582,24 +643,24 @@ export const OverlapCenter: React.FC = () => {
                     type="checkbox"
                     checked={linkAsRelated}
                     onChange={e => setLinkAsRelated(e.target.checked)}
-                    className="rounded text-blue-600"
+                    className="rounded-xs text-[#003366]"
                   />
                   <span>Create two-way link in Related Cases registry</span>
                 </label>
               )}
 
-              <div className="pt-3 border-t border-slate-100 flex justify-end space-x-2">
+              <div className="pt-2 border-t border-slate-200 flex justify-end space-x-2">
                 <button
                   type="button"
                   onClick={() => setDecisionModalOpen(false)}
-                  className="px-3.5 py-1.5 border border-slate-300 rounded text-xs text-slate-700 hover:bg-slate-50"
+                  className="px-3 py-1.5 border border-slate-300 rounded-xs text-slate-700 hover:bg-slate-100"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submittingDecision}
-                  className="px-4 py-1.5 bg-aicte-navy-900 text-white rounded text-xs font-semibold hover:bg-aicte-navy-800 disabled:opacity-50"
+                  className="px-4 py-1.5 bg-[#003366] hover:bg-[#002147] text-white rounded-xs text-xs font-semibold disabled:opacity-50"
                 >
                   {submittingDecision ? "Committing..." : "Commit Official Decision"}
                 </button>

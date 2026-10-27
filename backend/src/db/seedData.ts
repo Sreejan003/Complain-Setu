@@ -63,6 +63,19 @@ export const SEED_PROFILES: Profile[] = [
     isActive: true,
     createdAt: "2026-01-01T09:00:00Z",
     updatedAt: "2026-01-01T09:00:00Z"
+  },
+  {
+    id: "usr-inst-01",
+    email: "inst.officer@nist.edu.in",
+    passwordHash: DEMO_PW_HASH,
+    fullName: "Prof. Anirudh Patnaik",
+    role: "Institutional User",
+    institutionId: "inst-1",
+    institutionName: "National Institute of Science & Technology",
+    designation: "Registrar & Grievance Redressal Liaison Officer",
+    isActive: true,
+    createdAt: "2026-01-01T09:00:00Z",
+    updatedAt: "2026-01-01T09:00:00Z"
   }
 ];
 

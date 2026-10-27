@@ -3,7 +3,8 @@ export type UserRole =
   | "Regulation Bureau Officer"
   | "PGRC Officer"
   | "Regional Officer"
-  | "Senior Management";
+  | "Senior Management"
+  | "Institutional User";
 
 export type ComplaintStatus =
   | "Pending"
@@ -19,6 +20,7 @@ export type OverlapStatus =
   | "Confirmed Related"
   | "Confirmed Duplicate"
   | "Marked Unrelated"
+  | "Dismissed"
   | "Resolved";
 
 export interface UserProfile {
@@ -28,6 +30,8 @@ export interface UserProfile {
   role: UserRole;
   bureauId?: string;
   region?: string;
+  institutionId?: string;
+  institutionName?: string;
   designation?: string;
 }
 
@@ -73,6 +77,7 @@ export interface Complaint {
   hasOverlapAlert: boolean;
   disposalDate?: string;
   disposalRemarks?: string;
+  slaTargetDays?: number;
   createdBy?: string;
   createdByName?: string;
   createdAt: string;
@@ -132,14 +137,49 @@ export interface OverlapAlert {
   ruleMatchScore: number;
   semanticSimilarityScore?: number;
   matchReasons: string[];
+  explanation?: OverlapExplanation;
   alertStatus: OverlapStatus;
   recommendedAction: string;
   reviewedBy?: string;
   reviewedByName?: string;
   reviewedAt?: string;
+  confidenceCategory?: "High-Confidence Duplicate" | "Related Grievance" | "Low-Confidence Match";
+  detectionMethod?: string;
   reviewRemarks?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface OverlapExplanation {
+  institutionMatch: {
+    matched: boolean;
+    score: number;
+    details: string;
+  };
+  crossBureauMatch: {
+    isCrossBureau: boolean;
+    bureauA: string;
+    bureauB: string;
+    details: string;
+  };
+  categoryMatch: {
+    exactMatch: boolean;
+    categoryA: string;
+    categoryB: string;
+    details: string;
+  };
+  keywordMatch: {
+    matchedTerms: string[];
+    score: number;
+    details: string;
+  };
+  semanticMatch: {
+    score: number;
+    engine: string;
+    details: string;
+  };
+  summary: string;
+  recommendation: string;
 }
 
 export interface Notification {
@@ -199,3 +239,43 @@ export interface AuditLog {
   details?: Record<string, any>;
   createdAt: string;
 }
+
+export interface ComplaintDocument {
+  id: string;
+  complaintId: string;
+  institutionId?: string;
+  fileName: string;
+  originalName: string;
+  fileSize: number;
+  mimeType: string;
+  fileUrl: string;
+  documentType: string;
+  uploadedBy: string;
+  uploadedByName: string;
+  uploadedAt: string;
+}
+
+export interface InstitutionDashboardMetrics {
+  institution: Institution;
+  kpis: {
+    totalComplaints: number;
+    pendingCount: number;
+    underProcessCount: number;
+    resolvedCount: number;
+    overdueCount: number;
+    highPriorityCount: number;
+    activeOverlapCount: number;
+  };
+  distribution: {
+    byStatus: { name: string; count: number }[];
+    byPriority: { name: string; count: number }[];
+    byCategory: { name: string; count: number }[];
+    byDate: { date: string; count: number }[];
+  };
+  urgent: {
+    upcomingDeadlines: Complaint[];
+    overdueComplaints: Complaint[];
+    recentlyUpdated: Complaint[];
+  };
+}
+

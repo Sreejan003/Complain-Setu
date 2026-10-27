@@ -8,7 +8,9 @@ import {
   Notification,
   DashboardAnalytics,
   RelatedCase,
-  AuditLog
+  AuditLog,
+  ComplaintDocument,
+  InstitutionDashboardMetrics
 } from "./types.js";
 
 const API_BASE = "/api";
@@ -52,12 +54,28 @@ export const api = {
   // Institutions
   async getInstitutions(params?: Record<string, any>): Promise<{ data: Institution[]; pagination: any }> {
     const query = new URLSearchParams(params).toString();
-    const res = await fetch(`${API_BASE}/institutions?${query}`);
+    const res = await fetch(`${API_BASE}/institutions?${query}`, {
+      headers: { ...getAuthHeader() }
+    });
     return handleResponse(res);
   },
 
-  async getInstitutionProfile(id: string): Promise<{ institution: Institution; complaints: Complaint[]; overlapAlerts: OverlapAlert[] }> {
-    const res = await fetch(`${API_BASE}/institutions/${id}`);
+  async getInstitutionProfile(id: string): Promise<{
+    institution: Institution;
+    complaints: Complaint[];
+    overlapAlerts: OverlapAlert[];
+    documents?: ComplaintDocument[];
+  }> {
+    const res = await fetch(`${API_BASE}/institutions/${id}`, {
+      headers: { ...getAuthHeader() }
+    });
+    return handleResponse(res);
+  },
+
+  async getInstitutionDashboardMetrics(id: string): Promise<InstitutionDashboardMetrics> {
+    const res = await fetch(`${API_BASE}/institutions/${id}/dashboard-metrics`, {
+      headers: { ...getAuthHeader() }
+    });
     return handleResponse(res);
   },
 
@@ -73,12 +91,16 @@ export const api = {
   // Complaints
   async getComplaints(params?: Record<string, any>): Promise<{ data: Complaint[]; pagination: any }> {
     const query = new URLSearchParams(params).toString();
-    const res = await fetch(`${API_BASE}/complaints?${query}`);
+    const res = await fetch(`${API_BASE}/complaints?${query}`, {
+      headers: { ...getAuthHeader() }
+    });
     return handleResponse(res);
   },
 
   async getComplaintDetails(id: string): Promise<{ complaint: Complaint; history: CaseHistory[]; relatedCases: RelatedCase[]; overlapAlerts: OverlapAlert[] }> {
-    const res = await fetch(`${API_BASE}/complaints/${id}`);
+    const res = await fetch(`${API_BASE}/complaints/${id}`, {
+      headers: { ...getAuthHeader() }
+    });
     return handleResponse(res);
   },
 
@@ -123,6 +145,7 @@ export const api = {
       assignedOfficerId?: string;
       remarks: string;
       disposalRemarks?: string;
+      lastKnownUpdatedAt?: string;
     }
   ): Promise<Complaint> {
     const res = await fetch(`${API_BASE}/complaints/${id}/status`, {
@@ -133,22 +156,102 @@ export const api = {
     return handleResponse(res);
   },
 
+  async overrideSlaDeadline(
+    id: string,
+    arg2: string | { newDeadline: string; overrideReason: string },
+    arg3?: string
+  ): Promise<Complaint> {
+    const payload = typeof arg2 === "string" ? { newDeadline: arg2, overrideReason: arg3 } : arg2;
+    const res = await fetch(`${API_BASE}/complaints/${id}/override-sla`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...getAuthHeader() },
+      body: JSON.stringify(payload)
+    });
+    return handleResponse(res);
+  },
+
+  // Supporting Documents
+  async getComplaintDocuments(complaintId: string): Promise<ComplaintDocument[]> {
+    const res = await fetch(`${API_BASE}/complaints/${complaintId}/documents`, {
+      headers: { ...getAuthHeader() }
+    });
+    return handleResponse(res);
+  },
+
+  async uploadComplaintDocument(
+    complaintId: string,
+    file: File,
+    documentType: string = "Complaint Evidence"
+  ): Promise<ComplaintDocument> {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("documentType", documentType);
+
+    const token = localStorage.getItem("aicte_token");
+    const headers: Record<string, string> = {};
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
+    const res = await fetch(`${API_BASE}/complaints/${complaintId}/documents`, {
+      method: "POST",
+      headers,
+      body: formData
+    });
+    return handleResponse(res);
+  },
+
+  async downloadComplaintDocument(complaintId: string, docId: string, filename: string): Promise<void> {
+    const res = await fetch(`${API_BASE}/complaints/${complaintId}/documents/${docId}/download`, {
+      headers: { ...getAuthHeader() }
+    });
+    if (!res.ok) {
+      throw new Error(`Failed to download document: ${res.statusText}`);
+    }
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  },
+
+  async deleteComplaintDocument(complaintId: string, docId: string): Promise<{ message: string }> {
+    const res = await fetch(`${API_BASE}/complaints/${complaintId}/documents/${docId}`, {
+      method: "DELETE",
+      headers: { ...getAuthHeader() }
+    });
+    return handleResponse(res);
+  },
+
+  async getInstitutionDocuments(institutionId: string): Promise<ComplaintDocument[]> {
+    const res = await fetch(`${API_BASE}/institutions/${institutionId}/documents`, {
+      headers: { ...getAuthHeader() }
+    });
+    return handleResponse(res);
+  },
+
   // Overlap Detection Center
   async getOverlapAlerts(params?: Record<string, any>): Promise<{ data: OverlapAlert[]; pagination: any }> {
     const query = new URLSearchParams(params).toString();
-    const res = await fetch(`${API_BASE}/overlaps?${query}`);
+    const res = await fetch(`${API_BASE}/overlaps?${query}`, {
+      headers: { ...getAuthHeader() }
+    });
     return handleResponse(res);
   },
 
   async getOverlapDetails(id: string): Promise<{ alert: OverlapAlert; complaintA?: Complaint; complaintB?: Complaint }> {
-    const res = await fetch(`${API_BASE}/overlaps/${id}`);
+    const res = await fetch(`${API_BASE}/overlaps/${id}`, {
+      headers: { ...getAuthHeader() }
+    });
     return handleResponse(res);
   },
 
   async reviewOverlapAlert(
     id: string,
     reviewData: {
-      decision: "Confirmed Related" | "Confirmed Duplicate" | "Marked Unrelated" | "Resolved";
+      decision: "Confirmed Related" | "Confirmed Duplicate" | "Marked Unrelated" | "Dismissed" | "Resolved";
       remarks: string;
       linkAsRelated?: boolean;
     }
@@ -169,7 +272,7 @@ export const api = {
   }> {
     const res = await fetch(`${API_BASE}/overlaps/compare-live`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...getAuthHeader() },
       body: JSON.stringify({ textA, textB })
     });
     return handleResponse(res);
@@ -177,7 +280,9 @@ export const api = {
 
   // Transfers
   async getTransfers(): Promise<CaseTransfer[]> {
-    const res = await fetch(`${API_BASE}/transfers`);
+    const res = await fetch(`${API_BASE}/transfers`, {
+      headers: { ...getAuthHeader() }
+    });
     return handleResponse(res);
   },
 
@@ -221,13 +326,25 @@ export const api = {
 
   // Analytics
   async getDashboardAnalytics(): Promise<DashboardAnalytics> {
-    const res = await fetch(`${API_BASE}/analytics/dashboard`);
+    const res = await fetch(`${API_BASE}/analytics/dashboard`, {
+      headers: { ...getAuthHeader() }
+    });
+    return handleResponse(res);
+  },
+
+  async getPerformanceReport(params?: Record<string, string>): Promise<any> {
+    const query = new URLSearchParams(params).toString();
+    const res = await fetch(`${API_BASE}/analytics/performance-report?${query}`, {
+      headers: { ...getAuthHeader() }
+    });
     return handleResponse(res);
   },
 
   getExportCsvUrl(filters?: Record<string, string>): string {
-    const query = new URLSearchParams(filters).toString();
-    return `${API_BASE}/analytics/export-csv?${query}`;
+    const query = new URLSearchParams(filters);
+    const token = localStorage.getItem("aicte_token");
+    if (token) query.set("token", token);
+    return `${API_BASE}/analytics/export-csv?${query.toString()}`;
   },
 
   // Admin
@@ -254,7 +371,64 @@ export const api = {
   },
 
   async getSystemStatus(): Promise<any> {
-    const res = await fetch(`${API_BASE}/admin/system-status`);
+    const res = await fetch(`${API_BASE}/admin/system-status`, {
+      headers: { ...getAuthHeader() }
+    });
     return handleResponse(res);
+  },
+
+  async getSlaConfig(): Promise<{
+    approachingDeadlineDays: number;
+    autoEscalateOverdueDays: number;
+    reminderIntervalHours: number;
+    seniorManagementNotifyDays: number;
+  }> {
+    const res = await fetch(`${API_BASE}/admin/sla-config`, {
+      headers: { ...getAuthHeader() }
+    });
+    return handleResponse(res);
+  },
+
+  async updateSlaConfig(config: any): Promise<any> {
+    const res = await fetch(`${API_BASE}/admin/sla-config`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", ...getAuthHeader() },
+      body: JSON.stringify(config)
+    });
+    return handleResponse(res);
+  },
+
+  async runSlaEvaluation(): Promise<any> {
+    const res = await fetch(`${API_BASE}/admin/run-sla-scheduler`, {
+      method: "POST",
+      headers: { ...getAuthHeader() }
+    });
+    return handleResponse(res);
+  },
+
+  // Real-Time Events Subscription
+  subscribeLiveEvents(onEvent: (event: any) => void): () => void {
+    const token = localStorage.getItem("aicte_token");
+    if (!token) return () => {};
+
+    const url = `${API_BASE}/complaints/stream/live?token=${encodeURIComponent(token)}`;
+    const eventSource = new EventSource(url);
+
+    eventSource.onmessage = (e) => {
+      try {
+        const parsed = JSON.parse(e.data);
+        onEvent(parsed);
+      } catch (err) {
+        console.warn("SSE parse error:", err);
+      }
+    };
+
+    eventSource.onerror = () => {
+      // EventSource auto-reconnects on drop
+    };
+
+    return () => {
+      eventSource.close();
+    };
   }
 };
