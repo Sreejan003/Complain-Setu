@@ -216,11 +216,3 @@ Run `npm test` to execute the verification suite in `backend/src/tests/run_tests
 10. **Reports & Analytics (`/analytics`)**: Formal performance tables, metric definitions, and one-click CSV export.
 11. **Administration (`/admin`)**: Official directory, RBAC matrix, SLA rules table, audit records, and demo data reset.
 
----
-
-## ⚖️ License & Attribution
-
-This project is licensed under the [MIT License](./LICENSE).
-* Portions Copyright (c) 2024 **abdul-kheeyan** (*Nagrik Setu* - MIT License)
-* Portions Copyright (c) 2026 **Thikash J** (*ResolveIT* - MIT License)
-* AICTE Multi-Bureau Overlap Engine & SIH 2026 Implementation by AICTE Hackathon Contributors.
