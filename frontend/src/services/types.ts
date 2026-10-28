@@ -1,10 +1,4 @@
-export type UserRole =
-  | "Administrator"
-  | "Regulation Bureau Officer"
-  | "PGRC Officer"
-  | "Regional Officer"
-  | "Senior Management"
-  | "Institutional User";
+export type UserRole = "SYSTEM_ADMIN" | "COMPETENT_AUTHORITY" | "BUREAU_HEAD" | "CASE_OFFICER" | "Institutional User";
 
 export type ComplaintStatus =
   | "Pending"
@@ -29,6 +23,7 @@ export interface UserProfile {
   fullName: string;
   role: UserRole;
   bureauId?: string;
+  permissions?: string[];
   region?: string;
   institutionId?: string;
   institutionName?: string;
@@ -72,6 +67,8 @@ export interface Complaint {
   currentBureauId: string;
   assignedOfficerId?: string;
   assignedOfficerName?: string;
+  nextAction?: string;
+  nextActionDate?: string;
   status: ComplaintStatus;
   priority: Priority;
   hasOverlapAlert: boolean;
@@ -192,6 +189,7 @@ export interface Notification {
   referenceId?: string;
   referenceType?: "complaint" | "overlap" | "transfer";
   isRead: boolean;
+  readByUserIds?: string[];
   createdAt: string;
 }
 

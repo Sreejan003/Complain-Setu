@@ -1,3 +1,4 @@
+import { effectiveProfile } from "../security/rbac.js";
 import { Router, Response } from "express";
 import bcrypt from "bcryptjs";
 import { store } from "../db/store.js";
@@ -21,7 +22,7 @@ authRouter.get("/demo-accounts", (_req, res: Response) => {
     id: p.id,
     email: p.email,
     fullName: p.fullName,
-    role: p.role,
+    role: effectiveProfile(p).role,
     bureauId: p.bureauId,
     region: p.region,
     institutionId: p.institutionId,
@@ -69,6 +70,9 @@ authRouter.post("/login", (req, res: Response) => {
   loginAttempts.delete(normalizedEmail);
 
   // Generate signed JWT
+  profile.lastLogin = new Date().toISOString();
+  store.saveProfile(profile);
+  store.addAuditLog({userId:profile.id,userName:profile.fullName,action:"LOGIN_SUCCESS",entityType:"Authentication",entityId:profile.id,details:{}});
   const token = generateToken(profile);
 
   return res.json({
@@ -77,8 +81,9 @@ authRouter.post("/login", (req, res: Response) => {
       id: profile.id,
       email: profile.email,
       fullName: profile.fullName,
-      role: profile.role,
-      bureauId: profile.bureauId,
+      role: effectiveProfile(profile).role,
+      permissions: profile.permissions || [],
+      bureauId: effectiveProfile(profile).bureauId,
       region: profile.region,
       institutionId: profile.institutionId,
       institutionName: profile.institutionName,
@@ -88,6 +93,7 @@ authRouter.post("/login", (req, res: Response) => {
 });
 
 function recordFailedAttempt(email: string) {
+  store.addAuditLog({action:"LOGIN_FAILURE",entityType:"Authentication",entityId:email,details:{}});
   const now = Date.now();
   const existing = loginAttempts.get(email) || { attempts: 0, lockedUntil: 0 };
   const attempts = existing.attempts + 1;
@@ -102,4 +108,11 @@ authRouter.get("/me", requireAuth, (req: AuthenticatedRequest, res: Response) =>
   }
   const { passwordHash, ...safeProfile } = req.user;
   return res.json({ user: safeProfile, ...safeProfile });
+});
+
+authRouter.post("/logout", requireAuth, (req: AuthenticatedRequest,res) => {
+  const profile = store.getProfileById(req.user!.id)!;
+  store.saveProfile({...profile,updatedAt:new Date().toISOString()});
+  store.addAuditLog({userId:profile.id,userName:profile.fullName,action:"LOGOUT",entityType:"Authentication",entityId:profile.id,details:{}});
+  return res.json({success:true});
 });

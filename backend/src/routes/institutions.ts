@@ -3,6 +3,11 @@ import { store } from "../db/store.js";
 import { requireAuth, requireRole, AuthenticatedRequest } from "../middleware/auth.js";
 
 export const institutionsRouter = Router();
+institutionsRouter.use(requireAuth, (req: AuthenticatedRequest,res,next)=>{
+  if(req.user!.role === "SYSTEM_ADMIN") return res.status(403).json({error:"Institution complaint content is outside administration scope."});
+  if(req.method!=="GET" && !["BUREAU_HEAD","COMPETENT_AUTHORITY"].includes(req.user!.role)) return res.status(403).json({error:"Supervisory authorization required."});
+  next();
+});
 
 // Search and list institutions (Authenticated & Role-scoped)
 institutionsRouter.get("/", requireAuth, (req: AuthenticatedRequest, res: Response) => {
@@ -181,7 +186,7 @@ institutionsRouter.get("/:id/documents", requireAuth, (req: AuthenticatedRequest
 institutionsRouter.post(
   "/",
   requireAuth,
-  requireRole("Administrator", "Regulation Bureau Officer", "PGRC Officer"),
+  requireRole("BUREAU_HEAD", "COMPETENT_AUTHORITY", "Regulation Bureau Officer", "PGRC Officer"),
   (req: AuthenticatedRequest, res: Response) => {
     const {
       aictePermanentId,

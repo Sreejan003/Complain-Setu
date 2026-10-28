@@ -1,3 +1,5 @@
+import "dotenv/config";
+import { roleOf, effectiveProfile, mayRead, requestScope } from "../security/rbac.js";
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { Profile, Complaint } from "../models/types.js";
@@ -32,6 +34,7 @@ export interface AuthenticatedRequest extends Request {
 export function generateToken(profile: Profile): string {
   return jwt.sign(
     {
+      sessionVersion: profile.updatedAt,
       id: profile.id,
       email: profile.email,
       role: profile.role,
@@ -53,7 +56,15 @@ export function requireAuth(req: AuthenticatedRequest, res: Response, next: Next
   if (authHeader && authHeader.startsWith("Bearer ")) {
     token = authHeader.split(" ")[1];
   } else if (queryToken) {
-    token = queryToken;
+    // Only permit URL query tokens for Server-Sent Events (SSE) connections where EventSource cannot pass custom headers
+    const isSsePath = req.baseUrl?.includes("complaints") && req.path?.includes("stream");
+    if (isSsePath) {
+      token = queryToken;
+    } else {
+      return res.status(401).json({
+        error: "Insecure token transport: Authentication tokens in URL query parameters are rejected. Please use the Authorization: Bearer header."
+      });
+    }
   }
 
   if (!token) {
@@ -66,12 +77,12 @@ export function requireAuth(req: AuthenticatedRequest, res: Response, next: Next
     }
 
     const user = store.getProfileById(decoded.id);
-    if (!user || !user.isActive) {
-      return res.status(403).json({ error: "User account inactive or not found." });
+    if (!user || !user.isActive || decoded.sessionVersion !== user.updatedAt) {
+      return res.status(403).json({ error: "User account inactive, session revoked, or not found.", code:"SESSION_REVOKED" });
     }
 
-    req.user = user;
-    next();
+    req.user = effectiveProfile(user);
+    requestScope.run(req.user, () => next());
   } catch (err: any) {
     if (err.name === "TokenExpiredError") {
       return res.status(401).json({ error: "Authentication session expired. Please log in again.", code: "TOKEN_EXPIRED" });
@@ -86,12 +97,7 @@ export function requireRole(...allowedRoles: UserRole[]) {
       return res.status(401).json({ error: "Unauthorized: Please log in." });
     }
 
-    if (req.user.role === "Administrator") {
-      // Administrator has global oversight
-      return next();
-    }
-
-    if (!allowedRoles.includes(req.user.role)) {
+    if (!allowedRoles.some(role => roleOf(role) === roleOf(req.user!.role))) {
       return res.status(403).json({
         error: `Access Denied: Role "${req.user.role}" does not have permission to perform this operation.`,
         requiredRoles: allowedRoles
@@ -103,36 +109,12 @@ export function requireRole(...allowedRoles: UserRole[]) {
 }
 
 /**
- * Checks if the authenticated user has jurisdictional scope to view or mutate a complaint.
+ * Checks if the authenticated user has jurisdictional scope to view a complaint.
  */
 export function canAccessComplaint(user: Profile, complaint: Complaint, institutionRegion?: string): boolean {
-  if (user.role === "Administrator" || user.role === "Senior Management") {
-    return true;
-  }
-
-  if (user.role === "Regulation Bureau Officer") {
-    return complaint.currentBureauId === "RB" || complaint.receivingBureauId === "RB";
-  }
-
-  if (user.role === "PGRC Officer") {
-    return complaint.currentBureauId === "PGRC" || complaint.receivingBureauId === "PGRC";
-  }
-
-  if (user.role === "Regional Officer") {
-    if (!user.region) return true;
-    let reg = institutionRegion;
-    if (!reg && complaint.institutionId) {
-      const inst = store.getInstitutionById(complaint.institutionId);
-      reg = inst?.region;
-    }
-    if (!reg) return false;
-    return reg.toLowerCase().includes(user.region.toLowerCase());
-  }
-
-  if (user.role === "Institutional User") {
-    if (!user.institutionId) return false;
-    return complaint.institutionId === user.institutionId || complaint.aictePermanentId === user.institutionId;
-  }
-
-  return false;
+  return mayRead(effectiveProfile(user), complaint, institutionRegion || store.getInstitutionById(complaint.institutionId)?.region);
+}
+export function canMutateComplaint(user: Profile, complaint: Complaint, institutionRegion?: string): { allowed: boolean; reason?: string } {
+  const allowed = roleOf(user.role) !== "Institutional User" && canAccessComplaint(user, complaint, institutionRegion);
+  return { allowed, reason: allowed ? undefined : "Access denied: complaint is outside your authorized scope." };
 }

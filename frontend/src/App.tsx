@@ -1,3 +1,4 @@
+import { RoleDashboard } from "./pages/RoleDashboard.js";
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext.js";
@@ -24,7 +25,8 @@ const RoleAwareIndex: React.FC = () => {
   if (user?.role === "Institutional User") {
     return <Navigate to="/institution-dashboard" replace />;
   }
-  return <OverviewDashboard />;
+  const route = user?.role === "SYSTEM_ADMIN" ? "/admin/dashboard" : user?.role === "COMPETENT_AUTHORITY" ? "/authority/dashboard" : user?.role === "BUREAU_HEAD" ? "/bureau/dashboard" : "/officer/dashboard";
+  return <Navigate to={route} replace />;
 };
 
 export const App: React.FC = () => {
@@ -43,6 +45,10 @@ export const App: React.FC = () => {
           >
             {/* Smart landing — officer → Overview, institution → Single-Window */}
             <Route index element={<RoleAwareIndex />} />
+            <Route path="admin/dashboard" element={<ProtectedRoute allowedRoles={["SYSTEM_ADMIN"]}><RoleDashboard /></ProtectedRoute>} />
+            <Route path="authority/dashboard" element={<ProtectedRoute allowedRoles={["COMPETENT_AUTHORITY"]}><RoleDashboard /></ProtectedRoute>} />
+            <Route path="bureau/dashboard" element={<ProtectedRoute allowedRoles={["BUREAU_HEAD"]}><RoleDashboard /></ProtectedRoute>} />
+            <Route path="officer/dashboard" element={<ProtectedRoute allowedRoles={["CASE_OFFICER"]}><RoleDashboard /></ProtectedRoute>} />
 
             {/* Single-Window Portal (merged with Institution Directory) */}
             <Route path="institution-dashboard" element={<InstitutionDashboard />} />
@@ -57,7 +63,7 @@ export const App: React.FC = () => {
             <Route
               path="overlaps"
               element={
-                <ProtectedRoute allowedRoles={["Administrator","Senior Management","Regulation Bureau Officer","PGRC Officer","Regional Officer"]}>
+                <ProtectedRoute allowedRoles={["BUREAU_HEAD","COMPETENT_AUTHORITY","CASE_OFFICER"]}>
                   <OverlapCenter />
                 </ProtectedRoute>
               }
@@ -65,7 +71,7 @@ export const App: React.FC = () => {
             <Route
               path="transfers"
               element={
-                <ProtectedRoute allowedRoles={["Administrator","Regulation Bureau Officer","PGRC Officer","Regional Officer"]}>
+                <ProtectedRoute allowedRoles={["BUREAU_HEAD","COMPETENT_AUTHORITY","CASE_OFFICER"]}>
                   <WorkflowTransfers />
                 </ProtectedRoute>
               }
@@ -74,7 +80,7 @@ export const App: React.FC = () => {
             <Route
               path="analytics"
               element={
-                <ProtectedRoute allowedRoles={["Administrator","Senior Management","Regulation Bureau Officer","PGRC Officer","Regional Officer"]}>
+                <ProtectedRoute allowedRoles={["BUREAU_HEAD","COMPETENT_AUTHORITY","CASE_OFFICER"]}>
                   <ReportsAnalytics />
                 </ProtectedRoute>
               }
@@ -82,7 +88,7 @@ export const App: React.FC = () => {
             <Route
               path="admin"
               element={
-                <ProtectedRoute allowedRoles={["Administrator"]}>
+                <ProtectedRoute allowedRoles={["SYSTEM_ADMIN"]}>
                   <AdministrationPage />
                 </ProtectedRoute>
               }

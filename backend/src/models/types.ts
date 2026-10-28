@@ -7,9 +7,11 @@ export interface Profile {
   fullName: string;
   role: UserRole;
   bureauId?: string;
+  permissions?: string[];
   region?: string;
   institutionId?: string;
   institutionName?: string;
+  lastLogin?: string;
   designation?: string;
   isActive: boolean;
   createdAt: string;
@@ -53,6 +55,8 @@ export interface Complaint {
   currentBureauId: string;
   assignedOfficerId?: string;
   assignedOfficerName?: string;
+  nextAction?: string;
+  nextActionDate?: string;
   status: ComplaintStatus;
   priority: Priority;
   hasOverlapAlert: boolean;
@@ -198,6 +202,7 @@ export interface Notification {
   referenceId?: string;
   referenceType?: "complaint" | "overlap" | "transfer";
   isRead: boolean;
+  readByUserIds?: string[];
   createdAt: string;
 }
 

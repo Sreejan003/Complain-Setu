@@ -507,18 +507,30 @@ async function runTests() {
     assert(regOfficer, "Regional officer must exist");
 
     // Administrator has access to all complaints
-    assert(canAccessComplaint(adminUser, caseA), "Administrator must have global access");
+    assert(!canAccessComplaint(adminUser, caseA), "System administration must not grant case access");
 
     // CaseA belongs to RB bureau. PGRC officer cannot access RB case unless transferred
-    const caseRb: Complaint = { ...caseA, currentBureauId: "RB", receivingBureauId: "RB" };
+    const caseRb: Complaint = { ...caseA, currentBureauId: "RB", receivingBureauId: "RB", assignedOfficerId: store.getProfiles().find(p=>p.role === "Regulation Bureau Officer")!.id };
     assert(!canAccessComplaint(pgrcUser, caseRb), "PGRC Officer must be denied access to RB case");
 
     // Regional officer can only access complaints in their jurisdiction
-    const regionalCaseMatching: Complaint = { ...caseA, institutionId: mockInstA.id };
+    const regionalCaseMatching: Complaint = { ...caseA, institutionId: mockInstA.id, currentBureauId:"RO", assignedOfficerId:regOfficer.id };
     const regionalCaseOther: Complaint = { ...caseA, id: "c-other-inst", institutionId: mockInstB.id };
-    regOfficer.region = "Northern Region";
+    regOfficer.region = mockInstA.region;
+    regOfficer.bureauId = "RO";
     assert(canAccessComplaint(regOfficer, regionalCaseMatching, mockInstA.region), "Regional officer should access matching region");
     assert(!canAccessComplaint(regOfficer, regionalCaseOther, mockInstB.region), "Regional officer should be denied non-matching region");
+
+    // canMutateComplaint resource-level verification
+    const { canMutateComplaint } = await import("../middleware/auth.js");
+    const rbUser = store.getProfiles().find(p => p.role === "Regulation Bureau Officer")!;
+    const casePgrc: Complaint = { ...caseA, currentBureauId: "PGRC", receivingBureauId: "PGRC" };
+    assert(!canMutateComplaint(rbUser, casePgrc).allowed, "RB officer must not mutate PGRC case");
+    assert(!canMutateComplaint(pgrcUser, caseRb).allowed, "PGRC officer must not mutate RB case");
+    assert(canMutateComplaint(seniorMgmtProfile, caseRb).allowed, "Legacy management maps to Competent Authority supervisory access");
+    assert(canMutateComplaint(rbUser, caseRb).allowed, "RB officer must be allowed to mutate RB case");
+    assert(!canMutateComplaint(adminUser, caseRb).allowed, "Administrator must not mutate case");
+
     console.log("  ✓ Passed: Multi-tenant role and jurisdictional boundaries strictly enforced.");
     passed++;
 

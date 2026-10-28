@@ -23,6 +23,7 @@ function getAuthHeader(): Record<string, string> {
 async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
     const errorBody = await res.json().catch(() => ({ error: res.statusText }));
+    if (res.status===401 || errorBody.code==="SESSION_REVOKED") window.dispatchEvent(new Event("aicte-session-expired"));
     throw new Error(errorBody.error || `HTTP ${res.status}: ${res.statusText}`);
   }
   return res.json();
@@ -34,7 +35,7 @@ export const api = {
     const res = await fetch(`${API_BASE}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password: password || "Aicte@2026" })
+      body: JSON.stringify({ email, password })
     });
     return handleResponse(res);
   },
@@ -97,7 +98,7 @@ export const api = {
     return handleResponse(res);
   },
 
-  async getComplaintDetails(id: string): Promise<{ complaint: Complaint; history: CaseHistory[]; relatedCases: RelatedCase[]; overlapAlerts: OverlapAlert[] }> {
+  async getComplaintDetails(id: string): Promise<{ complaint: Complaint; permittedStatuses?: string[]; history: CaseHistory[]; relatedCases: RelatedCase[]; overlapAlerts: OverlapAlert[] }> {
     const res = await fetch(`${API_BASE}/complaints/${id}`, {
       headers: { ...getAuthHeader() }
     });
@@ -145,6 +146,8 @@ export const api = {
       assignedOfficerId?: string;
       remarks: string;
       disposalRemarks?: string;
+      nextAction?: string;
+      nextActionDate?: string;
       lastKnownUpdatedAt?: string;
     }
   ): Promise<Complaint> {
@@ -294,6 +297,18 @@ export const api = {
   }): Promise<CaseTransfer> {
     const res = await fetch(`${API_BASE}/transfers`, {
       method: "POST",
+      headers: { "Content-Type": "application/json", ...getAuthHeader() },
+      body: JSON.stringify(data)
+    });
+    return handleResponse(res);
+  },
+
+  async respondToTransfer(
+    transferId: string,
+    data: { action: "Accepted" | "Rejected"; remarks: string }
+  ): Promise<CaseTransfer> {
+    const res = await fetch(`${API_BASE}/transfers/${transferId}/respond`, {
+      method: "PATCH",
       headers: { "Content-Type": "application/json", ...getAuthHeader() },
       body: JSON.stringify(data)
     });

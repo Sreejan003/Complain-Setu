@@ -1,3 +1,5 @@
+import { CoordinationPanel } from "../components/common/CoordinationPanel.js";
+import { roleRequest } from "./RoleDashboard.js";
 import React, { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
@@ -125,9 +127,7 @@ export const OverlapCenter: React.FC = () => {
     }
   };
 
-  const canReview = ["Administrator", "Regulation Bureau Officer", "PGRC Officer", "Senior Management"].includes(
-    user?.role || ""
-  );
+  const canReview = user?.role === "COMPETENT_AUTHORITY" || (user?.role === "BUREAU_HEAD" && !!user.permissions?.includes("COORDINATE_CROSS_BUREAU"));
 
   return (
     <div className="space-y-4">
@@ -387,6 +387,7 @@ export const OverlapCenter: React.FC = () => {
                   <span>Inspect Side-by-Side</span>
                 </button>
 
+                <CoordinationPanel alertId={alert.id} />
                 {canReview && alert.alertStatus === "Pending Review" && (
                   <div className="flex items-center space-x-1.5">
                     <button

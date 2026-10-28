@@ -1,3 +1,5 @@
+import { BUREAUS, STATUS_TRANSITIONS } from "../config/constants.js";
+import { requestScope, mayRead, roleOf, effectiveProfile } from "../security/rbac.js";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -15,15 +17,16 @@ import {
   ComplaintDocument
 } from "../models/types.js";
 import type { IRepository, DatabaseHealthResult } from "./repository.js";
-import { generateSeedData } from "./seedData.js";
+import { generateSeedData, SEED_PROFILES } from "./seedData.js";
 import { detectOverlapsForComplaint, evaluateComplaintPair, fuzzyMatchInstitution } from "../services/overlapEngine.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const DATA_DIR = path.resolve(__dirname, "../../data");
+const DATA_DIR = process.env.DATA_DIR || path.resolve(__dirname, "../../data");
 const DB_FILE = path.join(DATA_DIR, "db.json");
 
 interface DatabaseSchema {
+  bureaus?: typeof BUREAUS;
   profiles: Profile[];
   institutions: Institution[];
   complaints: Complaint[];
@@ -84,9 +87,14 @@ export class Store implements IRepository {
         if (!parsed.documents) {
           parsed.documents = [];
         }
+        for (const p of SEED_PROFILES) {
+          if (!parsed.profiles.some(existing => existing.id === p.id || existing.email === p.email)) {
+            parsed.profiles.push(p);
+          }
+        }
         return parsed;
       } catch (err) {
-        console.error("Error reading db.json, generating fresh seed data:", err);
+        throw new Error("Existing database could not be read; refusing to replace historical records.");
       }
     }
 
@@ -156,6 +164,30 @@ export class Store implements IRepository {
     }
   }
 
+  private visibleComplaints(): Complaint[] {
+    const user = requestScope.getStore();
+    return user ? this.data.complaints.filter(c => mayRead(effectiveProfile(user), c, this.data.institutions.find(i => i.id === c.institutionId)?.region)) : this.data.complaints;
+  }
+  private visibleOverlaps(): OverlapAlert[] {
+    const user = requestScope.getStore();
+    if (!user) return this.data.overlapAlerts;
+    const ids = new Set(this.visibleComplaints().map(c => c.id));
+    return this.data.overlapAlerts.filter(o => ids.has(o.complaintIdA) || ids.has(o.complaintIdB));
+  }
+  public getBureaus() { return this.data.bureaus || BUREAUS; }
+  public saveBureau(bureau: typeof BUREAUS[number]) {
+    if (!this.data.bureaus) this.data.bureaus = BUREAUS.map(b => ({...b}));
+    const index = this.data.bureaus.findIndex(b => b.id === bureau.id);
+    if (index < 0) this.data.bureaus.push(bureau); else this.data.bureaus[index] = bureau;
+    this.persist(); return bureau;
+  }
+  public saveProfile(profile: Profile): Profile {
+    const index = this.data.profiles.findIndex(p => p.id === profile.id);
+    if (index < 0) this.data.profiles.push(profile); else this.data.profiles[index] = profile;
+    this.persist();
+    return profile;
+  }
+
   public resetDemoData(): DatabaseSchema {
     this.data = this.initializeWithSeedData();
     return this.data;
@@ -210,12 +242,12 @@ export class Store implements IRepository {
 
     // Refresh dynamic counters for institutions
     result.forEach(inst => {
-      const instComplaints = this.data.complaints.filter(c => c.institutionId === inst.id);
+      const instComplaints = this.visibleComplaints().filter(c => c.institutionId === inst.id);
       inst.totalComplaintsCount = instComplaints.length;
       inst.activeComplaintsCount = instComplaints.filter(c =>
         ["Pending", "Under Process", "Escalated"].includes(c.status)
       ).length;
-      inst.overlapCount = this.data.overlapAlerts.filter(o => o.institutionId === inst.id).length;
+      inst.overlapCount = this.visibleOverlaps().filter(o => o.institutionId === inst.id).length;
     });
 
     const sortBy = params.sortBy || "name";
@@ -246,12 +278,12 @@ export class Store implements IRepository {
   public getInstitutionById(id: string): Institution | undefined {
     const inst = this.data.institutions.find(i => i.id === id || i.aictePermanentId === id);
     if (inst) {
-      const instComplaints = this.data.complaints.filter(c => c.institutionId === inst.id);
+      const instComplaints = this.visibleComplaints().filter(c => c.institutionId === inst.id);
       inst.totalComplaintsCount = instComplaints.length;
       inst.activeComplaintsCount = instComplaints.filter(c =>
         ["Pending", "Under Process", "Escalated"].includes(c.status)
       ).length;
-      inst.overlapCount = this.data.overlapAlerts.filter(o => o.institutionId === inst.id).length;
+      inst.overlapCount = this.visibleOverlaps().filter(o => o.institutionId === inst.id).length;
     }
     return inst;
   }
@@ -321,7 +353,7 @@ export class Store implements IRepository {
     sortBy?: string;
     sortOrder?: "asc" | "desc";
   }) {
-    let result = [...this.data.complaints];
+    let result = [...this.visibleComplaints()];
 
     if (params.institutionId) {
       result = result.filter(c => c.institutionId === params.institutionId || c.aictePermanentId === params.institutionId);
@@ -432,7 +464,7 @@ export class Store implements IRepository {
   }
 
   public getComplaintById(id: string): Complaint | undefined {
-    return this.data.complaints.find(c => c.id === id || c.complaintId === id);
+    return this.visibleComplaints().find(c => c.id === id || c.complaintId === id);
   }
 
   /**
@@ -601,7 +633,7 @@ export class Store implements IRepository {
 
     return {
       complaint: newComplaint,
-      detectedOverlaps: detectionResult.candidateAlerts
+      detectedOverlaps: detectionResult.candidateAlerts.map(candidate => ({...candidate, existingComplaint: this.getComplaintById(candidate.existingComplaint.id) ? candidate.existingComplaint : {...candidate.existingComplaint,title:"Restricted related case",description:""}}))
     };
   }
 
@@ -613,6 +645,8 @@ export class Store implements IRepository {
       assignedOfficerId?: string;
       remarks: string;
       disposalRemarks?: string;
+      nextAction?: string;
+      nextActionDate?: string;
     },
     user: Profile
   ): Complaint {
@@ -625,13 +659,7 @@ export class Store implements IRepository {
     let actionType = "Status Update";
 
     // Validate permitted transitions
-    const VALID_TRANSITIONS: Record<string, string[]> = {
-      "Pending": ["Under Process", "Escalated", "Transferred"],
-      "Under Process": ["Disposed", "Escalated", "Transferred", "Pending"],
-      "Escalated": ["Under Process", "Disposed", "Transferred"],
-      "Transferred": ["Under Process", "Pending", "Escalated"],
-      "Disposed": ["Under Process"] // Reopen, admin only
-    };
+    const VALID_TRANSITIONS = STATUS_TRANSITIONS;
 
     if (updates.status && updates.status !== fromStatus) {
       const allowed = VALID_TRANSITIONS[fromStatus] || [];
@@ -641,12 +669,14 @@ export class Store implements IRepository {
     }
 
     if (fromStatus === "Disposed" && updates.status && updates.status !== "Disposed") {
-      if (user.role !== "Administrator") {
-        throw new Error("Disposed cases are closed and can only be reopened by an Administrator.");
+      if (roleOf(user.role) !== "COMPETENT_AUTHORITY") {
+        throw new Error("Disposed cases are closed and can only be reopened by a Competent Authority.");
       }
       actionType = "Case Reopened";
     }
 
+    if (updates.nextAction !== undefined) comp.nextAction = updates.nextAction;
+    if (updates.nextActionDate !== undefined) comp.nextActionDate = updates.nextActionDate;
     if (updates.status) {
       comp.status = updates.status;
       if (updates.status === "Disposed") {
@@ -692,7 +722,7 @@ export class Store implements IRepository {
       action: actionType.toUpperCase().replace(/\s+/g, "_"),
       entityType: "Complaint",
       entityId: comp.complaintId,
-      details: { fromStatus, toStatus: comp.status, remarks: updates.remarks },
+      details: { fromStatus, toStatus: comp.status, remarks: updates.remarks, nextAction:updates.nextAction, nextActionDate:updates.nextActionDate },
       createdAt: new Date().toISOString()
     });
 
@@ -715,6 +745,12 @@ export class Store implements IRepository {
     const comp = this.getComplaintById(complaintId);
     if (!comp) throw new Error("Complaint not found");
 
+    if (this.data.caseTransfers.some(t => t.complaintId === comp.id && t.acceptanceStatus === "Pending")) throw new Error("A transfer is already pending.");
+    if (!this.getBureaus().some(b => b.id === transferData.toBureauId)) throw new Error("Unknown destination bureau.");
+    if (transferData.toOfficerId) {
+      const officer = this.getProfileById(transferData.toOfficerId);
+      if (!officer?.isActive || roleOf(officer.role) !== "CASE_OFFICER" || officer.bureauId !== transferData.toBureauId) throw new Error("Invalid destination officer.");
+    }
     if (transferData.toBureauId === comp.currentBureauId) {
       throw new Error(`Cannot transfer case to the same bureau (${transferData.toBureauId}). Destination must be different.`);
     }
@@ -729,12 +765,6 @@ export class Store implements IRepository {
       const off = this.getProfileById(transferData.toOfficerId);
       toOfficerName = off?.fullName || "";
     }
-
-    comp.currentBureauId = transferData.toBureauId;
-    comp.assignedOfficerId = transferData.toOfficerId;
-    comp.assignedOfficerName = toOfficerName;
-    comp.status = "Transferred";
-    comp.updatedAt = new Date().toISOString();
 
     const transfer: CaseTransfer = {
       id: `trf-${Date.now()}`,
@@ -751,7 +781,7 @@ export class Store implements IRepository {
       transferredBy: user.id,
       transferredByName: user.fullName,
       transferredAt: new Date().toISOString(),
-      acceptanceStatus: "Accepted"
+      acceptanceStatus: "Pending"
     };
 
     this.data.caseTransfers.push(transfer);
@@ -786,8 +816,83 @@ export class Store implements IRepository {
     return transfer;
   }
 
+  public respondToTransfer(
+    transferId: string,
+    action: "Accepted" | "Rejected",
+    remarks: string,
+    user: Profile
+  ): CaseTransfer {
+    const transfer = this.data.caseTransfers.find(t => t.id === transferId);
+    if (!transfer) throw new Error("Transfer record not found");
+
+    if (transfer.acceptanceStatus !== "Pending") throw new Error("Transfer already adjudicated.");
+    if (roleOf(user.role) !== "COMPETENT_AUTHORITY" && !(roleOf(user.role) === "BUREAU_HEAD" && user.bureauId === transfer.toBureauId)) throw new Error("Receiving bureau authorization required.");
+    const comp = this.data.complaints.find(c => c.id === transfer.complaintId);
+    if (!comp) throw new Error("Associated complaint record not found");
+
+    transfer.acceptanceStatus = action;
+
+    if (action === "Rejected") {
+      // Revert complaint back to originating bureau and Under Process state
+      comp.currentBureauId = transfer.fromBureauId;
+      comp.assignedOfficerId = transfer.fromOfficerId;
+      comp.assignedOfficerName = transfer.fromOfficerName;
+      comp.status = "Under Process";
+      comp.updatedAt = new Date().toISOString();
+
+      this.data.caseHistory.push({
+        id: `hist-${Date.now()}`,
+        complaintId: comp.id,
+        actionType: "Transfer Rejected",
+        fromStatus: "Transferred",
+        toStatus: "Under Process",
+        remarks: `Transfer to ${transfer.toBureauId} rejected by ${user.fullName}. Remarks: ${remarks}. Case jurisdiction retained by ${transfer.fromBureauId}.`,
+        performedBy: user.id,
+        performedByName: user.fullName,
+        createdAt: new Date().toISOString()
+      });
+
+      // Notify the originating bureau
+      this.data.notifications.push({
+        id: `notif-${Date.now()}`,
+        recipientRole: transfer.fromBureauId === "RB" ? "Regulation Bureau Officer" : "PGRC Officer",
+        title: `Transfer Rejected: ${comp.complaintId}`,
+        message: `Transfer of case ${comp.complaintId} was rejected by ${transfer.toBureauId}. Remarks: ${remarks}`,
+        notificationType: "Transfer",
+        referenceId: comp.complaintId,
+        referenceType: "complaint",
+        isRead: false,
+        createdAt: new Date().toISOString()
+      });
+    } else {
+      comp.currentBureauId = transfer.toBureauId;
+      comp.assignedOfficerId = transfer.toOfficerId;
+      comp.assignedOfficerName = transfer.toOfficerName;
+      // Accepted: Update status to Under Process in the new bureau
+      comp.status = "Under Process";
+      comp.updatedAt = new Date().toISOString();
+
+      this.data.caseHistory.push({
+        id: `hist-${Date.now()}`,
+        complaintId: comp.id,
+        actionType: "Transfer Accepted",
+        fromStatus: "Transferred",
+        toStatus: "Under Process",
+        remarks: `Transfer accepted into ${transfer.toBureauId} by ${user.fullName}. Remarks: ${remarks}`,
+        performedBy: user.id,
+        performedByName: user.fullName,
+        createdAt: new Date().toISOString()
+      });
+    }
+
+    this.persist();
+    return transfer;
+  }
+
   public getTransfers() {
-    return [...this.data.caseTransfers].sort((a, b) => b.transferredAt.localeCompare(a.transferredAt));
+    const user = requestScope.getStore();
+    const ids = new Set(this.visibleComplaints().map(c => c.id));
+    return this.data.caseTransfers.filter(t => !user || ids.has(t.complaintId) || (roleOf(user.role) === "BUREAU_HEAD" && !!user.bureauId && [t.fromBureauId,t.toBureauId].includes(user.bureauId) && (!user.region || this.data.institutions.find(i=>i.id===this.data.complaints.find(c=>c.id===t.complaintId)?.institutionId)?.region===user.region))).sort((a, b) => b.transferredAt.localeCompare(a.transferredAt));
   }
 
   // ====================================================================
@@ -817,7 +922,7 @@ export class Store implements IRepository {
     page?: number;
     limit?: number;
   }) {
-    let result = [...this.data.overlapAlerts];
+    let result = [...this.visibleOverlaps()];
 
     if (params.bureau) {
       result = result.filter(o => o.bureauA === params.bureau || o.bureauB === params.bureau);
@@ -839,7 +944,11 @@ export class Store implements IRepository {
     const paginated = result.slice((page - 1) * limit, page * limit);
 
     return {
-      data: paginated,
+      data: paginated.map(o=> {
+        if (!requestScope.getStore()) return o;
+        const a = !!this.getComplaintById(o.complaintIdA), b = !!this.getComplaintById(o.complaintIdB);
+        return {...o,complaintTitleA:a?o.complaintTitleA:"Restricted related case",complaintDescA:a?o.complaintDescA:"",complaintTitleB:b?o.complaintTitleB:"Restricted related case",complaintDescB:b?o.complaintDescB:"",explanation:a&&b?o.explanation:undefined,matchReasons:a&&b?o.matchReasons:["Potential institution overlap across bureaus"]};
+      }),
       pagination: {
         page,
         limit,
@@ -850,7 +959,7 @@ export class Store implements IRepository {
   }
 
   public getOverlapAlertById(id: string): OverlapAlert | undefined {
-    return this.data.overlapAlerts.find(o => o.id === id || o.alertId === id);
+    return this.visibleOverlaps().find(o => o.id === id || o.alertId === id);
   }
 
   public reviewOverlapAlert(
@@ -1010,26 +1119,49 @@ export class Store implements IRepository {
   // ====================================================================
   // NOTIFICATIONS
   // ====================================================================
-  public getNotifications(userRole?: string) {
-    let result = [...this.data.notifications];
+  public getNotifications(userRole?: string, userId?: string) {
+    const user = requestScope.getStore();
+    let result = this.data.notifications.filter(n => {
+      if (!user) return true;
+      if (n.recipientId && n.recipientId !== user.id) return false;
+      if (n.referenceType === "complaint") return !!this.getComplaintById(n.referenceId || "");
+      if (n.referenceType === "transfer") return this.getTransfers().some(t=>t.id===n.referenceId || t.complaintRefId===n.referenceId);
+      if (n.referenceType === "overlap") return !!this.getOverlapAlertById(n.referenceId || "");
+      return (!n.recipientRole || roleOf(n.recipientRole) === roleOf(user.role)) && (!n.recipientId || n.recipientId === user.id);
+    });
     if (userRole && userRole !== "Administrator") {
-      result = result.filter(n => !n.recipientRole || n.recipientRole === userRole);
+      result = result.filter(n => !!n.referenceType || !n.recipientRole || roleOf(n.recipientRole || "") === roleOf(userRole || ""));
+    }
+    if (userId) {
+      result = result.map(n => ({
+        ...n,
+        isRead: Boolean((n.readByUserIds && n.readByUserIds.includes(userId)) || n.isRead)
+      }));
     }
     return result.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   }
 
-  public markNotificationRead(id: string) {
-    const notif = this.data.notifications.find(n => n.id === id);
+  public markNotificationRead(id: string, userId?: string) {
+    const notif = this.data.notifications.find(n => n.id === id && this.getNotifications(undefined, userId).some(v => v.id === id));
     if (notif) {
-      notif.isRead = true;
+      if (userId) {
+        if (!notif.readByUserIds) notif.readByUserIds = [];
+        if (!notif.readByUserIds.includes(userId)) notif.readByUserIds.push(userId);
+      }
+      if (!userId) notif.isRead = true;
       this.persist();
     }
   }
 
-  public markAllNotificationsRead(userRole?: string) {
-    this.data.notifications.forEach(n => {
+  public markAllNotificationsRead(userRole?: string, userId?: string) {
+    const visible = new Set(this.getNotifications(userRole, userId).map(n => n.id));
+    this.data.notifications.filter(n => visible.has(n.id)).forEach(n => {
       if (!userRole || !n.recipientRole || n.recipientRole === userRole) {
-        n.isRead = true;
+        if (userId) {
+          if (!n.readByUserIds) n.readByUserIds = [];
+          if (!n.readByUserIds.includes(userId)) n.readByUserIds.push(userId);
+        }
+        if (!userId) n.isRead = true;
       }
     });
     this.persist();
@@ -1046,9 +1178,14 @@ export class Store implements IRepository {
   // AUDIT LOGS
   // ====================================================================
   public getAuditLogs() {
-    return [...this.data.auditLogs].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    const user = requestScope.getStore();
+    return this.data.auditLogs.filter(l => !user || (roleOf(user.role) === "SYSTEM_ADMIN" ? !["Complaint","OverlapAlert"].includes(l.entityType) : !!this.getComplaintById(l.entityId))).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   }
 
+  public getCoordinationHistory(alertId: string) {
+    if (!this.getOverlapAlertById(alertId)) return [];
+    return this.data.auditLogs.filter(l=>l.entityType === "OverlapAlert" && l.entityId===alertId && l.action.startsWith("COORDINATION_")).sort((a,b)=>a.createdAt.localeCompare(b.createdAt));
+  }
   public addAuditLog(log: Omit<AuditLog, "id" | "createdAt">): AuditLog {
     const entry: AuditLog = {
       id: uuidv4(),
@@ -1063,8 +1200,17 @@ export class Store implements IRepository {
   // ====================================================================
   // DASHBOARD ANALYTICS & METRICS
   // ====================================================================
+  public getLastAction(complaintId: string) {
+    const complaint = this.getComplaintById(complaintId);
+    if (!complaint) return undefined;
+    return this.data.caseHistory.reduce<CaseHistory | undefined>((latest,h)=> [complaint.id,complaint.complaintId].includes(h.complaintId) && (!latest || h.createdAt>latest.createdAt) ? h : latest,undefined);
+  }
+  public getRoleCounts(until: string, today: string) {
+    const cases = this.visibleComplaints();
+    return {upcoming:cases.filter(c=>c.status!=="Disposed" && c.expectedDisposalDate>=today && c.expectedDisposalDate<=until).sort((a,b)=>a.expectedDisposalDate.localeCompare(b.expectedDisposalDate)).slice(0,5),unassigned:cases.filter(c=>!c.assignedOfficerId && c.status!=="Disposed").length,dueSoon:cases.filter(c=>c.status!=="Disposed" && c.expectedDisposalDate>=today && c.expectedDisposalDate<=until).length,pendingActions:cases.filter(c=>c.status!=="Disposed").length};
+  }
   public getDashboardAnalytics() {
-    const complaints = this.data.complaints;
+    const complaints = this.visibleComplaints();
     const today = new Date().toISOString().split("T")[0];
 
     const total = complaints.length;
@@ -1074,9 +1220,9 @@ export class Store implements IRepository {
     const transferred = complaints.filter(c => c.status === "Transferred").length;
     const escalated = complaints.filter(c => c.status === "Escalated").length;
     const overdue = complaints.filter(
-      c => ["Pending", "Under Process"].includes(c.status) && c.expectedDisposalDate < today
+      c => ["Pending", "Under Process", "Escalated", "Transferred"].includes(c.status) && c.expectedDisposalDate < today
     ).length;
-    const unresolvedOverlaps = this.data.overlapAlerts.filter(o => o.alertStatus === "Pending Review").length;
+    const unresolvedOverlaps = this.visibleOverlaps().filter(o => o.alertStatus === "Pending Review").length;
 
     // Status distribution
     const statusDistribution = [
@@ -1088,7 +1234,7 @@ export class Store implements IRepository {
     ];
 
     // Bureau-wise workload
-    const bureaus = ["RB", "PGRC", "RO", "AB", "PB"];
+    const bureaus = this.getBureaus().map(b=>b.id);
     const bureauWorkload = bureaus.map(b => {
       const bureauComplaints = complaints.filter(c => c.currentBureauId === b);
       return {
@@ -1165,7 +1311,7 @@ export class Store implements IRepository {
       .slice(0, 8);
 
     // Critical Alerts (active overdue + critical overlap alerts)
-    const criticalAlerts = this.data.overlapAlerts
+    const criticalAlerts = this.visibleOverlaps()
       .filter(o => o.alertStatus === "Pending Review" && (o.ruleMatchScore > 85 || (o.semanticSimilarityScore || 0) > 80))
       .slice(0, 5);
 
@@ -1199,6 +1345,7 @@ export class Store implements IRepository {
       this.data.documents = [];
     }
     return this.data.documents.filter(doc => {
+      if (requestScope.getStore() && !this.getComplaintById(doc.complaintId)) return false;
       if (params.complaintId && doc.complaintId !== params.complaintId) return false;
       if (params.institutionId && doc.institutionId !== params.institutionId) return false;
       return true;
@@ -1207,7 +1354,7 @@ export class Store implements IRepository {
 
   public getDocumentById(id: string): ComplaintDocument | undefined {
     if (!this.data.documents) this.data.documents = [];
-    return this.data.documents.find(d => d.id === id);
+    return this.getDocuments({}).find(d => d.id === id);
   }
 
   public addDocument(doc: ComplaintDocument): ComplaintDocument {
@@ -1232,7 +1379,7 @@ export class Store implements IRepository {
   // COMPREHENSIVE PERFORMANCE & STATUTORY REPORTS
   // ====================================================================
   public getPerformanceReport(params?: { period?: string; bureau?: string }) {
-    let complaints = [...this.data.complaints];
+    let complaints = [...this.visibleComplaints()];
     const now = new Date();
 
     if (params?.period === "30d") {
@@ -1261,7 +1408,7 @@ export class Store implements IRepository {
     // Bureau detailed breakdown
     const bureaus = ["RB", "PGRC", "RO", "AB", "PB"];
     const bureauPerformance = bureaus.map(bId => {
-      const bCases = complaints.filter(c => c.currentBureauId === bId || c.receivingBureauId === bId);
+      const bCases = complaints.filter(c => c.currentBureauId === bId);
       const bDisposed = bCases.filter(c => c.status === "Disposed");
       const bOverdue = bCases.filter(
         c => c.status !== "Disposed" && c.expectedDisposalDate && c.expectedDisposalDate < now.toISOString().split("T")[0]
@@ -1275,10 +1422,12 @@ export class Store implements IRepository {
         }
       });
       const avgDisposalDays = bDisposed.length > 0 ? Math.round((totalDays / bDisposed.length) * 10) / 10 : 0;
-      const bOverlaps = this.data.overlapAlerts.filter(o => o.bureauA === bId || o.bureauB === bId).length;
+      const bOverlaps = this.visibleOverlaps().filter(o => o.bureauA === bId || o.bureauB === bId).length;
 
       return {
         bureau: bId,
+        pending: bCases.filter(c=>c.status === "Pending").length,
+        underProcess: bCases.filter(c=>c.status === "Under Process").length,
         total: bCases.length,
         disposed: bDisposed.length,
         active: bCases.length - bDisposed.length,
@@ -1297,7 +1446,7 @@ export class Store implements IRepository {
       "Marked Unrelated": 0,
       "Resolved": 0
     };
-    this.data.overlapAlerts.forEach(o => {
+    this.visibleOverlaps().forEach(o => {
       overlapStatusCounts[o.alertStatus] = (overlapStatusCounts[o.alertStatus] || 0) + 1;
     });
 
@@ -1331,7 +1480,7 @@ export class Store implements IRepository {
           permId: c.aictePermanentId,
           total: 0,
           active: 0,
-          overlapCount: this.data.overlapAlerts.filter(o => o.institutionId === c.institutionId).length
+          overlapCount: this.visibleOverlaps().filter(o => o.institutionId === c.institutionId).length
         };
       }
       instComplaintsMap[c.institutionId].total++;
@@ -1352,8 +1501,8 @@ export class Store implements IRepository {
         escalatedComplaints: escalated,
         overdueComplaints: overdue,
         disposalRatePercentage: total > 0 ? Math.round((disposed / total) * 100) : 0,
-        totalOverlapAlerts: this.data.overlapAlerts.length,
-        unresolvedOverlapAlerts: this.data.overlapAlerts.filter(o => o.alertStatus === "Pending Review").length
+        totalOverlapAlerts: this.visibleOverlaps().length,
+        unresolvedOverlapAlerts: this.visibleOverlaps().filter(o => o.alertStatus === "Pending Review").length
       },
       bureauPerformance,
       overlapStatusCounts: Object.entries(overlapStatusCounts).map(([status, count]) => ({ status, count })),

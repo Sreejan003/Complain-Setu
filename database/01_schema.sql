@@ -13,8 +13,11 @@ CREATE TABLE IF NOT EXISTS profiles (
         'Administrator',
         'Regulation Bureau Officer',
         'PGRC Officer',
+        'Bureau Officer',
         'Regional Officer',
-        'Senior Management'
+        'Senior Management',
+        'Competent Authority',
+        'Institutional User'
     )),
     bureau_id VARCHAR(50),
     region VARCHAR(100),

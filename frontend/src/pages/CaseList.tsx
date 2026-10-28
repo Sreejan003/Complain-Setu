@@ -33,13 +33,13 @@ export const CaseList: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
 
-  const isSupervisor = user?.role === "Administrator" || user?.role === "Senior Management";
+  const isSupervisor = user?.role === "BUREAU_HEAD" || user?.role === "COMPETENT_AUTHORITY";
   const isInstitutional = user?.role === "Institutional User";
   const isDeskOfficer = !isSupervisor && !isInstitutional;
 
   // View-all override strictly for supervisors; by default everyone views their own cases
   const viewAllParam = searchParams.get("viewAll") === "true";
-  const isMyCasesMode = !isInstitutional && (!isSupervisor || !viewAllParam);
+  const isMyCasesMode = user?.role === "CASE_OFFICER" || (isSupervisor && searchParams.get("scope") === "my_cases");
   const effectiveOfficerId = isMyCasesMode ? user?.id : undefined;
 
   // URL-driven query states

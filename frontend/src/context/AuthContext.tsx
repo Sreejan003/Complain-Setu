@@ -18,6 +18,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState<boolean>(true);
   const [demoAccounts, setDemoAccounts] = useState<any[]>([]);
 
+  useEffect(()=>{
+    const expired=()=>{localStorage.removeItem("aicte_token");setUser(null);};
+    window.addEventListener("aicte-session-expired",expired);
+    return ()=>window.removeEventListener("aicte-session-expired",expired);
+  },[]);
   useEffect(() => {
     async function initAuth() {
       try {
@@ -55,10 +60,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const switchUserRole = async (email: string) => {
+  const switchUserRole = async (email: string, password = "Aicte@2026") => {
+    if (!demoAccounts.length) {
+      throw new Error("Role switching is disabled in production environments.");
+    }
     setLoading(true);
     try {
-      const res = await api.login(email, "Aicte@2026");
+      const res = await api.login(email, password);
       localStorage.setItem("aicte_token", res.token);
       setUser(res.user);
     } finally {
@@ -67,6 +75,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = () => {
+    void fetch("/api/auth/logout",{method:"POST",headers:{Authorization:`Bearer ${localStorage.getItem("aicte_token") || ""}`}}).catch(()=>{});
     localStorage.removeItem("aicte_token");
     setUser(null);
   };

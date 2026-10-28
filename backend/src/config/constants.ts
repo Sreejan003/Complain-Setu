@@ -39,11 +39,14 @@ export const BUREAUS: BureauConfig[] = [
 ];
 
 export const USER_ROLES = [
+  "SYSTEM_ADMIN", "COMPETENT_AUTHORITY", "BUREAU_HEAD", "CASE_OFFICER",
   "Administrator",
   "Regulation Bureau Officer",
   "PGRC Officer",
+  "Bureau Officer",
   "Regional Officer",
   "Senior Management",
+  "Competent Authority",
   "Institutional User"
 ] as const;
 
@@ -128,4 +131,13 @@ export const DEFAULT_ESCALATION_CONFIG: EscalationConfig = {
   autoEscalateOverdueDays: 5,
   reminderIntervalHours: 24,
   seniorManagementNotifyDays: 7
+};
+
+// Existing workflow transitions, shared by validation and the case action form.
+export const STATUS_TRANSITIONS: Record<string,string[]> = {
+  Pending:["Under Process","Escalated","Transferred"],
+  "Under Process":["Disposed","Escalated","Transferred","Pending"],
+  Escalated:["Under Process","Disposed","Transferred"],
+  Transferred:["Under Process","Pending","Escalated"],
+  Disposed:["Under Process"]
 };

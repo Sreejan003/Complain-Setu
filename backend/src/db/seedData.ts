@@ -65,6 +65,29 @@ export const SEED_PROFILES: Profile[] = [
     updatedAt: "2026-01-01T09:00:00Z"
   },
   {
+    id: "usr-ca-01",
+    email: "competent.authority@aicte.gov.in",
+    passwordHash: DEMO_PW_HASH,
+    fullName: "Dr. Vikramaditya Rathore",
+    role: "Competent Authority",
+    designation: "Vice Chairman & Competent Appellate Authority",
+    isActive: true,
+    createdAt: "2026-01-01T09:00:00Z",
+    updatedAt: "2026-01-01T09:00:00Z"
+  },
+  {
+    id: "usr-bo-01",
+    email: "ab.officer@aicte.gov.in",
+    passwordHash: DEMO_PW_HASH,
+    fullName: "Shri Manoj Tiwari",
+    role: "Bureau Officer",
+    bureauId: "AB",
+    designation: "Director (Approval Bureau)",
+    isActive: true,
+    createdAt: "2026-01-01T09:00:00Z",
+    updatedAt: "2026-01-01T09:00:00Z"
+  },
+  {
     id: "usr-inst-01",
     email: "inst.officer@nist.edu.in",
     passwordHash: DEMO_PW_HASH,

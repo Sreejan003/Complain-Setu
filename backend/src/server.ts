@@ -16,6 +16,7 @@ import { notificationsRouter } from "./routes/notifications.js";
 import { analyticsRouter } from "./routes/analytics.js";
 import { adminRouter } from "./routes/admin.js";
 import { requireAuth, AuthenticatedRequest } from "./middleware/auth.js";
+import { store } from "./db/store.js";
 import { startSlaScheduler } from "./services/slaScheduler.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -61,6 +62,8 @@ app.use(express.json({ limit: "2mb" }));
 // Authenticated Evidence File Access (Eliminates public unauthenticated access to confidential uploads)
 app.use("/uploads", requireAuth, (req: AuthenticatedRequest, res) => {
   const safeFilename = path.basename(req.path);
+  const doc = store.getDocuments({}).find(d => d.fileName === safeFilename);
+  if (!doc) return res.status(404).json({error:"Evidence not found in authorized scope."});
   const targetPath = path.join(UPLOADS_DIR, safeFilename);
   if (!fs.existsSync(targetPath)) {
     return res.status(404).json({ error: "Evidence file not found on server." });
@@ -107,7 +110,7 @@ export const server = app.listen(PORT, () => {
   console.log(`================================================================`);
 
   // Start background Statutory SLA Monitor
-  startSlaScheduler(15);
+  if (process.env.NODE_ENV !== "test") startSlaScheduler(15);
 });
 
 export default app;

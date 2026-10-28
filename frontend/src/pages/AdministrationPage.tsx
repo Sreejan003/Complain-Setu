@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import {
   Shield,
@@ -115,6 +116,7 @@ export const AdministrationPage: React.FC = () => {
 
   return (
     <div className="space-y-4">
+      <Link className="text-xs underline text-[#17365D]" to="/admin/dashboard">User Management, Roles & Permissions, Bureau/Cell Management</Link>
       {/* Official Header */}
       <div className="bg-white border border-[#cbd5e1] rounded-xs p-4 shadow-none flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
@@ -127,7 +129,7 @@ export const AdministrationPage: React.FC = () => {
           </p>
         </div>
 
-        {user?.role === "Administrator" && (
+        {user?.role === "SYSTEM_ADMIN" && (
           <button
             onClick={() => setResetModalOpen(true)}
             className="flex items-center space-x-1.5 px-3 py-1.5 bg-[#b91c1c] hover:bg-[#991b1b] text-white rounded-xs text-xs font-semibold shadow-none self-start sm:self-auto transition cursor-pointer"
@@ -364,7 +366,7 @@ export const AdministrationPage: React.FC = () => {
               </div>
             </div>
 
-            {user?.role === "Administrator" && (
+            {user?.role === "SYSTEM_ADMIN" && (
               <div className="flex justify-end pt-2 border-t border-[#e2e8f0]">
                 <button
                   type="submit"

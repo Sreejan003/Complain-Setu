@@ -1,3 +1,5 @@
+import { STATUS_TRANSITIONS } from "../config/constants.js";
+import { roleOf } from "../security/rbac.js";
 import { Router, Response } from "express";
 import multer from "multer";
 import path from "path";
@@ -5,10 +7,41 @@ import fs from "fs";
 import { fileURLToPath } from "url";
 import { v4 as uuidv4 } from "uuid";
 import { store } from "../db/store.js";
-import { requireAuth, requireRole, AuthenticatedRequest } from "../middleware/auth.js";
+import { requireAuth, requireRole, AuthenticatedRequest, canAccessComplaint, canMutateComplaint } from "../middleware/auth.js";
 import { detectOverlapsForComplaint } from "../services/overlapEngine.js";
 
 export const complaintsRouter = Router();
+complaintsRouter.use(requireAuth, (req: AuthenticatedRequest, res, next) => {
+  const role = roleOf(req.user!.role);
+  if (role === "SYSTEM_ADMIN") return res.status(403).json({error:"System administration does not grant complaint access."});
+  const id = req.path.split("/")[1];
+  if (id && !["stream", "check-overlap"].includes(id) && !store.getComplaintById(id)) return res.status(404).json({error:"Complaint not found in authorized scope."});
+  if (req.method === "PATCH" && req.path.endsWith("/status")) {
+    if (req.body.status === "Escalated" && !req.user!.permissions?.includes("APPROVE_ESCALATIONS")) return res.status(403).json({error:"Escalation decision permission has not been delegated."});
+    if (role === "COMPETENT_AUTHORITY" && req.body.assignedOfficerId && !req.user!.permissions?.includes("ASSIGN_OFFICERS")) return res.status(403).json({error:"Officer assignment has not been delegated."});
+    if (role === "CASE_OFFICER" && (req.body.assignedOfficerId !== undefined || ["Disposed","Transferred","Escalated"].includes(req.body.status))) return res.status(403).json({error:"Assignment and final decisions require a Bureau Head or Competent Authority."});
+    if (req.body.status === "Transferred") return res.status(400).json({error:"Use the recorded transfer workflow."});
+    if (req.body.assignedOfficerId) {
+      const officer = store.getProfileById(req.body.assignedOfficerId);
+      const complaint = store.getComplaintById(id);
+      if (!officer?.isActive || roleOf(officer.role) !== "CASE_OFFICER" || !officer.bureauId || officer.bureauId !== complaint?.currentBureauId || (req.user!.region && officer.region !== req.user!.region)) return res.status(400).json({error:"Select an active case officer within the case bureau and region."});
+    }
+  }
+  if (req.method === "POST" && req.path === "/") {
+    if (!store.getBureaus().some(b=>b.id===req.body.receivingBureauId)) return res.status(400).json({error:"Select a configured receiving bureau."});
+    const institution = store.getInstitutionById(req.body.institutionId);
+    if (!institution || (req.user!.region && institution.region!==req.user!.region)) return res.status(403).json({error:"Institution is outside your authorized scope."});
+    if (role === "Institutional User" && (!req.user!.institutionId || ![institution.id,institution.aictePermanentId].includes(req.user!.institutionId) || req.body.assignedOfficerId)) return res.status(403).json({error:"Institutional intake is restricted to your own institution, without officer assignment."});
+    if (!["BUREAU_HEAD","COMPETENT_AUTHORITY","Institutional User"].includes(role)) return res.status(403).json({error:"Complaint intake requires an authorized Bureau Head."});
+    if (req.user!.bureauId && req.body.receivingBureauId !== req.user!.bureauId) return res.status(403).json({error:"Receiving bureau is outside your scope."});
+    if (req.body.assignedOfficerId) {
+      const officer = store.getProfileById(req.body.assignedOfficerId);
+      if (!officer?.isActive || roleOf(officer.role) !== "CASE_OFFICER" || officer.bureauId !== req.body.receivingBureauId) return res.status(400).json({error:"Invalid case officer assignment."});
+    }
+  }
+  if (req.path.endsWith("/override-sla") && role !== "COMPETENT_AUTHORITY") return res.status(403).json({error:"Supervisory authority required."});
+  next();
+});
 
 // Real-time Event Stream (Server-Sent Events) - Authenticated & Scoped
 interface ClientConnection {
@@ -29,12 +62,10 @@ export function broadcastCaseEvent(event: {
   for (let i = sseClients.length - 1; i >= 0; i--) {
     const client = sseClients[i];
     try {
-      // Strict institutional scope isolation: Never leak other institutions' events
-      if (client.user.role === "Institutional User" && client.user.institutionId) {
-        if (event.institutionId && event.institutionId !== client.user.institutionId) {
-          continue;
-        }
-      }
+      const current = store.getProfileById(client.user.id);
+      const complaint = event.complaintId ? store.getComplaintById(event.complaintId) : undefined;
+      if (!current?.isActive || current.updatedAt !== client.user.updatedAt) {client.res.end();sseClients.splice(i,1);continue;}
+      if (!complaint || !canAccessComplaint(current, complaint)) continue;
       client.res.write(`data: ${payload}\n\n`);
     } catch {
       sseClients.splice(i, 1);
@@ -98,20 +129,7 @@ complaintsRouter.get("/", requireAuth, (req: AuthenticatedRequest, res: Response
     effectiveRegion = req.user.region;
   }
 
-  // Officer Case Queue Scope & Isolation
-  let effectiveAssignedOfficerId = assignedOfficerId as string;
-  if (req.query.scope === "my_cases" && req.user) {
-    effectiveAssignedOfficerId = req.user.id;
-  }
-  const isSupervisor = req.user && (req.user.role === "Administrator" || req.user.role === "Senior Management");
-  if (!isSupervisor && req.user && req.user.role !== "Institutional User") {
-    if (effectiveAssignedOfficerId && effectiveAssignedOfficerId !== req.user.id) {
-      effectiveAssignedOfficerId = req.user.id;
-    } else if (!effectiveAssignedOfficerId && !effectiveInstitutionId) {
-      effectiveAssignedOfficerId = req.user.id;
-    }
-  }
-
+  const effectiveAssignedOfficerId = assignedOfficerId as string;
   const results = store.getComplaints({
     institutionId: effectiveInstitutionId,
     aictePermanentId: aictePermanentId as string,
@@ -196,9 +214,10 @@ complaintsRouter.get("/:id", requireAuth, (req: AuthenticatedRequest, res: Respo
 
   return res.json({
     complaint,
+    permittedStatuses: (STATUS_TRANSITIONS[complaint.status] || []).filter(status => status!=="Transferred" && (req.user!.role!=="CASE_OFFICER" || !["Disposed","Escalated"].includes(status)) && (status!=="Escalated" || req.user!.permissions?.includes("APPROVE_ESCALATIONS")) && (complaint.status!=="Disposed" || req.user!.role==="COMPETENT_AUTHORITY")),
     history,
     relatedCases,
-    overlapAlerts
+    overlapAlerts: overlapAlerts.map(o => ({...o,complaintDescA:store.getComplaintById(o.complaintIdA)?o.complaintDescA:"",complaintDescB:store.getComplaintById(o.complaintIdB)?o.complaintDescB:"",explanation:undefined}))
   });
 });
 
@@ -236,11 +255,24 @@ complaintsRouter.get("/:id/related", requireAuth, (req: AuthenticatedRequest, re
   return res.json(related);
 });
 
+// Requests record an officer recommendation; they never approve or change ownership/status.
+complaintsRouter.post("/:id/requests", requireAuth, (req: AuthenticatedRequest,res)=>{
+  const complaint = store.getComplaintById(req.params.id);
+  if (!complaint || !canMutateComplaint(req.user!,complaint).allowed) return res.status(403).json({error:"Case request access denied."});
+  const {type,remarks} = req.body;
+  if (!["Transfer","Escalation","Disposal","Coordination"].includes(type) || typeof remarks!=="string" || !remarks.trim() || remarks.length>5000) return res.status(400).json({error:"Valid request type and remarks required."});
+  const timestamp = new Date().toISOString();
+  store.addCaseHistory({id:uuidv4(),complaintId:complaint.id,actionType:type+" Requested",remarks:remarks.trim(),performedBy:req.user!.id,performedByName:req.user!.fullName,createdAt:timestamp});
+  store.getProfiles().filter(p=>p.isActive && ((p.role==="BUREAU_HEAD" && p.bureauId===complaint.currentBureauId) || p.role==="COMPETENT_AUTHORITY")).filter(p=>canAccessComplaint(p,complaint)).forEach(p=>store.addNotification({id:uuidv4(),recipientId:p.id,title:type+" request: "+complaint.complaintId,message:remarks.trim(),notificationType:"Status Update",referenceId:complaint.id,referenceType:"complaint",isRead:false,createdAt:timestamp}));
+  store.addAuditLog({userId:req.user!.id,userName:req.user!.fullName,action:"CASE_REQUEST",entityType:"Complaint",entityId:complaint.id,details:{type,remarks:remarks.trim()}});
+  return res.status(201).json({success:true});
+});
+
 // Register new complaint
 complaintsRouter.post(
   "/",
   requireAuth,
-  requireRole("Administrator", "Regulation Bureau Officer", "PGRC Officer", "Regional Officer"),
+  requireRole("Institutional User", "BUREAU_HEAD", "COMPETENT_AUTHORITY", "Regulation Bureau Officer", "PGRC Officer", "Regional Officer"),
   async (req: AuthenticatedRequest, res: Response) => {
     const {
       institutionId,
@@ -292,10 +324,12 @@ complaintsRouter.post(
 complaintsRouter.patch(
   "/:id/status",
   requireAuth,
-  requireRole("Administrator", "Regulation Bureau Officer", "PGRC Officer", "Regional Officer"),
+  requireRole("BUREAU_HEAD", "COMPETENT_AUTHORITY", "Regulation Bureau Officer", "PGRC Officer", "Bureau Officer", "Regional Officer", "Competent Authority"),
   (req: AuthenticatedRequest, res: Response) => {
-    const { status, priority, assignedOfficerId, remarks, disposalRemarks, lastKnownUpdatedAt } = req.body;
+    const { status, priority, assignedOfficerId, remarks, disposalRemarks, lastKnownUpdatedAt, nextAction, nextActionDate } = req.body;
 
+    if ((nextAction !== undefined && (typeof nextAction !== "string" || nextAction.length>2000)) || (nextActionDate && (typeof nextActionDate !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(nextActionDate) || !Number.isFinite(Date.parse(nextActionDate))))) return res.status(400).json({error:"Invalid next action or action date."});
+    if (priority && !["Low","Medium","High","Critical"].includes(priority)) return res.status(400).json({error:"Invalid priority."});
     if (!remarks || typeof remarks !== "string" || remarks.trim().length === 0) {
       return res.status(400).json({ error: "Officer action remarks are mandatory for audit compliance." });
     }
@@ -314,10 +348,9 @@ complaintsRouter.patch(
     }
 
     const institution = store.getInstitutionById(complaint.institutionId);
-    if (req.user && req.user.role === "Regional Officer" && req.user.region && institution) {
-      if (!institution.region.toLowerCase().includes(req.user.region.toLowerCase())) {
-        return res.status(403).json({ error: "Access Denied: You do not have jurisdiction to update cases in this region." });
-      }
+    const mutationPerm = canMutateComplaint(req.user!, complaint, institution?.region);
+    if (!mutationPerm.allowed) {
+      return res.status(403).json({ error: mutationPerm.reason || "Access Denied: You do not have permission to modify this complaint." });
     }
 
     try {
@@ -328,7 +361,7 @@ complaintsRouter.patch(
           priority,
           assignedOfficerId,
           remarks,
-          disposalRemarks
+          disposalRemarks, nextAction, nextActionDate
         },
         req.user!
       );
@@ -354,7 +387,7 @@ complaintsRouter.patch(
 complaintsRouter.post(
   "/:id/override-sla",
   requireAuth,
-  requireRole("Administrator", "Senior Management"),
+  requireRole("BUREAU_HEAD", "COMPETENT_AUTHORITY", "Senior Management"),
   (req: AuthenticatedRequest, res: Response) => {
     const { newDeadline, overrideReason } = req.body;
 
@@ -440,6 +473,10 @@ complaintsRouter.get("/:id/documents", requireAuth, (req: AuthenticatedRequest, 
     return res.status(404).json({ error: "Complaint not found." });
   }
 
+  if (!canAccessComplaint(req.user!, complaint)) {
+    return res.status(403).json({ error: "Access Denied: You do not have permission to view documents for this complaint." });
+  }
+
   const documents = store.getDocuments({ complaintId: complaint.id });
   return res.json(documents);
 });
@@ -452,6 +489,10 @@ complaintsRouter.get(
     const complaint = store.getComplaintById(req.params.id);
     if (!complaint) {
       return res.status(404).json({ error: "Complaint not found." });
+    }
+
+    if (!canAccessComplaint(req.user!, complaint)) {
+      return res.status(403).json({ error: "Access Denied: You do not have permission to download documents for this complaint." });
     }
 
     const doc = store.getDocumentById(req.params.docId);
@@ -478,6 +519,10 @@ complaintsRouter.post(
     const complaint = store.getComplaintById(req.params.id);
     if (!complaint) {
       return res.status(404).json({ error: "Complaint not found." });
+    }
+
+    if (!canAccessComplaint(req.user!, complaint)) {
+      return res.status(403).json({ error: "Access Denied: You do not have permission to attach documents to this complaint." });
     }
 
     upload.single("file")(req, res, (err: any) => {
@@ -527,11 +572,16 @@ complaintsRouter.post(
 complaintsRouter.delete(
   "/:id/documents/:docId",
   requireAuth,
-  requireRole("Administrator", "Regulation Bureau Officer", "PGRC Officer", "Regional Officer"),
+  requireRole("BUREAU_HEAD", "COMPETENT_AUTHORITY", "Regulation Bureau Officer", "PGRC Officer", "Bureau Officer", "Regional Officer", "Competent Authority"),
   (req: AuthenticatedRequest, res: Response) => {
     const complaint = store.getComplaintById(req.params.id);
     if (!complaint) {
       return res.status(404).json({ error: "Complaint not found." });
+    }
+
+    const mutationPerm = canMutateComplaint(req.user!, complaint);
+    if (!mutationPerm.allowed) {
+      return res.status(403).json({ error: mutationPerm.reason || "Access Denied: You do not have permission to delete documents from this complaint." });
     }
 
     const doc = store.getDocumentById(req.params.docId);

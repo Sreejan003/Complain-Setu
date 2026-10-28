@@ -35,45 +35,34 @@ const ALL_NAV_ITEMS: NavItem[] = [
   { to: "/transfers",            label: "Workflow & Transfers",      icon: ArrowRightLeft },
   { to: "/notifications",        label: "Notification Center",       icon: Bell },
   { to: "/analytics",            label: "Reports & Analytics",       icon: BarChart3 },
+  { to: "/admin/dashboard#users", label: "User Management", icon: Settings },
+  { to: "/admin/dashboard#permissions", label: "Roles & Permissions", icon: ShieldCheck },
+  { to: "/admin/dashboard#bureaus", label: "Bureau/Cell Management", icon: Building },
+  { to: "/admin/dashboard#audit", label: "Audit Logs", icon: FilePlus2 },
   { to: "/admin",                label: "Administration",            icon: Settings },
 ];
 
-const ROLE_NAV_KEYS: Record<string, string[]> = {
-  Administrator: [
-    "/", "/institution-dashboard", "/complaints/register",
-    "/cases", "/overlaps", "/transfers", "/notifications", "/analytics", "/admin"
-  ],
-  "Senior Management": [
-    "/", "/institution-dashboard", "/cases",
-    "/overlaps", "/analytics", "/notifications"
-  ],
-  "Regulation Bureau Officer": [
-    "/", "/institution-dashboard", "/complaints/register",
-    "/cases", "/overlaps", "/transfers", "/notifications", "/analytics"
-  ],
-  "PGRC Officer": [
-    "/", "/institution-dashboard", "/complaints/register",
-    "/cases", "/overlaps", "/transfers", "/notifications", "/analytics"
-  ],
-  "Regional Officer": [
-    "/", "/institution-dashboard", "/complaints/register",
-    "/cases", "/overlaps", "/transfers", "/notifications", "/analytics"
-  ],
-  "Institutional User": [
-    "/institution-dashboard", "/complaints/register", "/notifications"
-  ],
+const ROLE_NAV_KEYS: Record<string,string[]> = {
+  SYSTEM_ADMIN:["/","/admin/dashboard#users","/admin/dashboard#permissions","/admin/dashboard#bureaus","/admin/dashboard#audit","/admin","/notifications"],
+  COMPETENT_AUTHORITY:["/","/institution-dashboard","/cases","/overlaps","/transfers","/analytics","/notifications"],
+  BUREAU_HEAD:["/","/institution-dashboard","/complaints/register","/cases","/overlaps","/transfers","/analytics","/notifications"],
+  CASE_OFFICER:["/","/cases","/overlaps","/analytics","/notifications"],
+  "Institutional User":["/institution-dashboard","/complaints/register","/notifications"]
 };
 
 export const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
   const { user } = useAuth();
   const role = user?.role ?? "";
-  const allowedKeys = ROLE_NAV_KEYS[role] ?? ALL_NAV_ITEMS.map(i => i.to);
+  // Strictly enforce deny-by-default: unrecognized or missing roles receive zero navigation items
+  const allowedKeys = ROLE_NAV_KEYS[role] ?? [];
 
   const navItems = ALL_NAV_ITEMS
     .filter(item => allowedKeys.includes(item.to))
     .map(item => {
+      if (item.to === "/") return {...item,to:user?.role === "SYSTEM_ADMIN"?"/admin/dashboard":user?.role === "COMPETENT_AUTHORITY"?"/authority/dashboard":user?.role === "BUREAU_HEAD"?"/bureau/dashboard":"/officer/dashboard",label:"Dashboard"};
+      if (item.to === "/admin") return {...item,label:"System Settings"};
       if (item.to === "/cases") {
-        const label = role.includes("Officer")
+        const label = role === "CASE_OFFICER"
           ? "My Assigned Cases"
           : role === "Institutional User"
           ? "Institution Grievances"
@@ -96,7 +85,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
             <div className="bg-[#0b2545] border border-[#163860] rounded-xs p-2 text-xs">
               <div className="flex items-center space-x-1.5 text-white font-semibold text-[11px] uppercase tracking-wider">
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                <span className="truncate">{user.role}</span>
+                <span className="truncate">{{SYSTEM_ADMIN:"System Administrator",COMPETENT_AUTHORITY:"Competent Authority",BUREAU_HEAD:"Bureau/Cell Head",CASE_OFFICER:"Case Handling Officer","Institutional User":"Institutional User"}[user.role]}</span>
               </div>
               <div className="text-[11px] text-slate-300 font-medium truncate mt-0.5">
                 {user.fullName}

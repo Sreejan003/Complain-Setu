@@ -123,7 +123,7 @@ export const InstitutionDirectory: React.FC = () => {
           </p>
         </div>
 
-        {["Administrator", "Regulation Bureau Officer", "PGRC Officer"].includes(user?.role || "") && (
+        {["BUREAU_HEAD", "COMPETENT_AUTHORITY"].includes(user?.role || "") && (
           <button
             onClick={() => setShowRegisterModal(true)}
             className="flex items-center space-x-1.5 px-3 py-1.5 bg-[#003366] hover:bg-[#002147] text-white rounded-xs text-xs font-semibold shadow-none self-start sm:self-auto transition cursor-pointer"

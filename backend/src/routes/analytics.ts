@@ -1,8 +1,26 @@
+import { getEscalationConfig } from "../services/slaScheduler.js";
 import { Router, Response } from "express";
 import { store } from "../db/store.js";
 import { requireAuth, requireRole, AuthenticatedRequest } from "../middleware/auth.js";
 
 export const analyticsRouter = Router();
+analyticsRouter.use(requireAuth, (req: AuthenticatedRequest, res, next) => {
+  if (["SYSTEM_ADMIN","Institutional User"].includes(req.user!.role)) return res.status(403).json({error:"Case analytics access denied."});
+  next();
+});
+
+analyticsRouter.get("/role-dashboard", (req: AuthenticatedRequest,res) => {
+  const analytics = store.getDashboardAnalytics();
+  const cases = store.getComplaints({limit:10,page:Number(req.query.page)||1,search:String(req.query.search||""),status:String(req.query.status||""),category:String(req.query.category||""),assignedOfficerId:String(req.query.officer||""),receivedFrom:String(req.query.from||""),receivedTo:String(req.query.to||""),sortBy:"expectedDisposalDate",sortOrder:"asc"});
+  const all = store.getPerformanceReport();
+  const today = new Date().toISOString().slice(0,10);
+  const threshold = getEscalationConfig().approachingDeadlineDays;
+  const until = new Date(Date.now()+threshold*86400000).toISOString().slice(0,10);
+
+  // Counts operate on the full scoped collection, independent of the visible page.
+  const extras = store.getRoleCounts(until,today);
+  res.json({role:req.user!.role,kpi:analytics.kpi,...extras,cases:{...cases,data:cases.data.map(c=>({...c,lastAction:store.getLastAction(c.id)}))},performance:all,threshold});
+});
 
 // Overall dashboard analytics KPIs and charts (Authenticated)
 analyticsRouter.get("/dashboard", requireAuth, (_req: AuthenticatedRequest, res: Response) => {
@@ -37,7 +55,7 @@ export function sanitizeCsvCell(value: any): string {
 analyticsRouter.get(
   "/export-csv",
   requireAuth,
-  requireRole("Administrator", "Senior Management", "Regulation Bureau Officer", "PGRC Officer", "Regional Officer"),
+  requireRole("BUREAU_HEAD", "CASE_OFFICER", "COMPETENT_AUTHORITY", "Senior Management", "Regulation Bureau Officer", "PGRC Officer", "Bureau Officer", "Regional Officer", "Competent Authority"),
   (req: AuthenticatedRequest, res: Response) => {
     const { bureau, status, category, priority, receivedFrom, receivedTo } = req.query;
 

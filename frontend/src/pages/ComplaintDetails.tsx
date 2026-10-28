@@ -1,3 +1,4 @@
+import { roleRequest } from "./RoleDashboard.js";
 import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import {
@@ -32,6 +33,7 @@ export const ComplaintDetails: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
+  const [permittedStatuses,setPermittedStatuses]=useState<string[]>([]);
   const [complaint, setComplaint] = useState<Complaint | null>(null);
   const [history, setHistory] = useState<CaseHistory[]>([]);
   const [relatedCases, setRelatedCases] = useState<RelatedCase[]>([]);
@@ -46,6 +48,15 @@ export const ComplaintDetails: React.FC = () => {
   const [docError, setDocError] = useState("");
 
   // Status Action Modal State
+  const [requestType,setRequestType]=useState("Coordination");
+  const [requestRemarks,setRequestRemarks]=useState("");
+  const [requestBusy,setRequestBusy]=useState(false);
+  const [requestMessage,setRequestMessage]=useState("");
+  const [nextAction,setNextAction]=useState("");
+  const [nextActionDate,setNextActionDate]=useState("");
+  const [assignee,setAssignee]=useState("");
+  const [officers,setOfficers]=useState<any[]>([]);
+  useEffect(()=>{if(user?.role==="BUREAU_HEAD") api.getUsers().then(setOfficers).catch(()=>setOfficers([]));},[user?.role]);
   const [actionModalOpen, setActionModalOpen] = useState(false);
   const [newStatus, setNewStatus] = useState<any>("Under Process");
   const [actionRemarks, setActionRemarks] = useState("");
@@ -65,18 +76,42 @@ export const ComplaintDetails: React.FC = () => {
   const [transferReason, setTransferReason] = useState("");
   const [transferSubmitting, setTransferSubmitting] = useState(false);
 
+  // Incoming Pending Transfer State & Adjudication
+  const [pendingTransfer, setPendingTransfer] = useState<any>(null);
+  const [adjudicateModalOpen, setAdjudicateModalOpen] = useState(false);
+  const [adjudicateAction, setAdjudicateAction] = useState<"Accepted" | "Rejected">("Accepted");
+  const [adjudicateRemarks, setAdjudicateRemarks] = useState("");
+  const [adjudicateSubmitting, setAdjudicateSubmitting] = useState(false);
+
   const fetchDetails = async () => {
     if (!id) return;
     setLoading(true);
     try {
       const res = await api.getComplaintDetails(id);
       setComplaint(res.complaint);
+      setPermittedStatuses(res.permittedStatuses || []);
+      setNewStatus(res.complaint.status);
+      setNextAction(res.complaint.nextAction || "");
+      setNextActionDate(res.complaint.nextActionDate || "");
       setHistory(res.history);
       setRelatedCases(res.relatedCases);
       setOverlapAlerts(res.overlapAlerts);
 
       const docs = await api.getComplaintDocuments(id);
       setDocuments(docs || []);
+
+      // Check active transfers for this complaint
+      try {
+        const trfs = await api.getTransfers();
+        const active = (trfs || []).find(
+          (t: any) =>
+            (t.complaintId === id || t.complaintRefId === res.complaint?.complaintId) &&
+            t.acceptanceStatus === "Pending"
+        );
+        setPendingTransfer(active || null);
+      } catch {
+        // non-blocking
+      }
     } catch (err) {
       console.error("Failed to load complaint details:", err);
     } finally {
@@ -84,11 +119,32 @@ export const ComplaintDetails: React.FC = () => {
     }
   };
 
+  const handleConfirmTransferAdjudicate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!pendingTransfer || !adjudicateRemarks.trim()) return;
+    setAdjudicateSubmitting(true);
+    try {
+      await api.respondToTransfer(pendingTransfer.id, {
+        action: adjudicateAction,
+        remarks: adjudicateRemarks.trim()
+      });
+      setAdjudicateModalOpen(false);
+      fetchDetails();
+    } catch (err: any) {
+      alert(err.message || "Failed to process transfer adjudication.");
+    } finally {
+      setAdjudicateSubmitting(false);
+    }
+  };
+
   // Real-time live update subscription (Feature 3)
   useEffect(() => {
     const unsub = api.subscribeLiveEvents((event) => {
       if (
-        (event.type === "CASE_UPDATED" || event.type === "CASE_TRANSFERRED") &&
+        (event.type === "CASE_UPDATED" ||
+          event.type === "CASE_TRANSFERRED" ||
+          event.type === "TRANSFER_ACCEPTED" ||
+          event.type === "TRANSFER_REJECTED") &&
         (event.data?.id === id || event.data?.complaintId === complaint?.complaintId)
       ) {
         fetchDetails();
@@ -151,6 +207,7 @@ export const ComplaintDetails: React.FC = () => {
       await api.updateComplaintStatus(complaint.id, {
         status: newStatus,
         remarks: actionRemarks,
+        nextAction, nextActionDate, ...(assignee?{assignedOfficerId:assignee}:{}),
         disposalRemarks: newStatus === "Disposed" ? actionRemarks : undefined,
         lastKnownUpdatedAt: complaint.updatedAt
       });
@@ -229,12 +286,47 @@ export const ComplaintDetails: React.FC = () => {
     );
   }
 
-  const canModify = ["Administrator", "Regulation Bureau Officer", "PGRC Officer", "Regional Officer"].includes(
-    user?.role || ""
+  const userCanMutate = !!user && !!complaint && (user.role === "COMPETENT_AUTHORITY" || (user.role === "BUREAU_HEAD" && !!user.bureauId && user.bureauId === complaint.currentBureauId) || (user.role === "CASE_OFFICER" && user.id === complaint.assignedOfficerId && !!user.bureauId && user.bureauId === complaint.currentBureauId));
+  const canModify = userCanMutate;
+  const isBureauAuthorized = () => userCanMutate;
+  const canAdjudicatePendingTransfer = () => !!user && !!pendingTransfer && !!user.permissions?.includes("APPROVE_TRANSFERS") && (user.role === "COMPETENT_AUTHORITY" || (user.role === "BUREAU_HEAD" && user.bureauId === pendingTransfer.toBureauId));
+
+  const lastAction = history && history.length > 0 ? history[0] : null;
+
+  const getNextAction = () => {
+    switch (complaint.status) {
+      case "Pending":
+        return "Initial Scrutiny & Preliminary Officer Allocation";
+      case "Under Process":
+        return "Fact-Finding Inquiry / Verification of Institution Defense";
+      case "Transferred":
+        return "Destination Bureau Acceptance Confirmation";
+      case "Escalated":
+        return "Adjudication & Final Hearing by Competent Authority";
+      case "Disposed":
+        return "Case Disposed & Archived — Final Resolution Recorded";
+      default:
+        return "Review Case Record";
+    }
+  };
+
+  const isOverdue = new Date(complaint.expectedDisposalDate) < new Date() && complaint.status !== "Disposed";
+  const daysDiff = Math.ceil(
+    (new Date(complaint.expectedDisposalDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
   );
+
+  const slaStatusText =
+    complaint.status === "Disposed"
+      ? "Disposed (Closed)"
+      : isOverdue
+      ? `Overdue (${Math.abs(daysDiff)} days elapsed)`
+      : daysDiff <= 3
+      ? `Approaching SLA (${daysDiff} days left)`
+      : `Within SLA Standard (${daysDiff} days left)`;
 
   return (
     <div className="space-y-4">
+      {user?.role==="CASE_OFFICER" && userCanMutate && <form className="bg-white border border-slate-200 p-3 space-y-2 text-xs" onSubmit={async e=>{e.preventDefault();setRequestBusy(true);try{await roleRequest(`complaints/${complaint.id}/requests`,"POST",{type:requestType,remarks:requestRemarks});setRequestMessage("Request recorded for supervisory review.");setRequestRemarks("");await fetchDetails();}catch(err:any){setRequestMessage(err.message);}finally{setRequestBusy(false);}}}><h2 className="font-bold">Submit a request to the Bureau Head</h2><label>Request type <select className="border p-1" value={requestType} onChange={e=>setRequestType(e.target.value)}>{["Coordination","Transfer","Escalation","Disposal"].map(t=><option key={t}>{t}</option>)}</select></label><label className="block">Remarks<textarea required className="block border w-full p-2" value={requestRemarks} onChange={e=>setRequestRemarks(e.target.value)}/></label><button disabled={requestBusy} className="bg-[#17365D] text-white px-3 py-2 disabled:opacity-50">Submit request</button><p role="status">{requestMessage}</p></form>}
       {/* Back button */}
       <div>
         <Link to="/cases" className="inline-flex items-center space-x-1.5 text-xs font-semibold text-[#003366] hover:underline">
@@ -268,6 +360,68 @@ export const ComplaintDetails: React.FC = () => {
           >
             <span>Open Overlap Center &rarr;</span>
           </Link>
+        </div>
+      )}
+
+      {/* Incoming Transfer Notice & Adjudication */}
+      {pendingTransfer && (
+        <div className="bg-[#eff6ff] border border-[#93c5fd] rounded-xs p-3.5 text-[#1e40af] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-start space-x-3">
+            <div className="p-1.5 bg-[#dbeafe] border border-[#bfdbfe] rounded-xs shrink-0 mt-0.5 text-[#1d4ed8]">
+              <ArrowRightLeft className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="flex items-center space-x-2">
+                <span className="font-bold text-xs uppercase tracking-wider text-[#1e3a8a]">
+                  Incoming Case Transfer Pending Acceptance
+                </span>
+                <span className="bg-[#2563eb] text-white font-bold text-[10px] px-1.5 py-0.2 rounded-xs">
+                  Route: {pendingTransfer.fromBureauId} &rarr; {pendingTransfer.toBureauId}
+                </span>
+              </div>
+              <p className="text-xs text-[#1e40af] mt-0.5 leading-normal">
+                <strong>Grounds:</strong> {pendingTransfer.transferReason} &bull; Initiated by {pendingTransfer.transferredByName} on {new Date(pendingTransfer.transferredAt).toLocaleString()}
+              </p>
+            </div>
+          </div>
+          {canAdjudicatePendingTransfer() && (
+            <div className="flex items-center space-x-2 shrink-0 self-start sm:self-auto">
+              <button
+                type="button"
+                onClick={() => {
+                  setAdjudicateAction("Accepted");
+                  setAdjudicateRemarks(`Jurisdiction transfer accepted by ${pendingTransfer.toBureauId}. Case taken under active investigation.`);
+                  setAdjudicateModalOpen(true);
+                }}
+                className="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xs text-xs font-semibold cursor-pointer"
+              >
+                Accept Transfer
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setAdjudicateAction("Rejected");
+                  setAdjudicateRemarks(`Transfer declined by ${pendingTransfer.toBureauId}. Case retained under originating bureau jurisdiction.`);
+                  setAdjudicateModalOpen(true);
+                }}
+                className="px-3 py-1.5 bg-rose-700 hover:bg-rose-800 text-white rounded-xs text-xs font-semibold cursor-pointer"
+              >
+                Decline Transfer
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Jurisdictional Read-Only Scope Notice */}
+      {canModify && !userCanMutate && (
+        <div className="bg-[#f8fafc] border border-[#cbd5e1] rounded-xs p-3 text-xs text-slate-700 flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <Shield className="w-4 h-4 text-[#003366] shrink-0" />
+            <span>
+              <strong>Cross-Bureau Jurisdictional Scope:</strong> This case is currently under active handling by <strong>{complaint.currentBureauId}</strong>. As a <strong>{user?.role}</strong>, you have full cross-bureau review visibility. To update status or proceed with official inquiry, initiate an Inter-Bureau Transfer below.
+            </span>
+          </div>
         </div>
       )}
 
@@ -305,6 +459,9 @@ export const ComplaintDetails: React.FC = () => {
               >
                 Priority: {complaint.priority}
               </span>
+              <span className="bg-[#f1f5f9] text-[#003366] border border-[#cbd5e1] px-2 py-0.5 rounded-xs text-[11px] font-semibold">
+                Category: {complaint.category}
+              </span>
               {complaint.hasOverlapAlert && (
                 <Link
                   to="/overlaps"
@@ -330,16 +487,18 @@ export const ComplaintDetails: React.FC = () => {
           {/* Action buttons */}
           {canModify && (
             <div className="flex flex-wrap items-center gap-2 self-start lg:self-auto">
-              <button
-                onClick={() => {
-                  const permitted = complaint.status === "Pending" ? "Under Process" : complaint.status === "Under Process" ? "Disposed" : "Under Process";
-                  setNewStatus(permitted);
-                  setActionModalOpen(true);
-                }}
-                className="px-3 py-1.5 bg-[#003366] text-white rounded-xs text-xs font-semibold hover:bg-[#002147] transition cursor-pointer"
-              >
-                Update Status / Dispose
-              </button>
+              {userCanMutate && (
+                <button
+                  onClick={() => {
+                    const permitted = complaint.status === "Pending" ? "Under Process" : complaint.status === "Under Process" ? "Disposed" : "Under Process";
+                    setNewStatus(permitted);
+                    setActionModalOpen(true);
+                  }}
+                  className="px-3 py-1.5 bg-[#003366] text-white rounded-xs text-xs font-semibold hover:bg-[#002147] transition cursor-pointer"
+                >
+                  Update Status / Dispose
+                </button>
+              )}
               <button
                 onClick={() => setTransferModalOpen(true)}
                 className="px-3 py-1.5 border border-[#cbd5e1] bg-white text-slate-700 rounded-xs text-xs font-medium hover:bg-slate-50 flex items-center space-x-1 cursor-pointer"
@@ -347,7 +506,7 @@ export const ComplaintDetails: React.FC = () => {
                 <ArrowRightLeft className="w-3.5 h-3.5 text-slate-600" />
                 <span>Transfer Case</span>
               </button>
-              {complaint.status !== "Escalated" && (
+              {userCanMutate && complaint.status !== "Escalated" && (
                 <button
                   onClick={() => {
                     setNewStatus("Escalated");
@@ -359,7 +518,7 @@ export const ComplaintDetails: React.FC = () => {
                   <span>Escalate</span>
                 </button>
               )}
-              {["Administrator", "Senior Management"].includes(user?.role || "") && (
+              {["SYSTEM_ADMIN", "COMPETENT_AUTHORITY", "COMPETENT_AUTHORITY"].includes(user?.role || "") && (
                 <button
                   onClick={() => {
                     setNewSlaDeadline(complaint.expectedDisposalDate);
@@ -375,25 +534,57 @@ export const ComplaintDetails: React.FC = () => {
           )}
         </div>
 
-        {/* Metadata info grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-3 text-xs">
+        {/* Complete AICTE PS 13-Field Metadata Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5 pt-3.5 text-xs">
           <div>
-            <span className="text-slate-500 block text-[11px] font-semibold uppercase">Receiving Bureau</span>
+            <span className="text-slate-500 block text-[10px] font-bold uppercase tracking-wider">Receiving Bureau</span>
             <span className="font-semibold text-slate-800">{complaint.receivingBureauId}</span>
           </div>
           <div>
-            <span className="text-slate-500 block text-[11px] font-semibold uppercase">Handling Bureau</span>
+            <span className="text-slate-500 block text-[10px] font-bold uppercase tracking-wider">Handling Bureau</span>
             <span className="font-semibold text-[#003366]">{complaint.currentBureauId}</span>
           </div>
           <div>
-            <span className="text-slate-500 block text-[11px] font-semibold uppercase">Assigned Officer</span>
+            <span className="text-slate-500 block text-[10px] font-bold uppercase tracking-wider">Assigned Officer</span>
             <span className="font-semibold text-slate-800">
               {complaint.assignedOfficerName || "Unassigned"}
             </span>
           </div>
           <div>
-            <span className="text-slate-500 block text-[11px] font-semibold uppercase">Expected SLA Disposal</span>
+            <span className="text-slate-500 block text-[10px] font-bold uppercase tracking-wider">Date Received</span>
+            <span className="font-semibold text-slate-800 font-mono">
+              {new Date(complaint.receivedDate).toLocaleDateString()}
+            </span>
+          </div>
+          <div>
+            <span className="text-slate-500 block text-[10px] font-bold uppercase tracking-wider">Expected Disposal</span>
             <span className="font-semibold text-slate-800 font-mono">{complaint.expectedDisposalDate}</span>
+          </div>
+          <div>
+            <span className="text-slate-500 block text-[10px] font-bold uppercase tracking-wider">SLA Status</span>
+            <span
+              className={`font-semibold font-mono text-[11px] ${
+                isOverdue ? "text-red-700 font-bold" : "text-emerald-700 font-bold"
+              }`}
+            >
+              {slaStatusText}
+            </span>
+          </div>
+        </div>
+
+        {/* Next Action & Last Action Status Strip */}
+        <div className="mt-3 pt-3 border-t border-[#e2e8f0] grid grid-cols-1 md:grid-cols-2 gap-3 text-xs bg-[#f8fafc] p-2.5 rounded-xs border">
+          <div className="flex items-center space-x-2">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 shrink-0">Last Action:</span>
+            <span className="text-slate-800 font-medium truncate">
+              {lastAction ? `${lastAction.actionType} by ${lastAction.performedByName} (${new Date(lastAction.createdAt).toLocaleDateString()})` : "Registration Recorded"}
+            </span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[#003366] shrink-0">Next Action Required:</span>
+            <span className="text-[#002147] font-semibold truncate">
+              {getNextAction()} &bull; Target: {complaint.expectedDisposalDate}
+            </span>
           </div>
         </div>
       </div>
@@ -671,36 +862,8 @@ export const ComplaintDetails: React.FC = () => {
                   onChange={e => setNewStatus(e.target.value)}
                   className="w-full bg-white border border-[#cbd5e1] rounded-xs px-3 py-1.5 text-xs focus:border-[#003366] focus:outline-none"
                 >
-                  {complaint.status === "Pending" && (
-                    <>
-                      <option value="Under Process">Under Process (Inspection / Inquiry Initiated)</option>
-                      <option value="Transferred">Transferred (Jurisdiction Transfer)</option>
-                      <option value="Disposed">Disposed (Resolution Completed & Closed)</option>
-                    </>
-                  )}
-                  {complaint.status === "Under Process" && (
-                    <>
-                      <option value="Disposed">Disposed (Resolution Completed & Closed)</option>
-                      <option value="Escalated">Escalated (Referred to Member Secretary)</option>
-                      <option value="Transferred">Transferred (Jurisdiction Transfer)</option>
-                      <option value="Pending">Pending (Reverted for Scrutiny)</option>
-                    </>
-                  )}
-                  {complaint.status === "Transferred" && (
-                    <>
-                      <option value="Under Process">Under Process (Inquiry Underway)</option>
-                      <option value="Disposed">Disposed (Resolution Completed & Closed)</option>
-                    </>
-                  )}
-                  {complaint.status === "Escalated" && (
-                    <>
-                      <option value="Under Process">Under Process (Post-Escalation Scrutiny)</option>
-                      <option value="Disposed">Disposed (Closed by Executive Authority)</option>
-                    </>
-                  )}
-                  {complaint.status === "Disposed" && (
-                    <option value="Under Process">Under Process (Administrator Reopen Case)</option>
-                  )}
+                  <option value={complaint.status}>{complaint.status} (Record action)</option>
+                  {permittedStatuses.map(status=><option key={status} value={status}>{status}</option>)}
                 </select>
               </div>
 
@@ -718,6 +881,9 @@ export const ComplaintDetails: React.FC = () => {
                 />
               </div>
 
+              <label className="block text-xs">Next action<input className="block w-full border p-2" value={nextAction} onChange={e=>setNextAction(e.target.value)}/></label>
+              <label className="block text-xs">Next action date<input type="date" className="block border p-2" value={nextActionDate} onChange={e=>setNextActionDate(e.target.value)}/></label>
+              {user?.role==="BUREAU_HEAD"&&<label className="block text-xs">Assign officer<select className="block border p-2" value={assignee} onChange={e=>setAssignee(e.target.value)}><option value="">Keep current assignment</option>{officers.map(o=><option key={o.id} value={o.id}>{o.fullName}</option>)}</select></label>}
               <div className="flex justify-end space-x-2 pt-3 border-t border-[#e2e8f0]">
                 <button
                   type="button"
@@ -877,6 +1043,71 @@ export const ComplaintDetails: React.FC = () => {
                   className="px-3.5 py-1.5 bg-[#003366] text-white rounded-xs text-xs font-semibold hover:bg-[#002147] disabled:opacity-50 cursor-pointer"
                 >
                   {transferSubmitting ? "Transferring..." : "Confirm Transfer"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* TRANSFER ADJUDICATION MODAL */}
+      {adjudicateModalOpen && pendingTransfer && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-xs shadow-lg max-w-md w-full border border-[#cbd5e1] overflow-hidden">
+            <div className={`px-4 py-3 text-white flex items-center justify-between ${
+              adjudicateAction === "Accepted" ? "bg-emerald-800" : "bg-rose-800"
+            }`}>
+              <h3 className="text-sm font-bold text-white">
+                {adjudicateAction === "Accepted" ? "Accept Jurisdiction Transfer" : "Decline Case Transfer"}
+              </h3>
+              <button onClick={() => setAdjudicateModalOpen(false)} className="text-slate-200 hover:text-white cursor-pointer">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleConfirmTransferAdjudicate} className="p-4 space-y-3.5">
+              <div className="p-2.5 bg-[#f8fafc] border border-slate-200 rounded-xs space-y-1 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-slate-600">Route:</span>
+                  <span className="font-mono font-bold text-[#003366]">{pendingTransfer.fromBureauId} &rarr; {pendingTransfer.toBureauId}</span>
+                </div>
+                <div className="text-[11px] text-slate-600 mt-1 pt-1 border-t border-slate-200">
+                  <span className="font-semibold text-slate-700">Originating Reason:</span> {pendingTransfer.transferReason}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Official Adjudication Remarks & Justification <span className="text-red-600">*</span>
+                </label>
+                <textarea
+                  rows={3}
+                  required
+                  value={adjudicateRemarks}
+                  onChange={e => setAdjudicateRemarks(e.target.value)}
+                  placeholder="State the regulatory grounds for accepting or declining this jurisdiction transfer..."
+                  className="w-full bg-white border border-[#cbd5e1] rounded-xs px-3 py-1.5 text-xs focus:border-[#003366] focus:outline-none"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-2 pt-3 border-t border-[#e2e8f0]">
+                <button
+                  type="button"
+                  onClick={() => setAdjudicateModalOpen(false)}
+                  className="px-3 py-1.5 border border-[#cbd5e1] rounded-xs text-xs font-medium text-slate-700 hover:bg-slate-50 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={adjudicateSubmitting}
+                  className={`px-3.5 py-1.5 text-white rounded-xs text-xs font-semibold disabled:opacity-50 cursor-pointer ${
+                    adjudicateAction === "Accepted"
+                      ? "bg-emerald-700 hover:bg-emerald-800"
+                      : "bg-rose-700 hover:bg-rose-800"
+                  }`}
+                >
+                  {adjudicateSubmitting ? "Submitting..." : adjudicateAction === "Accepted" ? "Confirm & Accept" : "Confirm & Decline"}
                 </button>
               </div>
             </form>

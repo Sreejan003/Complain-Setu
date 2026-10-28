@@ -1197,7 +1197,7 @@ export const InstitutionDashboard: React.FC = () => {
                   )}
 
                   {/* Authorized SLA Override Action */}
-                  {(user?.role === "Administrator" || user?.role === "Senior Management") && (
+                  {(user?.role === "SYSTEM_ADMIN" || user?.role === "COMPETENT_AUTHORITY") && (
                     <div className="pt-2 border-t border-slate-200">
                       <button
                         onClick={() => {

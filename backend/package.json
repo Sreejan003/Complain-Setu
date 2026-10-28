@@ -10,7 +10,8 @@
     "start": "node dist/server.js",
     "test": "tsx src/tests/run_tests.ts && tsx src/tests/acceptance_tests.ts",
     "seed": "tsx src/db/seed.ts",
-    "migrate": "tsx src/db/migrate.ts"
+    "migrate": "tsx src/db/migrate.ts",
+    "test:rbac": "tsx src/tests/rbac_tests.ts"
   },
   "dependencies": {
     "@types/multer": "^2.3.0",
