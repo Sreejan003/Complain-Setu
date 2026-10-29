@@ -21,6 +21,15 @@ const NotificationsPage = React.lazy(() => import("./pages/NotificationsPage.js"
 const ReportsAnalytics = React.lazy(() => import("./pages/ReportsAnalytics.js").then(module => ({ default: module.ReportsAnalytics })));
 const AdministrationPage = React.lazy(() => import("./pages/AdministrationPage.js").then(module => ({ default: module.AdministrationPage })));
 const InstitutionDashboard = React.lazy(() => import("./pages/InstitutionDashboard.js").then(module => ({ default: module.InstitutionDashboard })));
+const IntakeWorkspace = React.lazy(() => import("./pages/IntakeWorkspace.js").then(module => ({ default: module.IntakeWorkspace })));
+const IntakeConfigurationPage = React.lazy(() => import("./pages/IntakeWorkspace.js").then(module => ({ default: module.IntakeConfigurationPage })));
+const SensitivityConfiguration = React.lazy(() => import("./pages/SensitivityConfiguration.js").then(module => ({ default: module.SensitivityConfiguration })));
+const OverlapConfiguration = React.lazy(() => import("./pages/OverlapConfiguration.js").then(module => ({ default: module.OverlapConfiguration })));
+const ImportWorkspace = React.lazy(() => import("./pages/ImportWorkspace.js").then(module => ({ default: module.ImportWorkspace })));
+const ReportWorkspace = React.lazy(() => import("./pages/ReportWorkspace.js").then(module => ({default:module.ReportWorkspace})));
+const SlaPolicies = React.lazy(() => import("./pages/SlaPolicies.js").then(module => ({ default: module.SlaPolicies })));
+const SlaAlerts = React.lazy(() => import("./pages/SlaAlerts.js").then(module => ({ default: module.SlaAlerts })));
+const AuditIntegrity = React.lazy(() => import("./pages/AuditIntegrity.js").then(module => ({ default: module.AuditIntegrity })));
 
 /** Smart index — Institutional Users land on the Single-Window Portal */
 const RoleAwareIndex: React.FC = () => {
@@ -62,6 +71,15 @@ export const App: React.FC = () => {
 
             <Route path="complaints/register" element={<ProtectedRoute allowedRoles={["BUREAU_HEAD","COMPETENT_AUTHORITY","Institutional User"]}><ComplaintRegister /></ProtectedRoute>} />
             <Route path="cases" element={<CaseList />} />
+            <Route path="intake" element={<ProtectedRoute allowedRoles={["COMPETENT_AUTHORITY", "BUREAU_HEAD", "CASE_OFFICER"]}><IntakeWorkspace /></ProtectedRoute>} />
+            <Route path="imports" element={<ProtectedRoute allowedRoles={["COMPETENT_AUTHORITY", "BUREAU_HEAD", "CASE_OFFICER"]}><ImportWorkspace /></ProtectedRoute>} />
+            <Route path="admin/intake" element={<ProtectedRoute allowedRoles={["SYSTEM_ADMIN"]}><IntakeConfigurationPage /></ProtectedRoute>} />
+            <Route path="admin/confidentiality" element={<ProtectedRoute allowedRoles={["SYSTEM_ADMIN"]}><SensitivityConfiguration /></ProtectedRoute>} />
+            <Route path="admin/overlap-settings" element={<ProtectedRoute allowedRoles={["SYSTEM_ADMIN"]}><OverlapConfiguration /></ProtectedRoute>} />
+            <Route path="admin/sla-policies" element={<ProtectedRoute allowedRoles={["SYSTEM_ADMIN"]}><SlaPolicies /></ProtectedRoute>} />
+            <Route path="reports" element={<ProtectedRoute allowedRoles={["COMPETENT_AUTHORITY","BUREAU_HEAD","CASE_OFFICER"]}><ReportWorkspace /></ProtectedRoute>} />
+            <Route path="sla-alerts" element={<ProtectedRoute allowedRoles={["COMPETENT_AUTHORITY","BUREAU_HEAD","CASE_OFFICER"]}><SlaAlerts /></ProtectedRoute>} />
+            <Route path="admin/audit-integrity" element={<ProtectedRoute allowedRoles={["SYSTEM_ADMIN"]}><AuditIntegrity /></ProtectedRoute>} />
             <Route path="cases/:id" element={<ComplaintDetails />} />
             <Route
               path="overlaps"

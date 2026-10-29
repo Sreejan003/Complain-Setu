@@ -1,3 +1,4 @@
+import {reportingRouter} from "./routes/reporting.js";
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -16,9 +17,20 @@ import { notificationsRouter } from "./routes/notifications.js";
 import { analyticsRouter } from "./routes/analytics.js";
 import { adminRouter } from "./routes/admin.js";
 import {coordinationRouter} from "./routes/coordination.js";
+import { intakeRouter } from "./routes/intake.js";
 import { requireAuth, AuthenticatedRequest } from "./middleware/auth.js";
 import { store } from "./db/store.js";
 import { startSlaScheduler } from "./services/slaScheduler.js";
+import { initializeOperationalPersistence, operationalMiddleware } from "./db/operationalPostgres.js";
+import { dispatchCaseEvent } from "./routes/complaints.js";
+import { confidentialityJsonReplacer } from "./security/confidentiality.js";
+import { caseSecurityRouter } from "./routes/caseSecurity.js";
+import { complaintLanguageRouter } from "./routes/complaintLanguage.js";
+import { overlapConfigurationRouter, caseOverlapRouter } from "./routes/overlapConfiguration.js";
+import { caseFamilyRouter } from "./routes/caseFamily.js";
+import { ingestionRouter } from "./routes/ingestion.js";
+import {auditIntegrityRouter} from "./routes/auditIntegrity.js";
+import{slaPoliciesRouter,caseSlaRouter,slaAlertsRouter}from"./routes/slaPolicies.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -28,6 +40,10 @@ if (!fs.existsSync(UPLOADS_DIR)) {
 }
 
 const app = express();
+app.set("json replacer", function(this: any, key: string, value: unknown) {
+  if (key === "hasOverlapAlert") return this?.id ? store.hasVisibleOverlap(this.id) : undefined;
+  return confidentialityJsonReplacer(key, value);
+});
 const PORT = process.env.PORT || 5000;
 
 // Security Headers Middleware
@@ -59,6 +75,8 @@ app.use(cors({
 }));
 
 app.use(express.json({ limit: "2mb" }));
+await initializeOperationalPersistence(dispatchCaseEvent);
+app.use(operationalMiddleware);
 
 // Authenticated Evidence File Access (Eliminates public unauthenticated access to confidential uploads)
 app.use("/uploads", requireAuth, (req: AuthenticatedRequest, res) => {
@@ -69,6 +87,7 @@ app.use("/uploads", requireAuth, (req: AuthenticatedRequest, res) => {
   if (!fs.existsSync(targetPath)) {
     return res.status(404).json({ error: "Evidence file not found on server." });
   }
+  store.addAuditLog({userId:req.user!.id,userName:req.user!.fullName,action:"EVIDENCE_DOWNLOAD_AUTHORIZED",entityType:"Complaint",entityId:doc.complaintId,details:{documentId:doc.id,transport:"legacy_authenticated_upload"}});
   return res.sendFile(targetPath);
 });
 
@@ -82,6 +101,18 @@ app.use("/api/notifications", notificationsRouter);
 app.use("/api/analytics", analyticsRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/coordination",coordinationRouter);
+app.use("/api/intake", intakeRouter);
+app.use("/api/case-security", caseSecurityRouter);
+app.use("/api/complaint-language", complaintLanguageRouter);
+app.use("/api/admin/overlap-settings", overlapConfigurationRouter);
+app.use("/api/case-overlap", caseOverlapRouter);
+app.use("/api/case-family", caseFamilyRouter);
+app.use("/api/imports", ingestionRouter);
+app.use("/api/admin/audit-integrity",auditIntegrityRouter);
+app.use("/api/admin/sla-policies",slaPoliciesRouter);
+app.use("/api/case-sla",caseSlaRouter);
+app.use("/api/sla-alerts",slaAlertsRouter);
+app.use("/api/reports",reportingRouter);
 
 app.get("/health", (_req, res) => {
   res.json({
@@ -97,9 +128,9 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
   if (err.message && err.message.startsWith("CORS blocked")) {
     return res.status(403).json({ error: err.message });
   }
-  console.error("Internal Server Error:", err);
+  console.error("Internal Server Error", { code: typeof err.code === "string" ? err.code : "INTERNAL_ERROR" });
   return res.status(500).json({
-    error: process.env.NODE_ENV === "production" ? "An internal server error occurred." : err.message
+    error: "An internal server error occurred.", code: "INTERNAL_ERROR"
   });
 });
 

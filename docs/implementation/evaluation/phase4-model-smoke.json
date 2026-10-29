@@ -1,0 +1,103 @@
+{
+  "purpose": "Synthetic multilingual smoke test, not accuracy evaluation or threshold tuning",
+  "family": "smoke-only-salary-not-in-tuning-or-heldout",
+  "label_review_status": "unreviewed synthetic drafts; no native review or official translation approval claimed",
+  "generated_at": "2026-10-29T12:52:15.168522+00:00",
+  "python": "3.14.6",
+  "platform": "Windows",
+  "logical_cpus": 16,
+  "threads": "2",
+  "device": "cpu",
+  "provider": {
+    "mode": "multilingual_embeddings",
+    "engine": "Multilingual embeddings",
+    "model": "intfloat/multilingual-e5-small",
+    "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+    "preprocessing_version": "unicode-nfkc-lower-v1",
+    "chunking_version": "token-window-mean-v1",
+    "max_tokens": 512,
+    "limitation": "Similarity is not a calibrated probability of duplication."
+  },
+  "model_load_ms": 73371.44,
+  "embedding_dimensions": 384,
+  "rows": [
+    {
+      "language": "hi",
+      "sample_size": 1,
+      "synthetic_text": "शिक्षकों को तीन महीने से वेतन नहीं मिला है।",
+      "related_embedding_similarity": 92.99,
+      "unrelated_embedding_similarity": 70.75,
+      "related_ranked_above_unrelated": true,
+      "lexical_similarity": 0.0,
+      "uncached_pair_ms": 628.96,
+      "cached_pair_median_ms": 0.17
+    },
+    {
+      "language": "gu",
+      "sample_size": 1,
+      "synthetic_text": "શિક્ષકોને ત્રણ મહિનાથી પગાર મળ્યો નથી.",
+      "related_embedding_similarity": 90.17,
+      "unrelated_embedding_similarity": 69.35,
+      "related_ranked_above_unrelated": true,
+      "lexical_similarity": 0.0,
+      "uncached_pair_ms": 173.39,
+      "cached_pair_median_ms": 0.08
+    },
+    {
+      "language": "ta",
+      "sample_size": 1,
+      "synthetic_text": "ஆசிரியர்களுக்கு மூன்று மாதங்களாக சம்பளம் வழங்கப்படவில்லை.",
+      "related_embedding_similarity": 90.48,
+      "unrelated_embedding_similarity": 70.58,
+      "related_ranked_above_unrelated": true,
+      "lexical_similarity": 0.0,
+      "uncached_pair_ms": 141.77,
+      "cached_pair_median_ms": 0.08
+    },
+    {
+      "language": "te",
+      "sample_size": 1,
+      "synthetic_text": "అధ్యాపకులకు మూడు నెలలుగా జీతాలు చెల్లించలేదు.",
+      "related_embedding_similarity": 88.81,
+      "unrelated_embedding_similarity": 70.06,
+      "related_ranked_above_unrelated": true,
+      "lexical_similarity": 0.0,
+      "uncached_pair_ms": 176.73,
+      "cached_pair_median_ms": 0.09
+    },
+    {
+      "language": "bn",
+      "sample_size": 1,
+      "synthetic_text": "শিক্ষকদের তিন মাসের বেতন দেওয়া হয়নি।",
+      "related_embedding_similarity": 90.14,
+      "unrelated_embedding_similarity": 68.78,
+      "related_ranked_above_unrelated": true,
+      "lexical_similarity": 0.0,
+      "uncached_pair_ms": 206.82,
+      "cached_pair_median_ms": 0.08
+    },
+    {
+      "language": "kn",
+      "sample_size": 1,
+      "synthetic_text": "ಶಿಕ್ಷಕರಿಗೆ ಮೂರು ತಿಂಗಳಿನಿಂದ ವೇತನ ಪಾವತಿಸಿಲ್ಲ.",
+      "related_embedding_similarity": 89.34,
+      "unrelated_embedding_similarity": 68.39,
+      "related_ranked_above_unrelated": true,
+      "lexical_similarity": 0.0,
+      "uncached_pair_ms": 193.49,
+      "cached_pair_median_ms": 0.08
+    },
+    {
+      "language": "mixed",
+      "sample_size": 1,
+      "synthetic_text": "Faculty salary तीन महीने से unpaid है।",
+      "related_embedding_similarity": 89.61,
+      "unrelated_embedding_similarity": 71.56,
+      "related_ranked_above_unrelated": true,
+      "lexical_similarity": 0.0,
+      "uncached_pair_ms": 175.2,
+      "cached_pair_median_ms": 0.03
+    }
+  ],
+  "limitations": "One example per language; scores are not probabilities. Cached times exclude model inference. Cross-language and domain accuracy require the separate labeled family-split evaluation."
+}

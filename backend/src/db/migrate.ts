@@ -1,101 +1,30 @@
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
+import "dotenv/config";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
+import { createHash } from "node:crypto";
 import pg from "pg";
-import dotenv from "dotenv";
-
-dotenv.config();
-
-const { Client } = pg;
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const MIGRATIONS_DIR = path.resolve(__dirname, "../../../database/migrations");
-
-export async function runMigrations() {
-  console.log("==================================================================");
-  console.log("AICTE COMPLAINT TRACKER — DATABASE MIGRATION RUNNER");
-  console.log("==================================================================");
-
-  if (!fs.existsSync(MIGRATIONS_DIR)) {
-    console.error(`Migrations directory not found at: ${MIGRATIONS_DIR}`);
-    process.exit(1);
-  }
-
-  const migrationFiles = fs
-    .readdirSync(MIGRATIONS_DIR)
-    .filter(f => f.endsWith(".sql"))
-    .sort();
-
-  console.log(`Discovered ${migrationFiles.length} migration file(s):`);
-  migrationFiles.forEach(f => console.log(`  - ${f}`));
-
-  const connStr = process.env.DATABASE_URL || process.env.SUPABASE_DB_URL;
-  if (!connStr) {
-    console.log("\n[INFO] No DATABASE_URL or SUPABASE_DB_URL found in environment.");
-    console.log("[INFO] Validated migration SQL files successfully for offline readiness.");
-    console.log("[INFO] To run live migrations: set DATABASE_URL=postgresql://user:pass@host:5432/dbname and re-run.");
-    return { success: true, executedCount: 0, offlineValidation: true };
-  }
-
-  console.log(`\nConnecting to target database...`);
-  const client = new Client({
-    connectionString: connStr,
-    ssl: process.env.DATABASE_SSL === "true" || process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : undefined
-  });
-
+import { postgresConfig } from "./postgresConfig.js";
+const directory = fileURLToPath(new URL("../../../database/migrations/", import.meta.url));
+export function migrationPlan() { return fs.readdirSync(directory).filter(file => /^\d+_.+\.sql$/.test(file) && Number(file.split("_")[0]) >= 3).sort().map(name => ({ name, version: name.split("_")[0], sql: fs.readFileSync(path.join(directory,name), "utf8") })).map(file => ({...file, checksum: createHash("sha256").update(file.sql).digest("hex")})); }
+/** Only the additive operational schema is migrated here. Legacy public/Supabase migrations are preserved. */
+export async function runMigrations(pool?: pg.Pool) {
+  const ownPool = !pool; pool ||= new pg.Pool(postgresConfig()); const client = await pool.connect();
   try {
-    await client.connect();
-    console.log("Connected to database successfully.");
-
-    // Create migrations tracker table
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS schema_migrations (
-        version VARCHAR(100) PRIMARY KEY,
-        name VARCHAR(255) NOT NULL,
-        applied_at TIMESTAMPTZ DEFAULT NOW()
-      );
-    `);
-
-    const appliedRes = await client.query("SELECT version FROM schema_migrations");
-    const appliedVersions = new Set(appliedRes.rows.map(r => r.version));
-
-    let executed = 0;
-    for (const file of migrationFiles) {
-      const version = file.split("_")[0];
-      if (appliedVersions.has(version)) {
-        console.log(`  [SKIP] ${file} (already applied)`);
-        continue;
-      }
-
-      console.log(`  [APPLYING] ${file}...`);
-      const sql = fs.readFileSync(path.join(MIGRATIONS_DIR, file), "utf-8");
-
-      await client.query("BEGIN");
-      await client.query(sql);
-      await client.query(
-        "INSERT INTO schema_migrations (version, name) VALUES ($1, $2)",
-        [version, file]
-      );
-      await client.query("COMMIT");
-
-      console.log(`  [APPLIED]  ${file} successfully.`);
-      executed++;
+    await client.query("BEGIN"); await client.query("SELECT pg_advisory_xact_lock(26264, 1)");
+    await client.query("CREATE SCHEMA IF NOT EXISTS iicmcs_migrations; REVOKE ALL ON SCHEMA iicmcs_migrations FROM PUBLIC; CREATE TABLE IF NOT EXISTS iicmcs_migrations.applied(version text PRIMARY KEY,name text NOT NULL,checksum text NOT NULL,applied_at timestamptz NOT NULL DEFAULT now()); REVOKE ALL ON iicmcs_migrations.applied FROM PUBLIC");
+    const applied = await client.query("SELECT version,checksum FROM iicmcs_migrations.applied"); let executedCount = 0;
+    for (const migration of migrationPlan()) {
+      const existing = applied.rows.find(row => row.version === migration.version);
+      if (existing) { if (existing.checksum !== migration.checksum) throw new Error(`Migration checksum mismatch: ${migration.version}`); continue; }
+      await client.query(migration.sql);
+      await client.query("INSERT INTO iicmcs_migrations.applied(version,name,checksum) VALUES($1,$2,$3)", [migration.version,migration.name,migration.checksum]); executedCount++;
     }
-
-    console.log(`\nMigration process finished. ${executed} migration(s) applied.`);
-    return { success: true, executedCount: executed, offlineValidation: false };
-  } catch (err: any) {
-    await client.query("ROLLBACK").catch(() => {});
-    console.error("Migration failed:", err);
-    throw err;
-  } finally {
-    await client.end().catch(() => {});
-  }
+    await client.query("COMMIT"); return { success: true, executedCount, offlineValidation: false };
+  } catch (error) { await client.query("ROLLBACK").catch(() => {}); throw error; }
+  finally { client.release(); if (ownPool) await pool.end(); }
 }
-
-// Run standalone if invoked directly
-if (process.argv[1] && process.argv[1].endsWith("migrate.ts")) {
-  runMigrations()
-    .then(() => process.exit(0))
-    .catch(() => process.exit(1));
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  if (process.argv.includes("--plan")) console.log(JSON.stringify({ executed: false, sqlValidated: false, migrations: migrationPlan().map(({sql,...file})=>file), legacyPublicMigrations: "001/002 preserved; Supabase-specific, not run by the operational migrator" }, null, 2));
+  else await runMigrations().then(result=>console.log(result)).catch(error=>{ console.error("Migration failed; no SQL content or credentials logged:", error instanceof Error ? error.message.replace(/postgres(?:ql)?:\/\/\S+/gi,"[redacted]") : "unknown error"); process.exitCode=1; });
 }

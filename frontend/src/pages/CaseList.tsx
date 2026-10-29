@@ -1,3 +1,4 @@
+import {slaDaysRemaining} from "../services/sla.js";
 import { canVisit } from "../services/access.js";
 import { StatusBadge } from "../components/ui/Interface.js";
 import { tr, localizeLabel, localizeError, useLocaleRender } from "../i18n/index.js";
@@ -209,7 +210,6 @@ export const CaseList: React.FC = () => {
   const bureaus = ["RB", "PGRC", "RO", "AB", "PB"];
   const priorities = ["Critical", "High", "Medium", "Low"];
 
-  const today = new Date().toISOString().split("T")[0];
 
   return (
     <div className="space-y-3.5">
@@ -528,7 +528,7 @@ export const CaseList: React.FC = () => {
                 </tr>
               ) : (
                 complaints.map(c => {
-                  const isBreached = ["Pending", "Under Process"].includes(c.status) && c.expectedDisposalDate < today;
+                  const isBreached = ["Pending", "Under Process", "Escalated", "Transferred"].includes(c.status) && slaDaysRemaining(c.expectedDisposalDate,c.sla?.policy.timezone)<0;
 
                   return (
                     <tr key={c.id} className="hover:bg-slate-50 transition">

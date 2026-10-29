@@ -91,6 +91,7 @@ export const NotificationsPage: React.FC = () => {
         </button>
       </div>
 
+      {user && ["COMPETENT_AUTHORITY","BUREAU_HEAD","CASE_OFFICER"].includes(user.role) && <Link className="btn-secondary inline-block" to="/sla-alerts">{tr("complaints:slaPolicy.alerts")}</Link>}
       {/* Filter Toolbar */}
       <div className="bg-white border border-[#e5eaf0] rounded-lg p-3 shadow-none flex flex-wrap items-center justify-between gap-3 text-xs">
         <div className="flex items-center space-x-2">

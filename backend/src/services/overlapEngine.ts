@@ -1,5 +1,10 @@
 import { Complaint, Institution, OverlapAlert, DetectionResult, OverlapExplanation } from "../models/types.js";
-import { DEFAULT_DETECTION_CONFIG } from "../config/constants.js";
+import { defaultOverlapSettings } from "../config/overlap.js";
+import { assessOverlap } from "./overlapSignals.js";
+import type { OverlapSettings, OverlapAssessment } from "../models/overlapSettings.js";
+import { unicodeTokens, lexicalCosine, PREPROCESSING_VERSION } from "./unicodeText.js";
+import { compareTexts, querySimilarityService } from "./similarityProvider.js";
+import type { SimilarityResult } from "../models/textAnalysis.js";
 
 interface KeywordDictionary {
   [key: string]: string[];
@@ -13,55 +18,19 @@ const DOMAIN_KEYWORDS: KeywordDictionary = {
   admission: ["admission", "quota", "management", "eligibility", "counseling", "merit", "donation", "unauthorized", "intake"]
 };
 
-// Common English stopwords to ignore in text overlap
-const STOPWORDS = new Set([
-  "the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for", "of", "with", "by",
-  "from", "up", "about", "into", "over", "after", "is", "are", "was", "were", "be", "been",
-  "being", "have", "has", "had", "do", "does", "did", "this", "that", "these", "those", "it",
-  "its", "we", "they", "our", "their", "student", "college", "institution", "complaint", "aicte"
-]);
-
 /**
  * Tokenize and normalize text into clean unique keyword tokens
  */
 export function extractKeywords(text: string): string[] {
   if (!text) return [];
-  const words = text
-    .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, " ")
-    .split(/\s+/)
-    .filter(word => word.length > 2 && !STOPWORDS.has(word));
-  return Array.from(new Set(words));
+  return Array.from(new Set(unicodeTokens(text)));
 }
 
 /**
- * In-process Fallback Cosine Similarity calculation (word-vector based TF-IDF approximation)
+ * Unicode token-frequency cosine. This is lexical overlap, not TF-IDF or cross-language semantics.
  */
 export function computeInProcessCosineSimilarity(textA: string, textB: string): number {
-  const tokensA = extractKeywords(textA);
-  const tokensB = extractKeywords(textB);
-
-  if (tokensA.length === 0 || tokensB.length === 0) return 0;
-
-  const freqA: Record<string, number> = {};
-  tokensA.forEach(t => { freqA[t] = (freqA[t] || 0) + 1; });
-
-  const freqB: Record<string, number> = {};
-  tokensB.forEach(t => { freqB[t] = (freqB[t] || 0) + 1; });
-
-  let dotProduct = 0;
-  for (const token of Object.keys(freqA)) {
-    if (freqB[token]) {
-      dotProduct += freqA[token] * freqB[token];
-    }
-  }
-
-  const normA = Math.sqrt(Object.values(freqA).reduce((sum, val) => sum + val * val, 0));
-  const normB = Math.sqrt(Object.values(freqB).reduce((sum, val) => sum + val * val, 0));
-
-  if (normA === 0 || normB === 0) return 0;
-  const similarity = dotProduct / (normA * normB);
-  return Math.min(100, Math.round(similarity * 100 * 10) / 10);
+  return lexicalCosine(textA, textB);
 }
 
 /**
@@ -70,8 +39,9 @@ export function computeInProcessCosineSimilarity(textA: string, textB: string): 
 export function normalizeInstitutionName(name: string): string {
   if (!name) return "";
   return name
+    .normalize("NFKC")
     .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/[^\p{L}\p{M}\p{N}\s]/gu, " ")
     .replace(/\buniv\b/g, "university")
     .replace(/\btech\b/g, "technology")
     .replace(/\btechnological\b/g, "technology")
@@ -101,8 +71,9 @@ export function fuzzyMatchInstitution(query: string, candidate: string): { match
   // Canonical expansion for common educational abbreviations
   const expand = (s: string) =>
     s
+      .normalize("NFKC")
       .toLowerCase()
-      .replace(/[^a-z0-9\s]/g, " ")
+      .replace(/[^\p{L}\p{M}\p{N}\s]/gu, " ")
       .replace(/\buniv\b/g, "university")
       .replace(/\btech\b/g, "technology")
       .replace(/\btechnological\b/g, "technology")
@@ -114,6 +85,7 @@ export function fuzzyMatchInstitution(query: string, candidate: string): { match
 
   const expQ = expand(query);
   const expC = expand(candidate);
+  if (!expQ || !expC) return { match: false, score: 0 };
 
   if (expQ === expC) return { match: true, score: 95 };
   if (expC.includes(expQ) || expQ.includes(expC)) {
@@ -151,270 +123,46 @@ export function fuzzyMatchInstitution(query: string, candidate: string): { match
 /**
  * Query external Python AI Service (Sentence Transformers) if running
  */
-export async function querySemanticService(textA: string, textB: string): Promise<{ score: number; engine: string } | null> {
-  const aiUrl = process.env.AI_SERVICE_URL || "http://localhost:8000";
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 1200); // 1.2s fast timeout
-
-    const res = await fetch(`${aiUrl}/similarity/pair`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text_a: textA, text_b: textB }),
-      signal: controller.signal
-    });
-    clearTimeout(timeout);
-
-    if (res.ok) {
-      const data = await res.json();
-      return {
-        score: Number(data.similarity_score) || 0,
-        engine: data.engine || "SentenceTransformer"
-      };
-    }
-  } catch (err) {
-    // Expected when optional AI service is not running locally; smoothly fallback
-  }
-  return null;
+export async function querySemanticService(textA: string, textB: string) {
+  const result = await querySimilarityService(textA, textB);
+  return result && result.score !== undefined ? { ...result, score: result.score } : null;
 }
 
 export interface OverlapEvaluation {
-  isOverlap: boolean;
-  ruleScore: number;
-  semanticScore?: number;
-  combinedScore: number;
-  semanticEngine: string;
-  reasons: string[];
-  explanation: OverlapExplanation;
-  recommendation: string;
-  isCrossBureau: boolean;
+  similarity: SimilarityResult; assessment: OverlapAssessment; isOverlap: boolean; ruleScore: number;
+  semanticScore?: number; combinedScore: number; semanticEngine: string; reasons: string[];
+  explanation: OverlapExplanation; recommendation: string; isCrossBureau: boolean;
 }
 
-/**
- * Core 3-Stage Overlap Detection Algorithm:
- * Stage A: Exact Institution Matching
- * Stage B: Rule-based explainable heuristics
- * Stage C: Semantic Similarity (Sentence Transformers or TF-IDF fallback)
- */
-export async function evaluateComplaintPair(
-  newComplaint: Partial<Complaint>,
-  existingCase: Complaint,
-  institution: Institution,
-  config = DEFAULT_DETECTION_CONFIG
-): Promise<OverlapEvaluation> {
-  const reasons: string[] = [];
-  let ruleScore = 0;
-
-  // --- STAGE A: Exact Institution Matching ---
-  const isSameInstitution =
-    (newComplaint.institutionId && newComplaint.institutionId === existingCase.institutionId) ||
-    (newComplaint.aictePermanentId && newComplaint.aictePermanentId === existingCase.aictePermanentId);
-
-  if (!isSameInstitution) {
-    // If not the same institution, they cannot be an institution overlap case
-    return {
-      isOverlap: false,
-      ruleScore: 0,
-      combinedScore: 0,
-      semanticEngine: "None",
-      reasons: ["Different institutions: Overlap detection restricted to same institution"],
-      explanation: {
-        institutionMatch: { matched: false, score: 0, details: "Different institutions: Cross-institution isolation enforced." },
-        crossBureauMatch: { isCrossBureau: false, bureauA: "", bureauB: "", details: "N/A" },
-        categoryMatch: { exactMatch: false, categoryA: "", categoryB: "", details: "N/A" },
-        keywordMatch: { matchedTerms: [], score: 0, details: "N/A" },
-        semanticMatch: { score: 0, engine: "None", details: "N/A" },
-        summary: "Zero overlap: Complaints belong to distinct technical institutions.",
-        recommendation: "No action required."
-      },
-      recommendation: "No action required.",
-      isCrossBureau: false
-    };
-  }
-
-  ruleScore += config.exactInstitutionWeight;
-  reasons.push(`Exact Institution Match: Verified AICTE Permanent ID (${institution.aictePermanentId} - ${institution.name})`);
-
-  // --- STAGE B: Rule-Based Evaluation ---
-  // 1. Cross-Bureau Check
-  const newBureau = newComplaint.receivingBureauId || newComplaint.currentBureauId;
-  const existingBureau = existingCase.currentBureauId || existingCase.receivingBureauId;
-  const isCrossBureau = Boolean(newBureau && existingBureau && newBureau !== existingBureau);
-
-  if (isCrossBureau) {
-    ruleScore += config.crossBureauWeight;
-    reasons.push(`Cross-Bureau Overlap: Active simultaneously in ${newBureau} and ${existingBureau}. Cross-department coordination required.`);
-  } else {
-    reasons.push(`Intra-Bureau Case: Both handled under ${newBureau || existingBureau}.`);
-  }
-
-  // 2. Category Match
-  const sameCategory = newComplaint.category && existingCase.category && newComplaint.category === existingCase.category;
-  if (sameCategory) {
-    ruleScore += config.categoryMatchWeight;
-    reasons.push(`Identical Category: Both complaints filed under "${newComplaint.category}".`);
-  } else {
-    // Check related category keywords
-    const catWordsNew = (newComplaint.category || "").toLowerCase();
-    const catWordsExist = (existingCase.category || "").toLowerCase();
-    if (
-      (catWordsNew.includes("faculty") && catWordsExist.includes("salary")) ||
-      (catWordsNew.includes("salary") && catWordsExist.includes("faculty")) ||
-      (catWordsNew.includes("fee") && catWordsExist.includes("admission"))
-    ) {
-      ruleScore += Math.round(config.categoryMatchWeight * 0.7);
-      reasons.push(`Related Category Scope: Interdependent regulatory areas ("${newComplaint.category}" & "${existingCase.category}").`);
-    }
-  }
-
-  // 3. Status & Recency Check
-  const isActiveExisting = ["Pending", "Under Process", "Escalated"].includes(existingCase.status);
-  if (isActiveExisting) {
-    ruleScore += 10;
-    reasons.push(`Target Case is currently active (${existingCase.status}), heightening duplication risk.`);
-  }
-
-  // 4. Keyword Intersection Analysis
-  const fullTextNew = `${newComplaint.title || ""} ${newComplaint.description || ""}`;
-  const fullTextExisting = `${existingCase.title || ""} ${existingCase.description || ""}`;
-
-  const kwNew = extractKeywords(fullTextNew);
-  const kwExist = extractKeywords(fullTextExisting);
-
-  const sharedTokens = kwNew.filter(token => kwExist.includes(token));
-  if (sharedTokens.length >= 3) {
-    const keywordScore = Math.min(config.keywordOverlapWeight, sharedTokens.length * 4);
-    ruleScore += keywordScore;
-    reasons.push(`High Keyword Concordance: Matched terms: [${sharedTokens.slice(0, 6).join(", ")}].`);
-  }
-
-  // --- STAGE C: Semantic Similarity ---
-  let semanticScore: number | undefined;
-  let semanticEngine = "TF-IDF Fallback";
-
-  const aiResult = await querySemanticService(fullTextNew, fullTextExisting);
-  if (aiResult) {
-    semanticScore = aiResult.score;
-    semanticEngine = aiResult.engine;
-    reasons.push(`AI Semantic Embeddings: ${semanticScore}% similarity computed via ${aiResult.engine} (all-MiniLM-L6-v2).`);
-  } else {
-    const inProcessSim = computeInProcessCosineSimilarity(fullTextNew, fullTextExisting);
-    semanticScore = inProcessSim;
-    semanticEngine = "TF-IDF Fallback (in-process)";
-    reasons.push(`Rule & Lexical Similarity: ${inProcessSim}% text similarity computed via in-process cosine analyzer.`);
-  }
-
-  // Combined weighted score: 60% rule-based + 40% semantic similarity
-  const combinedScore = Math.min(100, Math.round(ruleScore * 0.6 + (semanticScore || 0) * 0.4));
-
-  // Determine if it qualifies as an overlap
-  const isOverlap = Boolean(
-    isSameInstitution &&
-    (ruleScore >= config.ruleThreshold || (semanticScore !== undefined && semanticScore >= config.semanticSimilarityThreshold))
-  );
-
-  let recommendation = "Monitor individually.";
-  if (isOverlap) {
-    if (combinedScore >= config.highConfidenceThreshold || (sameCategory && isCrossBureau && (semanticScore || 0) > 70)) {
-      recommendation = isCrossBureau
-        ? "CRITICAL: High-probability cross-Bureau overlap detected. Immediate joint review by RB and PGRC Officers recommended."
-        : "Probable duplicate or companion grievance. Review case files side-by-side.";
-    } else if (isCrossBureau) {
-      recommendation = "Cross-Bureau activity on same institution. Inform assigned officers and link case histories.";
-    } else {
-      recommendation = "Review complaints side-by-side to determine if complaints should be merged or linked.";
-    }
-  }
-
+/** Review-only signals. Mandatory review and inferred relationship are deliberately separate. */
+export async function evaluateComplaintPair(a: Partial<Complaint>, b: Complaint, institution: Institution, config: OverlapSettings = defaultOverlapSettings()): Promise<OverlapEvaluation> {
+  const sameInstitution = !!(a.institutionId && a.institutionId === b.institutionId || a.aictePermanentId && a.aictePermanentId === b.aictePermanentId);
+  const privateInput = [a, b].some(record => record.security && (record.security.level !== "internal" || record.security.reviewStatus === "pending"));
+  const similarity: SimilarityResult = sameInstitution ? await compareTexts(`${a.title || ""} ${a.description || ""}`, `${b.title || ""} ${b.description || ""}`, !privateInput) : { mode: "unavailable", engine: "Unavailable", model: "none", revision: "none", preprocessingVersion: PREPROCESSING_VERSION, limitation: "Different institutions; no text comparison performed." };
+  const scored = assessOverlap(a, b, similarity, config), assessment = scored.assessment;
+  const sharedTokens = extractKeywords(`${a.title || ""} ${a.description || ""}`).filter(token => extractKeywords(`${b.title} ${b.description}`).includes(token));
+  const reasons = assessment.signals.filter(signal => signal.available).map(signal => `${signal.key}: ${signal.reason}; contribution ${signal.contribution}/100.`);
+  if (assessment.mandatoryReview) reasons.unshift("Mandatory review: same institution, same category, both cases open, different handling Bureaus. This does not declare duplication.");
+  const recommendation = !assessment.reviewRequired ? "Handle individually under the existing workflow." : assessment.relationshipCandidate === "possible_duplicate" ? "Possible duplicate: an authorized reviewer must compare evidence and source obligations before deciding." : assessment.relationshipCandidate === "possible_related" ? "Possible related case: an authorized reviewer must decide whether coordination is needed." : "Mandatory overlap review; the relationship is undetermined. No merge or duplication decision has been made.";
+  const signal = (key: string) => assessment.signals.find(row => row.key === key)!;
   const explanation: OverlapExplanation = {
-    institutionMatch: {
-      matched: Boolean(isSameInstitution),
-      score: config.exactInstitutionWeight,
-      details: `Verified AICTE Permanent ID: ${institution.aictePermanentId} (${institution.name})`
-    },
-    crossBureauMatch: {
-      isCrossBureau,
-      bureauA: newBureau || "RB",
-      bureauB: existingBureau || "PGRC",
-      details: isCrossBureau
-        ? `Complaints active in separate bureaus (${newBureau} and ${existingBureau}). Joint coordination required.`
-        : `Complaints processed within same bureau (${newBureau || existingBureau}).`
-    },
-    categoryMatch: {
-      exactMatch: Boolean(sameCategory),
-      categoryA: newComplaint.category || "",
-      categoryB: existingCase.category || "",
-      details: sameCategory
-        ? `Identical grievance classification: "${newComplaint.category}"`
-        : `Categorized under "${newComplaint.category}" and "${existingCase.category}"`
-    },
-    keywordMatch: {
-      matchedTerms: sharedTokens.slice(0, 8),
-      score: Math.min(config.keywordOverlapWeight, sharedTokens.length * 4),
-      details: sharedTokens.length >= 3
-        ? `Identified common grievance terminology: [${sharedTokens.slice(0, 6).join(", ")}]`
-        : "Standard lexical vocabulary distribution."
-    },
-    semanticMatch: {
-      score: semanticScore || 0,
-      engine: semanticEngine,
-      details: `${semanticScore}% semantic contextual correlation computed via ${semanticEngine}`
-    },
-    summary: `${combinedScore}% composite overlap probability based on institution identity, regulatory category, shared keywords, and AI semantic vector distance.`,
-    recommendation
+    assessment,
+    institutionMatch: { matched: sameInstitution, score: signal("institution").contribution, details: sameInstitution ? `Exact resolved institution: ${institution.aictePermanentId} (${institution.name})` : "Different institutions" },
+    categoryMatch: { exactMatch: !!a.category && a.category === b.category, categoryA: a.category || "", categoryB: b.category, details: signal("category").reason },
+    crossBureauMatch: { isCrossBureau: scored.isCrossBureau, bureauA: a.currentBureauId || a.receivingBureauId || "", bureauB: b.currentBureauId || b.receivingBureauId, details: signal("crossBureau").reason },
+    keywordMatch: { matchedTerms: sharedTokens.slice(0, 8), score: 0, details: "Shared lexical terms are illustrative; their effect is included only in the text signal." },
+    semanticMatch: { score: similarity.score, engine: similarity.engine, mode: similarity.mode, model: similarity.model, revision: similarity.revision, preprocessingVersion: similarity.preprocessingVersion, details: similarity.limitation },
+    summary: `${scored.combinedScore}/100 weighted signal score; signals-v2 configuration ${config.version}; ${similarity.mode}. ${assessment.caveat}`, recommendation
   };
-
-  return {
-    isOverlap,
-    ruleScore,
-    semanticScore,
-    combinedScore,
-    semanticEngine,
-    reasons,
-    explanation,
-    recommendation,
-    isCrossBureau
-  };
+  return { ...scored, similarity, assessment, isOverlap: assessment.reviewRequired, semanticScore: similarity.score, semanticEngine: similarity.engine, reasons, explanation, recommendation };
 }
 
-/**
- * Run overlap detection for a new complaint against all relevant existing cases for that institution
- */
-export async function detectOverlapsForComplaint(
-  newComplaint: Partial<Complaint>,
-  institution: Institution,
-  existingComplaints: Complaint[]
-): Promise<DetectionResult> {
+export async function detectOverlapsForComplaint(a: Partial<Complaint>, institution: Institution, cases: Complaint[], config: OverlapSettings = defaultOverlapSettings()): Promise<DetectionResult> {
   const candidateAlerts: DetectionResult["candidateAlerts"] = [];
-
-  // Filter candidate cases: must be for the same institution and not the same record itself
-  const candidateCases = existingComplaints.filter(c => {
-    if (newComplaint.id && c.id === newComplaint.id) return false;
-    if (newComplaint.complaintId && c.complaintId === newComplaint.complaintId) return false;
-    return c.institutionId === institution.id || c.aictePermanentId === institution.aictePermanentId;
-  });
-
-  for (const existingCase of candidateCases) {
-    const evalResult = await evaluateComplaintPair(newComplaint, existingCase, institution);
-    if (evalResult.isOverlap) {
-      candidateAlerts.push({
-        existingComplaint: existingCase,
-        ruleScore: evalResult.ruleScore,
-        semanticScore: evalResult.semanticScore,
-        combinedScore: evalResult.combinedScore,
-        reasons: evalResult.reasons,
-        explanation: evalResult.explanation,
-        isCrossBureau: evalResult.isCrossBureau,
-        recommendation: evalResult.recommendation
-      });
-    }
+  for (const b of cases.filter(row => row.id !== a.id && row.complaintId !== a.complaintId && (row.institutionId === institution.id || row.aictePermanentId === institution.aictePermanentId))) {
+    const result = await evaluateComplaintPair(a, b, institution, config);
+    if (result.isOverlap) candidateAlerts.push({ existingComplaint: b, ruleScore: result.ruleScore, semanticScore: result.semanticScore, combinedScore: result.combinedScore, reasons: result.reasons, explanation: result.explanation, assessment: result.assessment, isCrossBureau: result.isCrossBureau, recommendation: result.recommendation });
   }
-
-  // Sort candidates by combined score descending
-  candidateAlerts.sort((a, b) => b.combinedScore - a.combinedScore);
-
-  return {
-    hasOverlap: candidateAlerts.length > 0,
-    candidateAlerts
-  };
+  candidateAlerts.sort((x, y) => y.combinedScore - x.combinedScore);
+  return { hasOverlap: candidateAlerts.length > 0, candidateAlerts };
 }

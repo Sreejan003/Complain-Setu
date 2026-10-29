@@ -5,13 +5,14 @@ import { store } from "../db/store.js";
 import { requireAuth, requireRole, AuthenticatedRequest } from "../middleware/auth.js";
 import { computeInProcessCosineSimilarity, querySemanticService, extractKeywords } from "../services/overlapEngine.js";
 import { broadcastCaseEvent } from "./complaints.js";
+import { compareTexts } from "../services/similarityProvider.js";
 
 export function scopedOverlap(alert: any) {
   if(!alert)return {canDecide:false,canCoordinate:false};
   const safe = {...alert};
   if (!store.getComplaintById(alert.complaintIdA)) {safe.complaintTitleA="Restricted related case";safe.complaintDescA="";}
   if (!store.getComplaintById(alert.complaintIdB)) {safe.complaintTitleB="Restricted related case";safe.complaintDescB="";}
-  if (!store.getComplaintById(alert.complaintIdA) || !store.getComplaintById(alert.complaintIdB)) {safe.explanation=undefined; safe.matchReasons=["Potential institution overlap across authorized bureaus"];}
+  if (!store.getComplaintById(alert.complaintIdA) || !store.getComplaintById(alert.complaintIdB)) {safe.explanation=undefined; safe.assessment=undefined; safe.matchReasons=["Potential institution overlap across authorized bureaus"];}
   const complaint=store.getComplaintById(alert.complaintIdA)||store.getComplaintById(alert.complaintIdB);
   const user=requestScope.getStore();
   safe.canDecide=!!user&&!!complaint&&authorize(user,"overlap.decide",complaint,{region:store.getComplaintRegion(complaint)});
@@ -27,6 +28,11 @@ overlapsRouter.use(requireAuth, (req: AuthenticatedRequest, res, next) => {
   next();
 });
 overlapsRouter.get("/:id/coordination", (req,res)=>res.json(store.getCoordinationHistory(req.params.id)));
+overlapsRouter.get("/:id/feedback", (req, res) => {
+  const alert = store.getOverlapAlertById(req.params.id)!;
+  if (!store.getComplaintById(alert.complaintIdA) || !store.getComplaintById(alert.complaintIdB)) return res.json([]);
+  return res.json(store.getOverlapFeedback(alert.id));
+});
 overlapsRouter.post("/:id/coordination", (req: AuthenticatedRequest, res) => {
   const alert = store.getOverlapAlertById(req.params.id)!;
   if(!scopedOverlap(alert).canCoordinate) return res.status(403).json({error:"Coordination action is not authorized."});
@@ -92,14 +98,15 @@ overlapsRouter.post(
   requireAuth,
   requireRole("BUREAU_HEAD", "COMPETENT_AUTHORITY", "Regulation Bureau Officer", "PGRC Officer", "Bureau Officer", "Regional Officer", "Senior Management", "Competent Authority"),
   (req: AuthenticatedRequest, res: Response) => {
-    const { decision, remarks, linkAsRelated } = req.body;
+    const { decision, remarks, linkAsRelated, requestId, expectedUpdatedAt } = req.body;
 
-    if (!decision || !remarks) {
+    if (typeof decision !== "string" || typeof remarks !== "string" || remarks.trim().length < 5 || remarks.length > 5000 || linkAsRelated !== undefined && typeof linkAsRelated !== "boolean" || requestId !== undefined && (typeof requestId !== "string" || !/^[a-zA-Z0-9_-]{8,100}$/.test(requestId)) || expectedUpdatedAt !== undefined && typeof expectedUpdatedAt !== "string") {
       return res.status(400).json({ error: "Review decision and administrative remarks are required." });
     }
 
-    const validDecisions = ["Confirmed Related", "Confirmed Duplicate", "Marked Unrelated", "Dismissed", "Resolved"];
-    if (!validDecisions.includes(decision)) {
+    const validDecisions = ["Confirmed Related", "Confirmed Duplicate", "Marked Unrelated", "Dismissed", "Resolved"] as const;
+    const reviewedDecision = validDecisions.find(value => value === decision);
+    if (!reviewedDecision) {
       return res.status(400).json({ error: `Invalid review decision. Must be one of: ${validDecisions.join(", ")}` });
     }
 
@@ -107,9 +114,9 @@ overlapsRouter.post(
       const reviewed = store.reviewOverlapAlert(
         req.params.id,
         {
-          decision,
+          decision: reviewedDecision,
           remarks,
-          linkAsRelated
+          linkAsRelated, requestId, expectedUpdatedAt
         },
         req.user!
       );
@@ -131,7 +138,7 @@ overlapsRouter.post(
 // Dynamic live side-by-side text comparison endpoint (Authenticated)
 overlapsRouter.post("/compare-live", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
   const { textA, textB } = req.body;
-  if (!textA || !textB) {
+  if (typeof textA !== "string" || typeof textB !== "string" || !textA.trim() || !textB.trim() || textA.length > 20000 || textB.length > 20000) {
     return res.status(400).json({ error: "Both textA and textB are required." });
   }
 
@@ -139,20 +146,13 @@ overlapsRouter.post("/compare-live", requireAuth, async (req: AuthenticatedReque
   const kwB = extractKeywords(textB);
   const commonKeywords = kwA.filter(k => kwB.includes(k));
 
-  let semanticScore: number;
-  let engine = "TF-IDF Fallback";
-
-  const aiRes = await querySemanticService(textA, textB);
-  if (aiRes) {
-    semanticScore = aiRes.score;
-    engine = aiRes.engine;
-  } else {
-    semanticScore = computeInProcessCosineSimilarity(textA, textB);
-  }
+  // This ad-hoc tool has no source-case classification; use local processing only.
+  const result = await compareTexts(textA, textB, false);
 
   return res.json({
-    semanticScore,
-    engine,
+    semanticScore: result.score,
+    engine: result.engine,
+    mode: result.mode, model: result.model, revision: result.revision, preprocessingVersion: result.preprocessingVersion, limitation: result.limitation,
     commonKeywords,
     keywordOverlapCount: commonKeywords.length
   });

@@ -1,0 +1,22 @@
+import type{Complaint}from"../models/types.js";
+import type{CaseSla,SlaPolicy,SlaPolicyConfiguration}from"../models/slaPolicy.js";
+export function validCivilDate(value:unknown):value is string{return typeof value==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(value)&&Number.isFinite(Date.parse(value))&&new Date(value).toISOString().slice(0,10)===value;}
+export function policyDay(now:Date,timezone:string){const parts=new Intl.DateTimeFormat("en-CA",{timeZone:timezone,year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(now);const part=(type:string)=>parts.find(row=>row.type===type)!.value;return`${part("year")}-${part("month")}-${part("day")}`;}
+export function civilDistance(a:string,b:string){return Math.round((Date.parse(b)-Date.parse(a))/86400000);}
+export function deadlineDaysRemaining(record:Pick<Complaint,"expectedDisposalDate"|"sla">,now=new Date()){return validCivilDate(record.expectedDisposalDate)?civilDistance(policyDay(now,record.sla?.policy.timezone||"UTC"),record.expectedDisposalDate):Number.NaN;}
+export function nextCivil(day:string){const next=new Date(Date.parse(day)+86400000).toISOString().slice(0,10);if(!validCivilDate(next))throw new Error("Date outside supported calendar range");return next;}
+export function workingDay(day:string,policy:SlaPolicy){const weekday=new Date(day).getUTCDay();return policy.calendar==="calendar"||weekday!==0&&weekday!==6&&!policy.holidays.includes(day);}
+export function addPolicyDays(start:string,days:number,policy:SlaPolicy){if(!validCivilDate(start)||!Number.isInteger(days)||days<0||days>10000)throw new Error("Invalid deadline calendar input");let day=start,left=days;for(let steps=0;left>0;steps++){if(steps>20000)throw new Error("Calendar calculation limit");day=nextCivil(day);if(workingDay(day,policy))left--;}return day;}
+export function pauseDays(clock:CaseSla,today:string){let total=0;for(const pause of clock.pauses){const end=pause.to||today,calendar={...clock.policy,calendar:pause.calendar||clock.policy.calendar,holidays:pause.holidays||clock.policy.holidays};if(civilDistance(pause.from,end)<0||civilDistance(pause.from,end)>10000)throw new Error("Invalid pause interval");for(let day=pause.from;day<end;day=nextCivil(day))if(workingDay(day,calendar))total++;}return total;}
+export function clockDeadline(clock:CaseSla,today:string){return addPolicyDays(clock.baseDeadline,Math.max(0,pauseDays(clock,today)-(clock.creditedPauseDays||0)),clock.policy);}
+export function selectSlaPolicy(configuration:SlaPolicyConfiguration,complaint:Partial<Complaint>,now:Date):SlaPolicy|undefined{
+  return [...configuration.policies].filter(policy=>{const day=policyDay(now,policy.timezone),matches=(values:string[],value?:string)=>!values.length||!!value&&values.includes(value);return policy.enabled&&policy.effectiveFrom<=day&&(!policy.effectiveTo||policy.effectiveTo>=day)&&matches(policy.categories,complaint.category)&&matches(policy.caseTypes,complaint.metadata?.caseTypeId||"grievance")&&matches(policy.sources,complaint.metadata?.sourceChannelId)&&matches(policy.priorities,complaint.priority);}).sort((a,b)=>b.precedence-a.precedence||a.id.localeCompare(b.id))[0];
+}
+export function initialCaseSla(configuration:SlaPolicyConfiguration,complaint:Partial<Complaint>,actorId:string,now=new Date(),manualDeadline?:string):CaseSla{
+  const policy=selectSlaPolicy(configuration,complaint,now);if(!policy)throw new Error("No applicable operational SLA policy; lifecycle/policy review is required.");
+  const entered=complaint.createdAt&&Number.isFinite(Date.parse(complaint.createdAt))?new Date(complaint.createdAt):now;
+  const startDate=policy.startBasis==="source_received_date"?complaint.metadata?.sourceReceivedDate:policyDay(entered,policy.timezone);
+  if(!validCivilDate(startDate))throw new Error("The selected policy requires a valid source date.");
+  const baseDeadline=manualDeadline||addPolicyDays(startDate,policy.days,policy);if(!validCivilDate(baseDeadline))throw new Error("Invalid manual SLA deadline");
+  return{version:1,configurationVersion:configuration.version,policy:structuredClone(policy),startDate,baseDeadline,manualDeadline:!!manualDeadline,pauses:[],history:[{at:now.toISOString(),actorId,action:"Applied",reason:manualDeadline?"Explicit initial deadline retained alongside policy metadata.":"Configured operational policy applied; no statutory basis asserted.",deadline:baseDeadline,configurationVersion:configuration.version}]};
+}

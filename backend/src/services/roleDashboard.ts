@@ -2,6 +2,7 @@ import { store } from "../db/store.js";
 import { authorize, effectiveProfile, roleOf } from "../security/rbac.js";
 import { getEscalationConfig } from "./slaScheduler.js";
 import type { Complaint, Profile } from "../models/types.js";
+import{deadlineDaysRemaining}from"./slaCalendar.js";
 
 const active = (c: Complaint) => c.status !== "Disposed";
 function paginate<T>(rows: T[], page: number, limit = 10) {
@@ -21,8 +22,8 @@ export function roleDashboard(user: Profile, query: Record<string, any>) {
   const to = String(query.to||"");
   const scoped = store.getScopedComplaints();
   const cases = scoped.filter(c=>(!bureau||c.currentBureauId===bureau) && (!region||store.getComplaintRegion(c)===region) && (!from||c.receivedDate>=from) && (!to||c.receivedDate<=to));
-  const overdue = (c:Complaint) => active(c) && c.expectedDisposalDate<today;
-  const dueSoon = (c:Complaint) => active(c) && c.expectedDisposalDate>=today && c.expectedDisposalDate<=until;
+  const overdue = (c:Complaint) => active(c) && deadlineDaysRemaining(c)<0;
+  const dueSoon = (c:Complaint) => active(c) && deadlineDaysRemaining(c)>=0 && deadlineDaysRemaining(c)<=threshold;
   const dueToday = (c:Complaint) => active(c) && c.nextActionDate===today;
   const ids = new Set(cases.map(c=>c.id));
   const transfers = store.getTransfers().filter(t=> {

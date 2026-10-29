@@ -1,0 +1,1727 @@
+{
+  "datasetVersion": "synthetic-overlap-v1",
+  "datasetSha256": "c5c21d687497e053cc2017ef729d0c453f9f3c5b9a2350f8e5c24da7e6f7bc12",
+  "generatedAt": "2026-10-29T14:12:36.238Z",
+  "requestedMode": "embeddings",
+  "metricsVersion": "candidate-class-union-v1",
+  "datasetSize": {
+    "pairs": 84,
+    "cases": 112,
+    "tuning": 60,
+    "heldout": 24,
+    "familyGroups": 28
+  },
+  "splitValidation": {
+    "familyDisjoint": true,
+    "exactTextDisjoint": true,
+    "smokeFamilyExcluded": true,
+    "smokeTextExclusionVerified": true
+  },
+  "labelReviewStatus": "draft_not_independently_reviewed",
+  "algorithm": "signals-v2",
+  "configuration": {
+    "id": "overlap-settings-1",
+    "version": 1,
+    "changedBy": "system-default",
+    "changedAt": "2026-01-01T00:00:00.000Z",
+    "reason": "Transparent review-only engineering defaults; validate with reviewed local data before operational tuning.",
+    "algorithmVersion": "signals-v2",
+    "weights": {
+      "institution": 20,
+      "category": 15,
+      "programme": 10,
+      "reference": 15,
+      "entity": 10,
+      "text": 20,
+      "temporal": 5,
+      "crossBureau": 5
+    },
+    "dateWindowDays": 180,
+    "reviewScoreThreshold": 60,
+    "duplicateScoreThreshold": 85,
+    "lexicalRelatedThreshold": 40,
+    "lexicalDuplicateThreshold": 85,
+    "embeddingRelatedThreshold": 85,
+    "embeddingDuplicateThreshold": 92
+  },
+  "configurationSha256": "378daa82c50dfe06d5cde19a89040b64e78bcaee889b8df0986e299fe3121d71",
+  "predictor": "signals-v2 relationshipCandidate maps to duplicate/related/unrelated-undetermined. Mandatory review is reported separately through flagged; undetermined is not a confirmed unrelated decision.",
+  "thresholdProtocol": "Engineering defaults fixed before evaluation. No threshold fitting on held-out labels. Different-institution gating is part of the pipeline, not an embedding result.",
+  "splits": {
+    "tuning": {
+      "sampleSize": 60,
+      "confusionMatrix": {
+        "rows": "expected",
+        "columns": "candidate_prediction",
+        "values": {
+          "duplicate": {
+            "duplicate": 14,
+            "related": 6,
+            "unrelated": 0
+          },
+          "related": {
+            "duplicate": 0,
+            "related": 20,
+            "unrelated": 0
+          },
+          "unrelated": {
+            "duplicate": 0,
+            "related": 5,
+            "unrelated": 15
+          }
+        }
+      },
+      "perClass": {
+        "duplicate": {
+          "support": 20,
+          "predicted": 14,
+          "precision": 1,
+          "recall": 0.7,
+          "f1": 0.8235294117647058
+        },
+        "related": {
+          "support": 20,
+          "predicted": 31,
+          "precision": 0.6451612903225806,
+          "recall": 1,
+          "f1": 0.7843137254901961
+        },
+        "unrelated": {
+          "support": 20,
+          "predicted": 15,
+          "precision": 1,
+          "recall": 0.75,
+          "f1": 0.8571428571428571
+        }
+      },
+      "macroF1": 0.8216619981325864,
+      "macroPolicy": "Mean over labels with actual support or predictions; undefined precision/recall contributes zero for such a label. No samples -> null. Per-class absent denominators remain null.",
+      "candidateClassification": {
+        "macroPrecision": 0.8817204301075269,
+        "macroRecall": 0.8166666666666668,
+        "macroF1": 0.8216619981325864,
+        "microPrecision": 0.8166666666666667,
+        "microRecall": 0.8166666666666667,
+        "microF1": 0.8166666666666667
+      },
+      "reviewCandidateDetection": {
+        "precision": 0.8695652173913043,
+        "recall": 1,
+        "f1": 0.9302325581395349,
+        "tp": 40,
+        "fp": 6,
+        "fn": 0
+      },
+      "perMode": {
+        "multilingual_embeddings": {
+          "sampleSize": 53,
+          "confusionMatrix": {
+            "rows": "expected",
+            "columns": "candidate_prediction",
+            "values": {
+              "duplicate": {
+                "duplicate": 14,
+                "related": 6,
+                "unrelated": 0
+              },
+              "related": {
+                "duplicate": 0,
+                "related": 20,
+                "unrelated": 0
+              },
+              "unrelated": {
+                "duplicate": 0,
+                "related": 5,
+                "unrelated": 8
+              }
+            }
+          },
+          "perClass": {
+            "duplicate": {
+              "support": 20,
+              "predicted": 14,
+              "precision": 1,
+              "recall": 0.7,
+              "f1": 0.8235294117647058
+            },
+            "related": {
+              "support": 20,
+              "predicted": 31,
+              "precision": 0.6451612903225806,
+              "recall": 1,
+              "f1": 0.7843137254901961
+            },
+            "unrelated": {
+              "support": 13,
+              "predicted": 8,
+              "precision": 1,
+              "recall": 0.6153846153846154,
+              "f1": 0.7619047619047619
+            }
+          },
+          "macroF1": 0.7899159663865546,
+          "macroPolicy": "Mean over labels with actual support or predictions; undefined precision/recall contributes zero for such a label. No samples -> null. Per-class absent denominators remain null.",
+          "candidateClassification": {
+            "macroPrecision": 0.8817204301075269,
+            "macroRecall": 0.7717948717948717,
+            "macroF1": 0.7899159663865546,
+            "microPrecision": 0.7924528301886793,
+            "microRecall": 0.7924528301886793,
+            "microF1": 0.7924528301886793
+          },
+          "reviewCandidateDetection": {
+            "precision": 0.8695652173913043,
+            "recall": 1,
+            "f1": 0.9302325581395349,
+            "tp": 40,
+            "fp": 6,
+            "fn": 0
+          }
+        },
+        "not_compared_different_institution": {
+          "sampleSize": 7,
+          "confusionMatrix": {
+            "rows": "expected",
+            "columns": "candidate_prediction",
+            "values": {
+              "duplicate": {
+                "duplicate": 0,
+                "related": 0,
+                "unrelated": 0
+              },
+              "related": {
+                "duplicate": 0,
+                "related": 0,
+                "unrelated": 0
+              },
+              "unrelated": {
+                "duplicate": 0,
+                "related": 0,
+                "unrelated": 7
+              }
+            }
+          },
+          "perClass": {
+            "duplicate": {
+              "support": 0,
+              "predicted": 0,
+              "precision": null,
+              "recall": null,
+              "f1": null
+            },
+            "related": {
+              "support": 0,
+              "predicted": 0,
+              "precision": null,
+              "recall": null,
+              "f1": null
+            },
+            "unrelated": {
+              "support": 7,
+              "predicted": 7,
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            }
+          },
+          "macroF1": 1,
+          "macroPolicy": "Mean over labels with actual support or predictions; undefined precision/recall contributes zero for such a label. No samples -> null. Per-class absent denominators remain null.",
+          "candidateClassification": {
+            "macroPrecision": 1,
+            "macroRecall": 1,
+            "macroF1": 1,
+            "microPrecision": 1,
+            "microRecall": 1,
+            "microF1": 1
+          },
+          "reviewCandidateDetection": {
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "tp": 0,
+            "fp": 0,
+            "fn": 0
+          }
+        }
+      },
+      "perLanguage": {
+        "en→bn": {
+          "sampleSize": 6,
+          "confusionMatrix": {
+            "rows": "expected",
+            "columns": "candidate_prediction",
+            "values": {
+              "duplicate": {
+                "duplicate": 2,
+                "related": 0,
+                "unrelated": 0
+              },
+              "related": {
+                "duplicate": 0,
+                "related": 2,
+                "unrelated": 0
+              },
+              "unrelated": {
+                "duplicate": 0,
+                "related": 1,
+                "unrelated": 1
+              }
+            }
+          },
+          "perClass": {
+            "duplicate": {
+              "support": 2,
+              "predicted": 2,
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "related": {
+              "support": 2,
+              "predicted": 3,
+              "precision": 0.6666666666666666,
+              "recall": 1,
+              "f1": 0.8
+            },
+            "unrelated": {
+              "support": 2,
+              "predicted": 1,
+              "precision": 1,
+              "recall": 0.5,
+              "f1": 0.6666666666666666
+            }
+          },
+          "macroF1": 0.8222222222222223,
+          "macroPolicy": "Mean over labels with actual support or predictions; undefined precision/recall contributes zero for such a label. No samples -> null. Per-class absent denominators remain null.",
+          "candidateClassification": {
+            "macroPrecision": 0.8888888888888888,
+            "macroRecall": 0.8333333333333334,
+            "macroF1": 0.8222222222222223,
+            "microPrecision": 0.8333333333333334,
+            "microRecall": 0.8333333333333334,
+            "microF1": 0.8333333333333334
+          },
+          "reviewCandidateDetection": {
+            "precision": 0.8,
+            "recall": 1,
+            "f1": 0.8888888888888888,
+            "tp": 4,
+            "fp": 1,
+            "fn": 0
+          }
+        },
+        "en→en": {
+          "sampleSize": 9,
+          "confusionMatrix": {
+            "rows": "expected",
+            "columns": "candidate_prediction",
+            "values": {
+              "duplicate": {
+                "duplicate": 3,
+                "related": 0,
+                "unrelated": 0
+              },
+              "related": {
+                "duplicate": 0,
+                "related": 3,
+                "unrelated": 0
+              },
+              "unrelated": {
+                "duplicate": 0,
+                "related": 1,
+                "unrelated": 2
+              }
+            }
+          },
+          "perClass": {
+            "duplicate": {
+              "support": 3,
+              "predicted": 3,
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "related": {
+              "support": 3,
+              "predicted": 4,
+              "precision": 0.75,
+              "recall": 1,
+              "f1": 0.8571428571428571
+            },
+            "unrelated": {
+              "support": 3,
+              "predicted": 2,
+              "precision": 1,
+              "recall": 0.6666666666666666,
+              "f1": 0.8
+            }
+          },
+          "macroF1": 0.8857142857142858,
+          "macroPolicy": "Mean over labels with actual support or predictions; undefined precision/recall contributes zero for such a label. No samples -> null. Per-class absent denominators remain null.",
+          "candidateClassification": {
+            "macroPrecision": 0.9166666666666666,
+            "macroRecall": 0.8888888888888888,
+            "macroF1": 0.8857142857142858,
+            "microPrecision": 0.8888888888888888,
+            "microRecall": 0.8888888888888888,
+            "microF1": 0.8888888888888888
+          },
+          "reviewCandidateDetection": {
+            "precision": 0.8571428571428571,
+            "recall": 1,
+            "f1": 0.9230769230769231,
+            "tp": 6,
+            "fp": 1,
+            "fn": 0
+          }
+        },
+        "en→gu": {
+          "sampleSize": 9,
+          "confusionMatrix": {
+            "rows": "expected",
+            "columns": "candidate_prediction",
+            "values": {
+              "duplicate": {
+                "duplicate": 0,
+                "related": 3,
+                "unrelated": 0
+              },
+              "related": {
+                "duplicate": 0,
+                "related": 3,
+                "unrelated": 0
+              },
+              "unrelated": {
+                "duplicate": 0,
+                "related": 0,
+                "unrelated": 3
+              }
+            }
+          },
+          "perClass": {
+            "duplicate": {
+              "support": 3,
+              "predicted": 0,
+              "precision": null,
+              "recall": 0,
+              "f1": 0
+            },
+            "related": {
+              "support": 3,
+              "predicted": 6,
+              "precision": 0.5,
+              "recall": 1,
+              "f1": 0.6666666666666666
+            },
+            "unrelated": {
+              "support": 3,
+              "predicted": 3,
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            }
+          },
+          "macroF1": 0.5555555555555555,
+          "macroPolicy": "Mean over labels with actual support or predictions; undefined precision/recall contributes zero for such a label. No samples -> null. Per-class absent denominators remain null.",
+          "candidateClassification": {
+            "macroPrecision": 0.5,
+            "macroRecall": 0.6666666666666666,
+            "macroF1": 0.5555555555555555,
+            "microPrecision": 0.6666666666666666,
+            "microRecall": 0.6666666666666666,
+            "microF1": 0.6666666666666666
+          },
+          "reviewCandidateDetection": {
+            "precision": 0.8571428571428571,
+            "recall": 1,
+            "f1": 0.9230769230769231,
+            "tp": 6,
+            "fp": 1,
+            "fn": 0
+          }
+        },
+        "en→hi": {
+          "sampleSize": 9,
+          "confusionMatrix": {
+            "rows": "expected",
+            "columns": "candidate_prediction",
+            "values": {
+              "duplicate": {
+                "duplicate": 3,
+                "related": 0,
+                "unrelated": 0
+              },
+              "related": {
+                "duplicate": 0,
+                "related": 3,
+                "unrelated": 0
+              },
+              "unrelated": {
+                "duplicate": 0,
+                "related": 1,
+                "unrelated": 2
+              }
+            }
+          },
+          "perClass": {
+            "duplicate": {
+              "support": 3,
+              "predicted": 3,
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "related": {
+              "support": 3,
+              "predicted": 4,
+              "precision": 0.75,
+              "recall": 1,
+              "f1": 0.8571428571428571
+            },
+            "unrelated": {
+              "support": 3,
+              "predicted": 2,
+              "precision": 1,
+              "recall": 0.6666666666666666,
+              "f1": 0.8
+            }
+          },
+          "macroF1": 0.8857142857142858,
+          "macroPolicy": "Mean over labels with actual support or predictions; undefined precision/recall contributes zero for such a label. No samples -> null. Per-class absent denominators remain null.",
+          "candidateClassification": {
+            "macroPrecision": 0.9166666666666666,
+            "macroRecall": 0.8888888888888888,
+            "macroF1": 0.8857142857142858,
+            "microPrecision": 0.8888888888888888,
+            "microRecall": 0.8888888888888888,
+            "microF1": 0.8888888888888888
+          },
+          "reviewCandidateDetection": {
+            "precision": 0.8571428571428571,
+            "recall": 1,
+            "f1": 0.9230769230769231,
+            "tp": 6,
+            "fp": 1,
+            "fn": 0
+          }
+        },
+        "en→kn": {
+          "sampleSize": 6,
+          "confusionMatrix": {
+            "rows": "expected",
+            "columns": "candidate_prediction",
+            "values": {
+              "duplicate": {
+                "duplicate": 2,
+                "related": 0,
+                "unrelated": 0
+              },
+              "related": {
+                "duplicate": 0,
+                "related": 2,
+                "unrelated": 0
+              },
+              "unrelated": {
+                "duplicate": 0,
+                "related": 1,
+                "unrelated": 1
+              }
+            }
+          },
+          "perClass": {
+            "duplicate": {
+              "support": 2,
+              "predicted": 2,
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "related": {
+              "support": 2,
+              "predicted": 3,
+              "precision": 0.6666666666666666,
+              "recall": 1,
+              "f1": 0.8
+            },
+            "unrelated": {
+              "support": 2,
+              "predicted": 1,
+              "precision": 1,
+              "recall": 0.5,
+              "f1": 0.6666666666666666
+            }
+          },
+          "macroF1": 0.8222222222222223,
+          "macroPolicy": "Mean over labels with actual support or predictions; undefined precision/recall contributes zero for such a label. No samples -> null. Per-class absent denominators remain null.",
+          "candidateClassification": {
+            "macroPrecision": 0.8888888888888888,
+            "macroRecall": 0.8333333333333334,
+            "macroF1": 0.8222222222222223,
+            "microPrecision": 0.8333333333333334,
+            "microRecall": 0.8333333333333334,
+            "microF1": 0.8333333333333334
+          },
+          "reviewCandidateDetection": {
+            "precision": 0.8,
+            "recall": 1,
+            "f1": 0.8888888888888888,
+            "tp": 4,
+            "fp": 1,
+            "fn": 0
+          }
+        },
+        "en→mixed": {
+          "sampleSize": 6,
+          "confusionMatrix": {
+            "rows": "expected",
+            "columns": "candidate_prediction",
+            "values": {
+              "duplicate": {
+                "duplicate": 2,
+                "related": 0,
+                "unrelated": 0
+              },
+              "related": {
+                "duplicate": 0,
+                "related": 2,
+                "unrelated": 0
+              },
+              "unrelated": {
+                "duplicate": 0,
+                "related": 0,
+                "unrelated": 2
+              }
+            }
+          },
+          "perClass": {
+            "duplicate": {
+              "support": 2,
+              "predicted": 2,
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "related": {
+              "support": 2,
+              "predicted": 2,
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "unrelated": {
+              "support": 2,
+              "predicted": 2,
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            }
+          },
+          "macroF1": 1,
+          "macroPolicy": "Mean over labels with actual support or predictions; undefined precision/recall contributes zero for such a label. No samples -> null. Per-class absent denominators remain null.",
+          "candidateClassification": {
+            "macroPrecision": 1,
+            "macroRecall": 1,
+            "macroF1": 1,
+            "microPrecision": 1,
+            "microRecall": 1,
+            "microF1": 1
+          },
+          "reviewCandidateDetection": {
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "tp": 4,
+            "fp": 0,
+            "fn": 0
+          }
+        },
+        "en→ta": {
+          "sampleSize": 9,
+          "confusionMatrix": {
+            "rows": "expected",
+            "columns": "candidate_prediction",
+            "values": {
+              "duplicate": {
+                "duplicate": 1,
+                "related": 2,
+                "unrelated": 0
+              },
+              "related": {
+                "duplicate": 0,
+                "related": 3,
+                "unrelated": 0
+              },
+              "unrelated": {
+                "duplicate": 0,
+                "related": 1,
+                "unrelated": 2
+              }
+            }
+          },
+          "perClass": {
+            "duplicate": {
+              "support": 3,
+              "predicted": 1,
+              "precision": 1,
+              "recall": 0.3333333333333333,
+              "f1": 0.5
+            },
+            "related": {
+              "support": 3,
+              "predicted": 6,
+              "precision": 0.5,
+              "recall": 1,
+              "f1": 0.6666666666666666
+            },
+            "unrelated": {
+              "support": 3,
+              "predicted": 2,
+              "precision": 1,
+              "recall": 0.6666666666666666,
+              "f1": 0.8
+            }
+          },
+          "macroF1": 0.6555555555555556,
+          "macroPolicy": "Mean over labels with actual support or predictions; undefined precision/recall contributes zero for such a label. No samples -> null. Per-class absent denominators remain null.",
+          "candidateClassification": {
+            "macroPrecision": 0.8333333333333334,
+            "macroRecall": 0.6666666666666666,
+            "macroF1": 0.6555555555555556,
+            "microPrecision": 0.6666666666666666,
+            "microRecall": 0.6666666666666666,
+            "microF1": 0.6666666666666666
+          },
+          "reviewCandidateDetection": {
+            "precision": 0.8571428571428571,
+            "recall": 1,
+            "f1": 0.9230769230769231,
+            "tp": 6,
+            "fp": 1,
+            "fn": 0
+          }
+        },
+        "en→te": {
+          "sampleSize": 6,
+          "confusionMatrix": {
+            "rows": "expected",
+            "columns": "candidate_prediction",
+            "values": {
+              "duplicate": {
+                "duplicate": 1,
+                "related": 1,
+                "unrelated": 0
+              },
+              "related": {
+                "duplicate": 0,
+                "related": 2,
+                "unrelated": 0
+              },
+              "unrelated": {
+                "duplicate": 0,
+                "related": 0,
+                "unrelated": 2
+              }
+            }
+          },
+          "perClass": {
+            "duplicate": {
+              "support": 2,
+              "predicted": 1,
+              "precision": 1,
+              "recall": 0.5,
+              "f1": 0.6666666666666666
+            },
+            "related": {
+              "support": 2,
+              "predicted": 3,
+              "precision": 0.6666666666666666,
+              "recall": 1,
+              "f1": 0.8
+            },
+            "unrelated": {
+              "support": 2,
+              "predicted": 2,
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            }
+          },
+          "macroF1": 0.8222222222222223,
+          "macroPolicy": "Mean over labels with actual support or predictions; undefined precision/recall contributes zero for such a label. No samples -> null. Per-class absent denominators remain null.",
+          "candidateClassification": {
+            "macroPrecision": 0.8888888888888888,
+            "macroRecall": 0.8333333333333334,
+            "macroF1": 0.8222222222222223,
+            "microPrecision": 0.8333333333333334,
+            "microRecall": 0.8333333333333334,
+            "microF1": 0.8333333333333334
+          },
+          "reviewCandidateDetection": {
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "tp": 4,
+            "fp": 0,
+            "fn": 0
+          }
+        }
+      }
+    }
+  },
+  "limitations": "Synthetic template-based draft labels/translation; no independent native or subject-matter review. Small held-out language groups; no production accuracy claim, statistical confidence claim or training on held-out data.",
+  "rows": [
+    {
+      "id": "EVAL-001-duplicate",
+      "split": "tuning",
+      "expected": "duplicate",
+      "predicted": "duplicate",
+      "mode": "multilingual_embeddings",
+      "language": "en→en",
+      "combinedScore": 90,
+      "textScore": 100,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 171.89
+    },
+    {
+      "id": "EVAL-001-related",
+      "split": "tuning",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "multilingual_embeddings",
+      "language": "en→en",
+      "combinedScore": 65,
+      "textScore": 92.46,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 33.76
+    },
+    {
+      "id": "EVAL-001-unrelated",
+      "split": "tuning",
+      "expected": "unrelated",
+      "predicted": "unrelated",
+      "mode": "not_compared_different_institution",
+      "language": "en→en",
+      "combinedScore": 0,
+      "ruleScore": 0,
+      "flagged": false,
+      "model": "none",
+      "revision": "none",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.47
+    },
+    {
+      "id": "EVAL-002-duplicate",
+      "split": "tuning",
+      "expected": "duplicate",
+      "predicted": "duplicate",
+      "mode": "multilingual_embeddings",
+      "language": "en→hi",
+      "combinedScore": 89,
+      "textScore": 96.75,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 62.92
+    },
+    {
+      "id": "EVAL-002-related",
+      "split": "tuning",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "multilingual_embeddings",
+      "language": "en→hi",
+      "combinedScore": 65,
+      "textScore": 92.47,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 36.21
+    },
+    {
+      "id": "EVAL-002-unrelated",
+      "split": "tuning",
+      "expected": "unrelated",
+      "predicted": "unrelated",
+      "mode": "multilingual_embeddings",
+      "language": "en→hi",
+      "combinedScore": 66,
+      "textScore": 95.73,
+      "ruleScore": 57,
+      "flagged": false,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 38.68
+    },
+    {
+      "id": "EVAL-003-duplicate",
+      "split": "tuning",
+      "expected": "duplicate",
+      "predicted": "related",
+      "mode": "multilingual_embeddings",
+      "language": "en→gu",
+      "combinedScore": 88,
+      "textScore": 91.51,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 66.51
+    },
+    {
+      "id": "EVAL-003-related",
+      "split": "tuning",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "multilingual_embeddings",
+      "language": "en→gu",
+      "combinedScore": 64,
+      "textScore": 87.64,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 40
+    },
+    {
+      "id": "EVAL-003-unrelated",
+      "split": "tuning",
+      "expected": "unrelated",
+      "predicted": "unrelated",
+      "mode": "multilingual_embeddings",
+      "language": "en→gu",
+      "combinedScore": 80,
+      "textScore": 84.88,
+      "ruleScore": 79,
+      "flagged": true,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 35.21
+    },
+    {
+      "id": "EVAL-004-duplicate",
+      "split": "tuning",
+      "expected": "duplicate",
+      "predicted": "related",
+      "mode": "multilingual_embeddings",
+      "language": "en→ta",
+      "combinedScore": 88,
+      "textScore": 91.93,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 68.83
+    },
+    {
+      "id": "EVAL-004-related",
+      "split": "tuning",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "multilingual_embeddings",
+      "language": "en→ta",
+      "combinedScore": 64,
+      "textScore": 87.44,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 36.33
+    },
+    {
+      "id": "EVAL-004-unrelated",
+      "split": "tuning",
+      "expected": "unrelated",
+      "predicted": "unrelated",
+      "mode": "not_compared_different_institution",
+      "language": "en→ta",
+      "combinedScore": 0,
+      "ruleScore": 0,
+      "flagged": false,
+      "model": "none",
+      "revision": "none",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.41
+    },
+    {
+      "id": "EVAL-005-duplicate",
+      "split": "tuning",
+      "expected": "duplicate",
+      "predicted": "duplicate",
+      "mode": "multilingual_embeddings",
+      "language": "en→te",
+      "combinedScore": 89,
+      "textScore": 94.2,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 71.34
+    },
+    {
+      "id": "EVAL-005-related",
+      "split": "tuning",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "multilingual_embeddings",
+      "language": "en→te",
+      "combinedScore": 64,
+      "textScore": 88.47,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 55.64
+    },
+    {
+      "id": "EVAL-005-unrelated",
+      "split": "tuning",
+      "expected": "unrelated",
+      "predicted": "unrelated",
+      "mode": "multilingual_embeddings",
+      "language": "en→te",
+      "combinedScore": 65,
+      "textScore": 93.86,
+      "ruleScore": 57,
+      "flagged": false,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 44.25
+    },
+    {
+      "id": "EVAL-006-duplicate",
+      "split": "tuning",
+      "expected": "duplicate",
+      "predicted": "duplicate",
+      "mode": "multilingual_embeddings",
+      "language": "en→bn",
+      "combinedScore": 88,
+      "textScore": 92.42,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 65.29
+    },
+    {
+      "id": "EVAL-006-related",
+      "split": "tuning",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "multilingual_embeddings",
+      "language": "en→bn",
+      "combinedScore": 64,
+      "textScore": 88.14,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 35.42
+    },
+    {
+      "id": "EVAL-006-unrelated",
+      "split": "tuning",
+      "expected": "unrelated",
+      "predicted": "related",
+      "mode": "multilingual_embeddings",
+      "language": "en→bn",
+      "combinedScore": 80,
+      "textScore": 86.3,
+      "ruleScore": 79,
+      "flagged": true,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 36.85
+    },
+    {
+      "id": "EVAL-007-duplicate",
+      "split": "tuning",
+      "expected": "duplicate",
+      "predicted": "duplicate",
+      "mode": "multilingual_embeddings",
+      "language": "en→kn",
+      "combinedScore": 88,
+      "textScore": 92.51,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 62.67
+    },
+    {
+      "id": "EVAL-007-related",
+      "split": "tuning",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "multilingual_embeddings",
+      "language": "en→kn",
+      "combinedScore": 64,
+      "textScore": 86.06,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 36.68
+    },
+    {
+      "id": "EVAL-007-unrelated",
+      "split": "tuning",
+      "expected": "unrelated",
+      "predicted": "unrelated",
+      "mode": "not_compared_different_institution",
+      "language": "en→kn",
+      "combinedScore": 0,
+      "ruleScore": 0,
+      "flagged": false,
+      "model": "none",
+      "revision": "none",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.32
+    },
+    {
+      "id": "EVAL-008-duplicate",
+      "split": "tuning",
+      "expected": "duplicate",
+      "predicted": "duplicate",
+      "mode": "multilingual_embeddings",
+      "language": "en→mixed",
+      "combinedScore": 89,
+      "textScore": 96.89,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 62.01
+    },
+    {
+      "id": "EVAL-008-related",
+      "split": "tuning",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "multilingual_embeddings",
+      "language": "en→mixed",
+      "combinedScore": 65,
+      "textScore": 90.45,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 32.93
+    },
+    {
+      "id": "EVAL-008-unrelated",
+      "split": "tuning",
+      "expected": "unrelated",
+      "predicted": "unrelated",
+      "mode": "multilingual_embeddings",
+      "language": "en→mixed",
+      "combinedScore": 66,
+      "textScore": 94.88,
+      "ruleScore": 57,
+      "flagged": false,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 38.45
+    },
+    {
+      "id": "EVAL-009-duplicate",
+      "split": "tuning",
+      "expected": "duplicate",
+      "predicted": "duplicate",
+      "mode": "multilingual_embeddings",
+      "language": "en→en",
+      "combinedScore": 90,
+      "textScore": 100,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 32.31
+    },
+    {
+      "id": "EVAL-009-related",
+      "split": "tuning",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "multilingual_embeddings",
+      "language": "en→en",
+      "combinedScore": 64,
+      "textScore": 89.97,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 33.85
+    },
+    {
+      "id": "EVAL-009-unrelated",
+      "split": "tuning",
+      "expected": "unrelated",
+      "predicted": "related",
+      "mode": "multilingual_embeddings",
+      "language": "en→en",
+      "combinedScore": 80,
+      "textScore": 86.45,
+      "ruleScore": 79,
+      "flagged": true,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 32.13
+    },
+    {
+      "id": "EVAL-010-duplicate",
+      "split": "tuning",
+      "expected": "duplicate",
+      "predicted": "duplicate",
+      "mode": "multilingual_embeddings",
+      "language": "en→hi",
+      "combinedScore": 89,
+      "textScore": 94.23,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 63.49
+    },
+    {
+      "id": "EVAL-010-related",
+      "split": "tuning",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "multilingual_embeddings",
+      "language": "en→hi",
+      "combinedScore": 64,
+      "textScore": 89.46,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 32.12
+    },
+    {
+      "id": "EVAL-010-unrelated",
+      "split": "tuning",
+      "expected": "unrelated",
+      "predicted": "unrelated",
+      "mode": "not_compared_different_institution",
+      "language": "en→hi",
+      "combinedScore": 0,
+      "ruleScore": 0,
+      "flagged": false,
+      "model": "none",
+      "revision": "none",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.3
+    },
+    {
+      "id": "EVAL-011-duplicate",
+      "split": "tuning",
+      "expected": "duplicate",
+      "predicted": "related",
+      "mode": "multilingual_embeddings",
+      "language": "en→gu",
+      "combinedScore": 88,
+      "textScore": 91.75,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 59.41
+    },
+    {
+      "id": "EVAL-011-related",
+      "split": "tuning",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "multilingual_embeddings",
+      "language": "en→gu",
+      "combinedScore": 64,
+      "textScore": 86.37,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 33.77
+    },
+    {
+      "id": "EVAL-011-unrelated",
+      "split": "tuning",
+      "expected": "unrelated",
+      "predicted": "unrelated",
+      "mode": "multilingual_embeddings",
+      "language": "en→gu",
+      "combinedScore": 64,
+      "textScore": 90.12,
+      "ruleScore": 57,
+      "flagged": false,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 35.03
+    },
+    {
+      "id": "EVAL-012-duplicate",
+      "split": "tuning",
+      "expected": "duplicate",
+      "predicted": "duplicate",
+      "mode": "multilingual_embeddings",
+      "language": "en→ta",
+      "combinedScore": 89,
+      "textScore": 93.4,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 61.11
+    },
+    {
+      "id": "EVAL-012-related",
+      "split": "tuning",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "multilingual_embeddings",
+      "language": "en→ta",
+      "combinedScore": 64,
+      "textScore": 89.14,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 36.36
+    },
+    {
+      "id": "EVAL-012-unrelated",
+      "split": "tuning",
+      "expected": "unrelated",
+      "predicted": "related",
+      "mode": "multilingual_embeddings",
+      "language": "en→ta",
+      "combinedScore": 63,
+      "textScore": 85.22,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 31.15
+    },
+    {
+      "id": "EVAL-013-duplicate",
+      "split": "tuning",
+      "expected": "duplicate",
+      "predicted": "related",
+      "mode": "multilingual_embeddings",
+      "language": "en→te",
+      "combinedScore": 88,
+      "textScore": 90.51,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 65.96
+    },
+    {
+      "id": "EVAL-013-related",
+      "split": "tuning",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "multilingual_embeddings",
+      "language": "en→te",
+      "combinedScore": 64,
+      "textScore": 86.5,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 37.89
+    },
+    {
+      "id": "EVAL-013-unrelated",
+      "split": "tuning",
+      "expected": "unrelated",
+      "predicted": "unrelated",
+      "mode": "not_compared_different_institution",
+      "language": "en→te",
+      "combinedScore": 0,
+      "ruleScore": 0,
+      "flagged": false,
+      "model": "none",
+      "revision": "none",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.3
+    },
+    {
+      "id": "EVAL-014-duplicate",
+      "split": "tuning",
+      "expected": "duplicate",
+      "predicted": "duplicate",
+      "mode": "multilingual_embeddings",
+      "language": "en→bn",
+      "combinedScore": 89,
+      "textScore": 94.4,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 61.9
+    },
+    {
+      "id": "EVAL-014-related",
+      "split": "tuning",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "multilingual_embeddings",
+      "language": "en→bn",
+      "combinedScore": 64,
+      "textScore": 88.45,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 32.65
+    },
+    {
+      "id": "EVAL-014-unrelated",
+      "split": "tuning",
+      "expected": "unrelated",
+      "predicted": "unrelated",
+      "mode": "multilingual_embeddings",
+      "language": "en→bn",
+      "combinedScore": 65,
+      "textScore": 92.48,
+      "ruleScore": 57,
+      "flagged": false,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 34.15
+    },
+    {
+      "id": "EVAL-015-duplicate",
+      "split": "tuning",
+      "expected": "duplicate",
+      "predicted": "duplicate",
+      "mode": "multilingual_embeddings",
+      "language": "en→kn",
+      "combinedScore": 89,
+      "textScore": 93.58,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 60.33
+    },
+    {
+      "id": "EVAL-015-related",
+      "split": "tuning",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "multilingual_embeddings",
+      "language": "en→kn",
+      "combinedScore": 64,
+      "textScore": 88.97,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 35.09
+    },
+    {
+      "id": "EVAL-015-unrelated",
+      "split": "tuning",
+      "expected": "unrelated",
+      "predicted": "related",
+      "mode": "multilingual_embeddings",
+      "language": "en→kn",
+      "combinedScore": 63,
+      "textScore": 85.42,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 33.45
+    },
+    {
+      "id": "EVAL-016-duplicate",
+      "split": "tuning",
+      "expected": "duplicate",
+      "predicted": "duplicate",
+      "mode": "multilingual_embeddings",
+      "language": "en→mixed",
+      "combinedScore": 89,
+      "textScore": 97.42,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 64.22
+    },
+    {
+      "id": "EVAL-016-related",
+      "split": "tuning",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "multilingual_embeddings",
+      "language": "en→mixed",
+      "combinedScore": 65,
+      "textScore": 90.76,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 33.96
+    },
+    {
+      "id": "EVAL-016-unrelated",
+      "split": "tuning",
+      "expected": "unrelated",
+      "predicted": "unrelated",
+      "mode": "not_compared_different_institution",
+      "language": "en→mixed",
+      "combinedScore": 0,
+      "ruleScore": 0,
+      "flagged": false,
+      "model": "none",
+      "revision": "none",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.38
+    },
+    {
+      "id": "EVAL-017-duplicate",
+      "split": "tuning",
+      "expected": "duplicate",
+      "predicted": "duplicate",
+      "mode": "multilingual_embeddings",
+      "language": "en→en",
+      "combinedScore": 90,
+      "textScore": 100,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 36.2
+    },
+    {
+      "id": "EVAL-017-related",
+      "split": "tuning",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "multilingual_embeddings",
+      "language": "en→en",
+      "combinedScore": 65,
+      "textScore": 91.83,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 39.69
+    },
+    {
+      "id": "EVAL-017-unrelated",
+      "split": "tuning",
+      "expected": "unrelated",
+      "predicted": "unrelated",
+      "mode": "multilingual_embeddings",
+      "language": "en→en",
+      "combinedScore": 66,
+      "textScore": 97.4,
+      "ruleScore": 57,
+      "flagged": false,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 42.63
+    },
+    {
+      "id": "EVAL-018-duplicate",
+      "split": "tuning",
+      "expected": "duplicate",
+      "predicted": "duplicate",
+      "mode": "multilingual_embeddings",
+      "language": "en→hi",
+      "combinedScore": 89,
+      "textScore": 96.55,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 73.77
+    },
+    {
+      "id": "EVAL-018-related",
+      "split": "tuning",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "multilingual_embeddings",
+      "language": "en→hi",
+      "combinedScore": 65,
+      "textScore": 92.3,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 45.18
+    },
+    {
+      "id": "EVAL-018-unrelated",
+      "split": "tuning",
+      "expected": "unrelated",
+      "predicted": "related",
+      "mode": "multilingual_embeddings",
+      "language": "en→hi",
+      "combinedScore": 64,
+      "textScore": 86.5,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 40.7
+    },
+    {
+      "id": "EVAL-019-duplicate",
+      "split": "tuning",
+      "expected": "duplicate",
+      "predicted": "related",
+      "mode": "multilingual_embeddings",
+      "language": "en→gu",
+      "combinedScore": 88,
+      "textScore": 91.07,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 81.69
+    },
+    {
+      "id": "EVAL-019-related",
+      "split": "tuning",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "multilingual_embeddings",
+      "language": "en→gu",
+      "combinedScore": 64,
+      "textScore": 87.14,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 48.99
+    },
+    {
+      "id": "EVAL-019-unrelated",
+      "split": "tuning",
+      "expected": "unrelated",
+      "predicted": "unrelated",
+      "mode": "not_compared_different_institution",
+      "language": "en→gu",
+      "combinedScore": 0,
+      "ruleScore": 0,
+      "flagged": false,
+      "model": "none",
+      "revision": "none",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.4
+    },
+    {
+      "id": "EVAL-020-duplicate",
+      "split": "tuning",
+      "expected": "duplicate",
+      "predicted": "related",
+      "mode": "multilingual_embeddings",
+      "language": "en→ta",
+      "combinedScore": 88,
+      "textScore": 91.66,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 90.82
+    },
+    {
+      "id": "EVAL-020-related",
+      "split": "tuning",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "multilingual_embeddings",
+      "language": "en→ta",
+      "combinedScore": 64,
+      "textScore": 87.4,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 50.37
+    },
+    {
+      "id": "EVAL-020-unrelated",
+      "split": "tuning",
+      "expected": "unrelated",
+      "predicted": "unrelated",
+      "mode": "multilingual_embeddings",
+      "language": "en→ta",
+      "combinedScore": 65,
+      "textScore": 90.99,
+      "ruleScore": 57,
+      "flagged": false,
+      "model": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 56.66
+    }
+  ]
+}

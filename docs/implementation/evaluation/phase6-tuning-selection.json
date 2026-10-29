@@ -1,0 +1,225 @@
+{
+  "datasetSha256": "c5c21d687497e053cc2017ef729d0c453f9f3c5b9a2350f8e5c24da7e6f7bc12",
+  "split": "tuning_only",
+  "sampleSizePerMode": 60,
+  "grid": {
+    "review": [
+      40,
+      45,
+      50,
+      55,
+      60,
+      65,
+      70
+    ],
+    "duplicate": [
+      65,
+      70,
+      75,
+      80,
+      85,
+      90,
+      95
+    ],
+    "lexicalRelated": [
+      30,
+      40,
+      50,
+      60,
+      70
+    ],
+    "lexicalDuplicate": [
+      60,
+      70,
+      80,
+      85,
+      90
+    ],
+    "embeddingRelated": [
+      70,
+      75,
+      80,
+      85,
+      90
+    ],
+    "embeddingDuplicate": [
+      85,
+      90,
+      92,
+      95,
+      98
+    ]
+  },
+  "evaluated": 2352,
+  "objective": "Mean lexical/embedding macro-F1 for draft synthetic relationship candidates. Tie-break fewer false relationships, then higher thresholds. Review flags separately include mandatory review.",
+  "selected": {
+    "id": "overlap-settings-1",
+    "version": 1,
+    "changedBy": "system-default",
+    "changedAt": "2026-01-01T00:00:00.000Z",
+    "reason": "Transparent review-only engineering defaults; validate with reviewed local data before operational tuning.",
+    "algorithmVersion": "signals-v2",
+    "weights": {
+      "institution": 20,
+      "category": 15,
+      "programme": 10,
+      "reference": 15,
+      "entity": 10,
+      "text": 20,
+      "temporal": 5,
+      "crossBureau": 5
+    },
+    "dateWindowDays": 180,
+    "reviewScoreThreshold": 50,
+    "duplicateScoreThreshold": 85,
+    "lexicalRelatedThreshold": 40,
+    "lexicalDuplicateThreshold": 70,
+    "embeddingRelatedThreshold": 85,
+    "embeddingDuplicateThreshold": 90
+  },
+  "metrics": [
+    {
+      "mode": "lexical",
+      "related": 40,
+      "duplicate": 70,
+      "metrics": {
+        "sampleSize": 60,
+        "confusionMatrix": {
+          "rows": "expected",
+          "columns": "candidate_prediction",
+          "values": {
+            "duplicate": {
+              "duplicate": 5,
+              "related": 15,
+              "unrelated": 0
+            },
+            "related": {
+              "duplicate": 0,
+              "related": 20,
+              "unrelated": 0
+            },
+            "unrelated": {
+              "duplicate": 0,
+              "related": 6,
+              "unrelated": 14
+            }
+          }
+        },
+        "perClass": {
+          "duplicate": {
+            "support": 20,
+            "predicted": 5,
+            "precision": 1,
+            "recall": 0.25,
+            "f1": 0.4
+          },
+          "related": {
+            "support": 20,
+            "predicted": 41,
+            "precision": 0.4878048780487805,
+            "recall": 1,
+            "f1": 0.6557377049180327
+          },
+          "unrelated": {
+            "support": 20,
+            "predicted": 14,
+            "precision": 1,
+            "recall": 0.7,
+            "f1": 0.8235294117647058
+          }
+        },
+        "macroF1": 0.6264223722275796,
+        "macroPolicy": "Mean over labels with actual support or predictions; undefined precision/recall contributes zero for such a label. No samples -> null. Per-class absent denominators remain null.",
+        "candidateClassification": {
+          "macroPrecision": 0.8292682926829268,
+          "macroRecall": 0.65,
+          "macroF1": 0.6264223722275796,
+          "microPrecision": 0.65,
+          "microRecall": 0.65,
+          "microF1": 0.65
+        },
+        "reviewCandidateDetection": {
+          "precision": 0.8695652173913043,
+          "recall": 1,
+          "f1": 0.9302325581395349,
+          "tp": 40,
+          "fp": 6,
+          "fn": 0
+        }
+      },
+      "falseRelationships": 6
+    },
+    {
+      "mode": "embeddings",
+      "related": 85,
+      "duplicate": 90,
+      "metrics": {
+        "sampleSize": 60,
+        "confusionMatrix": {
+          "rows": "expected",
+          "columns": "candidate_prediction",
+          "values": {
+            "duplicate": {
+              "duplicate": 20,
+              "related": 0,
+              "unrelated": 0
+            },
+            "related": {
+              "duplicate": 0,
+              "related": 20,
+              "unrelated": 0
+            },
+            "unrelated": {
+              "duplicate": 0,
+              "related": 5,
+              "unrelated": 15
+            }
+          }
+        },
+        "perClass": {
+          "duplicate": {
+            "support": 20,
+            "predicted": 20,
+            "precision": 1,
+            "recall": 1,
+            "f1": 1
+          },
+          "related": {
+            "support": 20,
+            "predicted": 25,
+            "precision": 0.8,
+            "recall": 1,
+            "f1": 0.8888888888888888
+          },
+          "unrelated": {
+            "support": 20,
+            "predicted": 15,
+            "precision": 1,
+            "recall": 0.75,
+            "f1": 0.8571428571428571
+          }
+        },
+        "macroF1": 0.9153439153439153,
+        "macroPolicy": "Mean over labels with actual support or predictions; undefined precision/recall contributes zero for such a label. No samples -> null. Per-class absent denominators remain null.",
+        "candidateClassification": {
+          "macroPrecision": 0.9333333333333332,
+          "macroRecall": 0.9166666666666666,
+          "macroF1": 0.9153439153439153,
+          "microPrecision": 0.9166666666666666,
+          "microRecall": 0.9166666666666666,
+          "microF1": 0.9166666666666666
+        },
+        "reviewCandidateDetection": {
+          "precision": 0.8695652173913043,
+          "recall": 1,
+          "f1": 0.9302325581395349,
+          "tp": 40,
+          "fp": 6,
+          "fn": 0
+        }
+      },
+      "falseRelationships": 5
+    }
+  ],
+  "limitations": "Draft synthetic labels and translations, small template corpus. Not production validation, calibrated confidence, legal rules or model retraining. Held-out rows were not used. Weights/date window unchanged."
+}

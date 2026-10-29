@@ -4,7 +4,7 @@
   "locales": [
     {
       "locale": "en",
-      "keys": 1227,
+      "keys": 1708,
       "draftTranslated": 0,
       "englishFallback": 0,
       "productionEnabled": true,
@@ -12,177 +12,177 @@
     },
     {
       "locale": "hi",
-      "keys": 1227,
+      "keys": 1708,
       "draftTranslated": 989,
-      "englishFallback": 238,
+      "englishFallback": 719,
       "productionEnabled": false,
       "review": "draft"
     },
     {
       "locale": "mr",
-      "keys": 1227,
+      "keys": 1708,
       "draftTranslated": 986,
-      "englishFallback": 241,
+      "englishFallback": 722,
       "productionEnabled": false,
       "review": "draft"
     },
     {
       "locale": "gu",
-      "keys": 1227,
+      "keys": 1708,
       "draftTranslated": 987,
-      "englishFallback": 240,
+      "englishFallback": 721,
       "productionEnabled": false,
       "review": "draft"
     },
     {
       "locale": "ta",
-      "keys": 1227,
+      "keys": 1708,
       "draftTranslated": 986,
-      "englishFallback": 241,
+      "englishFallback": 722,
       "productionEnabled": false,
       "review": "draft"
     },
     {
       "locale": "te",
-      "keys": 1227,
+      "keys": 1708,
       "draftTranslated": 988,
-      "englishFallback": 239,
+      "englishFallback": 720,
       "productionEnabled": false,
       "review": "draft"
     },
     {
       "locale": "bn",
-      "keys": 1227,
+      "keys": 1708,
       "draftTranslated": 989,
-      "englishFallback": 238,
+      "englishFallback": 719,
       "productionEnabled": false,
       "review": "draft"
     },
     {
       "locale": "kn",
-      "keys": 1227,
+      "keys": 1708,
       "draftTranslated": 987,
-      "englishFallback": 240,
+      "englishFallback": 721,
       "productionEnabled": false,
       "review": "draft"
     },
     {
       "locale": "ml",
-      "keys": 1227,
+      "keys": 1708,
       "draftTranslated": 985,
-      "englishFallback": 242,
+      "englishFallback": 723,
       "productionEnabled": false,
       "review": "draft"
     },
     {
       "locale": "pa",
-      "keys": 1227,
+      "keys": 1708,
       "draftTranslated": 987,
-      "englishFallback": 240,
+      "englishFallback": 721,
       "productionEnabled": false,
       "review": "draft"
     },
     {
       "locale": "or",
-      "keys": 1227,
+      "keys": 1708,
       "draftTranslated": 987,
-      "englishFallback": 240,
+      "englishFallback": 721,
       "productionEnabled": false,
       "review": "draft"
     },
     {
       "locale": "as",
-      "keys": 1227,
+      "keys": 1708,
       "draftTranslated": 984,
-      "englishFallback": 243,
+      "englishFallback": 724,
       "productionEnabled": false,
       "review": "draft"
     },
     {
       "locale": "ur",
-      "keys": 1227,
+      "keys": 1708,
       "draftTranslated": 988,
-      "englishFallback": 239,
+      "englishFallback": 720,
       "productionEnabled": false,
       "review": "draft"
     },
     {
       "locale": "ne",
-      "keys": 1227,
+      "keys": 1708,
       "draftTranslated": 987,
-      "englishFallback": 240,
+      "englishFallback": 721,
       "productionEnabled": false,
       "review": "draft"
     },
     {
       "locale": "sa",
-      "keys": 1227,
+      "keys": 1708,
       "draftTranslated": 990,
-      "englishFallback": 237,
+      "englishFallback": 718,
       "productionEnabled": false,
       "review": "draft"
     },
     {
       "locale": "mai",
-      "keys": 1227,
+      "keys": 1708,
       "draftTranslated": 987,
-      "englishFallback": 240,
+      "englishFallback": 721,
       "productionEnabled": false,
       "review": "draft"
     },
     {
       "locale": "kok",
-      "keys": 1227,
+      "keys": 1708,
       "draftTranslated": 993,
-      "englishFallback": 234,
+      "englishFallback": 715,
       "productionEnabled": false,
       "review": "draft"
     },
     {
       "locale": "doi",
-      "keys": 1227,
+      "keys": 1708,
       "draftTranslated": 979,
-      "englishFallback": 248,
+      "englishFallback": 729,
       "productionEnabled": false,
       "review": "draft"
     },
     {
       "locale": "brx",
-      "keys": 1227,
+      "keys": 1708,
       "draftTranslated": 13,
-      "englishFallback": 1214,
+      "englishFallback": 1695,
       "productionEnabled": false,
       "review": "draft"
     },
     {
       "locale": "mni-Mtei",
-      "keys": 1227,
+      "keys": 1708,
       "draftTranslated": 974,
-      "englishFallback": 253,
+      "englishFallback": 734,
       "productionEnabled": false,
       "review": "draft"
     },
     {
       "locale": "sat-Olck",
-      "keys": 1227,
+      "keys": 1708,
       "draftTranslated": 982,
-      "englishFallback": 245,
+      "englishFallback": 726,
       "productionEnabled": false,
       "review": "draft"
     },
     {
       "locale": "ks-Arab",
-      "keys": 1227,
+      "keys": 1708,
       "draftTranslated": 15,
-      "englishFallback": 1212,
+      "englishFallback": 1693,
       "productionEnabled": false,
       "review": "draft"
     },
     {
       "locale": "sd-Arab",
-      "keys": 1227,
+      "keys": 1708,
       "draftTranslated": 987,
-      "englishFallback": 240,
+      "englishFallback": 721,
       "productionEnabled": false,
       "review": "draft"
     }

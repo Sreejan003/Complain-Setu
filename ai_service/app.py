@@ -1,156 +1,67 @@
 import os
-import math
-from typing import List, Optional
-from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+import secrets
+from typing import Optional
+from fastapi import FastAPI, Header, HTTPException, Depends
+from pydantic import BaseModel, Field
+from providers import SimilarityProvider
+from unicode_text import lexical_cosine
 
-app = FastAPI(
-    title="AICTE Overlap Semantic Similarity Service",
-    description="Sentence Transformers semantic similarity inference service for institution complaint monitoring",
-    version="1.0.0"
-)
+app = FastAPI(title="Complain-Setu text similarity service", version="2.0.0", description="Optional local multilingual embeddings with an explicitly labeled Unicode lexical fallback.")
+provider = SimilarityProvider()
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
-# Global model holder
-model = None
-MODEL_NAME = os.getenv("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
-model_load_error = None
+def authorized(authorization: Optional[str] = Header(default=None)):
+    expected = os.getenv("AI_SERVICE_TOKEN")
+    if expected and not secrets.compare_digest(authorization or "", "Bearer " + expected):
+        raise HTTPException(status_code=401, detail="Service authentication required")
 
-try:
-    from sentence_transformers import SentenceTransformer, util
-    print(f"Loading SentenceTransformer: {MODEL_NAME}...")
-    model = SentenceTransformer(MODEL_NAME)
-    print("SentenceTransformer loaded successfully.")
-except Exception as e:
-    model_load_error = str(e)
-    print(f"SentenceTransformer not available in local environment: {e}")
-    print("Enabling built-in high-accuracy TF-IDF cosine similarity fallback.")
 
 class PairRequest(BaseModel):
-    text_a: str
-    text_b: str
+    text_a: str = Field(min_length=1, max_length=20000)
+    text_b: str = Field(min_length=1, max_length=20000)
+
 
 class Candidate(BaseModel):
-    id: str
-    text: str
+    id: str = Field(min_length=1, max_length=160)
+    text: str = Field(min_length=1, max_length=20000)
     category: Optional[str] = None
 
+
 class BatchRequest(BaseModel):
-    query_text: str
-    candidates: List[Candidate]
+    query_text: str = Field(min_length=1, max_length=20000)
+    candidates: list[Candidate] = Field(max_length=100)
 
-class MatchResult(BaseModel):
-    id: str
-    semantic_score: float
-    engine: str
-
-def fallback_cosine_similarity(text1: str, text2: str) -> float:
-    """Accurate word-frequency token cosine similarity with stopword filtering."""
-    import re
-    stopwords = {"the", "a", "an", "in", "on", "of", "to", "for", "at", "by", "from", "with", "and", "or", "is", "was", "are", "been"}
-    
-    def tokenize(t):
-        words = re.findall(r'\b[a-z0-9]+\b', t.lower())
-        return [w for w in words if w not in stopwords]
-    
-    tokens1 = tokenize(text1)
-    tokens2 = tokenize(text2)
-    
-    if not tokens1 or not tokens2:
-        return 0.0
-        
-    vec1 = {}
-    for t in tokens1:
-        vec1[t] = vec1.get(t, 0) + 1
-        
-    vec2 = {}
-    for t in tokens2:
-        vec2[t] = vec2.get(t, 0) + 1
-        
-    dot_product = sum(vec1[t] * vec2.get(t, 0) for t in vec1)
-    norm1 = math.sqrt(sum(v * v for v in vec1.values()))
-    norm2 = math.sqrt(sum(v * v for v in vec2.values()))
-    
-    if norm1 == 0 or norm2 == 0:
-        return 0.0
-    return float(dot_product / (norm1 * norm2))
 
 @app.get("/health")
 def health():
-    return {
-        "status": "healthy",
-        "service": "AICTE Semantic Similarity Engine",
-        "model_loaded": model is not None,
-        "model_name": MODEL_NAME if model else "TF-IDF Fallback",
-        "error": model_load_error
-    }
+    return {"status": "unavailable" if provider.mode == "unavailable" else "ready", "service": "Complain-Setu text similarity", **provider.metadata(),
+        "model_loaded": provider.model is not None, "configured_model": provider.model_id, "configured_revision": provider.revision, "error_code": provider.error_code,
+        "cache_entries": len(provider.cache), "provider": provider.provider}
 
-@app.post("/similarity/pair")
+
+@app.post("/similarity/pair", dependencies=[Depends(authorized)])
 def compute_pair_similarity(req: PairRequest):
-    if not req.text_a or not req.text_b:
-        raise HTTPException(status_code=400, detail="Both text_a and text_b are required")
-        
-    if model:
-        try:
-            embeddings = model.encode([req.text_a, req.text_b], convert_to_tensor=True)
-            score = float(util.cos_sim(embeddings[0], embeddings[1])[0][0])
-            score_pct = round(max(0.0, min(1.0, score)) * 100, 2)
-            return {
-                "similarity_score": score_pct,
-                "engine": "SentenceTransformer",
-                "model": MODEL_NAME
-            }
-        except Exception as e:
-            print(f"Inference error, reverting to fallback: {e}")
-            
-    sim = fallback_cosine_similarity(req.text_a, req.text_b)
-    return {
-        "similarity_score": round(sim * 100, 2),
-        "engine": "TF-IDF Fallback",
-        "model": "built-in"
-    }
+    result = provider.pair(req.text_a, req.text_b)
+    if result["mode"] == "unavailable":
+        raise HTTPException(status_code=503, detail="Text similarity unavailable")
+    return result
 
-@app.post("/similarity/batch", response_model=List[MatchResult])
+
+@app.post("/similarity/batch", dependencies=[Depends(authorized)])
 def compute_batch_similarity(req: BatchRequest):
-    if not req.candidates:
-        return []
-        
+    if sum(len(candidate.text) for candidate in req.candidates) > 200000:
+        raise HTTPException(status_code=413, detail="Candidate batch exceeds its text limit")
     results = []
-    if model:
-        try:
-            query_emb = model.encode(req.query_text, convert_to_tensor=True)
-            candidate_texts = [c.text for c in req.candidates]
-            cand_embs = model.encode(candidate_texts, convert_to_tensor=True)
-            cos_scores = util.cos_sim(query_emb, cand_embs)[0]
-            
-            for idx, candidate in enumerate(req.candidates):
-                score_pct = round(float(cos_scores[idx]) * 100, 2)
-                results.append(MatchResult(
-                    id=candidate.id,
-                    semantic_score=max(0.0, min(100.0, score_pct)),
-                    engine="SentenceTransformer"
-                ))
-            return sorted(results, key=lambda x: x.semantic_score, reverse=True)
-        except Exception as e:
-            print(f"Batch inference error: {e}")
-            
     for candidate in req.candidates:
-        sim = fallback_cosine_similarity(req.query_text, candidate.text)
-        results.append(MatchResult(
-            id=candidate.id,
-            semantic_score=round(sim * 100, 2),
-            engine="TF-IDF Fallback"
-        ))
-    return sorted(results, key=lambda x: x.semantic_score, reverse=True)
+        result = provider.pair(req.query_text, candidate.text)
+        if result["mode"] == "unavailable":
+            raise HTTPException(status_code=503, detail="Text similarity unavailable")
+        results.append({"id": candidate.id, "semantic_score": result["similarity_score"], **{key: value for key, value in result.items() if key != "similarity_score"}})
+    return sorted(results, key=lambda item: item["semantic_score"], reverse=True)
+
+
+fallback_cosine_similarity = lexical_cosine
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run(app, host=os.getenv("AI_BIND_HOST", "127.0.0.1"), port=int(os.getenv("AI_PORT", "8000")), reload=False, access_log=False)

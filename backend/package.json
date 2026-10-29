@@ -4,6 +4,11 @@
   "type": "module",
   "description": "AICTE Integrated Institution Complaint Monitoring and Status Dashboard Backend",
   "main": "dist/server.js",
+  "overrides": {
+    "exceljs": {
+      "uuid": "11.1.1"
+    }
+  },
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
@@ -11,18 +16,47 @@
     "test": "tsx src/tests/run_tests.ts && tsx src/tests/acceptance_tests.ts",
     "seed": "tsx src/db/seed.ts",
     "migrate": "tsx src/db/migrate.ts",
+    "migrate:plan": "tsx src/db/migrate.ts --plan",
+    "backfill:operational": "tsx src/db/backfill.ts",
+    "test:postgres": "tsx src/tests/postgres_integration.ts",
+    "test:intake": "tsx src/tests/intake_integration.ts",
+    "test:intake:postgres": "tsx src/tests/intake_integration.ts --postgres",
+    "identity:maintain": "tsx src/db/identityMaintenance.ts",
+    "test:security": "tsx src/tests/intake_integration.ts --security",
+    "test:security:postgres": "tsx src/tests/intake_integration.ts --security --postgres",
+    "test:language": "tsx src/tests/intake_integration.ts --language",
+    "test:language:postgres": "tsx src/tests/intake_integration.ts --language --postgres",
+    "evaluate:overlaps": "tsx src/evaluation/evaluate.ts",
+    "evaluate:generate": "tsx src/evaluation/generateDataset.ts",
+    "test:evaluation": "tsx src/evaluation/metrics_tests.ts",
+    "test:overlap": "tsx src/tests/overlap_signal_tests.ts && tsx src/tests/intake_integration.ts --overlap",
+    "test:overlap:postgres": "tsx src/tests/intake_integration.ts --overlap --postgres",
+    "test:family": "tsx src/tests/intake_integration.ts --family",
+    "test:family:postgres": "tsx src/tests/intake_integration.ts --family --postgres",
+    "test:imports": "tsx src/tests/intake_integration.ts --imports",
+    "test:imports:postgres": "tsx src/tests/intake_integration.ts --imports --postgres",
+    "test:audit": "tsx src/tests/audit_chain_tests.ts && tsx src/tests/intake_integration.ts --audit",
+    "test:audit:postgres": "tsx src/tests/intake_integration.ts --audit --postgres",
+    "test:reports": "tsx src/tests/intake_integration.ts --reports",
+    "test:reports:postgres": "tsx src/tests/intake_integration.ts --reports --postgres",
+    "test:sla": "tsx src/tests/sla_calendar_tests.ts && tsx src/tests/intake_integration.ts --sla",
+    "test:sla:postgres": "tsx src/tests/intake_integration.ts --sla --postgres",
     "test:rbac": "tsx src/tests/rbac_tests.ts"
   },
   "dependencies": {
     "@types/multer": "^2.3.0",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
+    "csv-parse": "7.0.3",
     "dotenv": "^16.4.7",
+    "exceljs": "4.4.0",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.5.0",
+    "pdfkit": "0.20.2",
     "pg": "^8.23.1",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    "yauzl": "3.4.0"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
@@ -30,8 +64,11 @@
     "@types/express": "^4.17.21",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^22.13.9",
+    "@types/pdfkit": "0.17.7",
     "@types/pg": "^8.23.1",
     "@types/uuid": "^10.0.0",
+    "@types/yauzl": "3.4.0",
+    "embedded-postgres": "18.4.0-beta.17",
     "tsx": "^4.19.3",
     "typescript": "^5.8.2"
   }

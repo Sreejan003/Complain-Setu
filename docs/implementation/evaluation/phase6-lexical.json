@@ -1,0 +1,2827 @@
+{
+  "datasetVersion": "synthetic-overlap-v1",
+  "datasetSha256": "c5c21d687497e053cc2017ef729d0c453f9f3c5b9a2350f8e5c24da7e6f7bc12",
+  "generatedAt": "2026-10-29T14:15:04.740Z",
+  "requestedMode": "lexical",
+  "metricsVersion": "candidate-class-union-v1",
+  "datasetSize": {
+    "pairs": 84,
+    "cases": 112,
+    "tuning": 60,
+    "heldout": 24,
+    "familyGroups": 28
+  },
+  "splitValidation": {
+    "familyDisjoint": true,
+    "exactTextDisjoint": true,
+    "smokeFamilyExcluded": true,
+    "smokeTextExclusionVerified": true
+  },
+  "labelReviewStatus": "draft_not_independently_reviewed",
+  "algorithm": "signals-v2",
+  "configuration": {
+    "id": "overlap-settings-1",
+    "version": 1,
+    "changedBy": "system-default",
+    "changedAt": "2026-01-01T00:00:00.000Z",
+    "reason": "Review-only defaults selected on 60 draft synthetic tuning pairs per mode; not independently reviewed or calibrated. Validate with reviewed local data before operational tuning.",
+    "algorithmVersion": "signals-v2",
+    "weights": {
+      "institution": 20,
+      "category": 15,
+      "programme": 10,
+      "reference": 15,
+      "entity": 10,
+      "text": 20,
+      "temporal": 5,
+      "crossBureau": 5
+    },
+    "dateWindowDays": 180,
+    "reviewScoreThreshold": 50,
+    "duplicateScoreThreshold": 85,
+    "lexicalRelatedThreshold": 40,
+    "lexicalDuplicateThreshold": 70,
+    "embeddingRelatedThreshold": 85,
+    "embeddingDuplicateThreshold": 90
+  },
+  "configurationSha256": "d7cc6ee6b19b17c63bcff7b14fd1d57a0430eb141cfcee0a747baf3aec3e9d6d",
+  "predictor": "signals-v2 relationshipCandidate maps to duplicate/related/unrelated-undetermined. Mandatory review is reported separately through flagged; undetermined is not a confirmed unrelated decision.",
+  "thresholdProtocol": "Deterministic threshold grid selected using only 60 tuning pairs per mode; weights/date window unchanged. Settings frozen before Phase 6 held-out evaluation, with no fitting on held-out labels. See phase6-tuning-selection.json. Different-institution gating is part of the pipeline, not an embedding result.",
+  "splits": {
+    "tuning": {
+      "sampleSize": 60,
+      "confusionMatrix": {
+        "rows": "expected",
+        "columns": "candidate_prediction",
+        "values": {
+          "duplicate": {
+            "duplicate": 5,
+            "related": 15,
+            "unrelated": 0
+          },
+          "related": {
+            "duplicate": 0,
+            "related": 20,
+            "unrelated": 0
+          },
+          "unrelated": {
+            "duplicate": 0,
+            "related": 6,
+            "unrelated": 14
+          }
+        }
+      },
+      "perClass": {
+        "duplicate": {
+          "support": 20,
+          "predicted": 5,
+          "precision": 1,
+          "recall": 0.25,
+          "f1": 0.4
+        },
+        "related": {
+          "support": 20,
+          "predicted": 41,
+          "precision": 0.4878048780487805,
+          "recall": 1,
+          "f1": 0.6557377049180327
+        },
+        "unrelated": {
+          "support": 20,
+          "predicted": 14,
+          "precision": 1,
+          "recall": 0.7,
+          "f1": 0.8235294117647058
+        }
+      },
+      "macroF1": 0.6264223722275796,
+      "macroPolicy": "Mean over labels with actual support or predictions; undefined precision/recall contributes zero for such a label. No samples -> null. Per-class absent denominators remain null.",
+      "candidateClassification": {
+        "macroPrecision": 0.8292682926829268,
+        "macroRecall": 0.65,
+        "macroF1": 0.6264223722275796,
+        "microPrecision": 0.65,
+        "microRecall": 0.65,
+        "microF1": 0.65
+      },
+      "reviewCandidateDetection": {
+        "precision": 0.8695652173913043,
+        "recall": 1,
+        "f1": 0.9302325581395349,
+        "tp": 40,
+        "fp": 6,
+        "fn": 0
+      },
+      "perMode": {
+        "lexical_fallback": {
+          "sampleSize": 53,
+          "confusionMatrix": {
+            "rows": "expected",
+            "columns": "candidate_prediction",
+            "values": {
+              "duplicate": {
+                "duplicate": 5,
+                "related": 15,
+                "unrelated": 0
+              },
+              "related": {
+                "duplicate": 0,
+                "related": 20,
+                "unrelated": 0
+              },
+              "unrelated": {
+                "duplicate": 0,
+                "related": 6,
+                "unrelated": 7
+              }
+            }
+          },
+          "perClass": {
+            "duplicate": {
+              "support": 20,
+              "predicted": 5,
+              "precision": 1,
+              "recall": 0.25,
+              "f1": 0.4
+            },
+            "related": {
+              "support": 20,
+              "predicted": 41,
+              "precision": 0.4878048780487805,
+              "recall": 1,
+              "f1": 0.6557377049180327
+            },
+            "unrelated": {
+              "support": 13,
+              "predicted": 7,
+              "precision": 1,
+              "recall": 0.5384615384615384,
+              "f1": 0.7
+            }
+          },
+          "macroF1": 0.5852459016393442,
+          "macroPolicy": "Mean over labels with actual support or predictions; undefined precision/recall contributes zero for such a label. No samples -> null. Per-class absent denominators remain null.",
+          "candidateClassification": {
+            "macroPrecision": 0.8292682926829268,
+            "macroRecall": 0.5961538461538461,
+            "macroF1": 0.5852459016393442,
+            "microPrecision": 0.6037735849056604,
+            "microRecall": 0.6037735849056604,
+            "microF1": 0.6037735849056604
+          },
+          "reviewCandidateDetection": {
+            "precision": 0.8695652173913043,
+            "recall": 1,
+            "f1": 0.9302325581395349,
+            "tp": 40,
+            "fp": 6,
+            "fn": 0
+          }
+        },
+        "not_compared_different_institution": {
+          "sampleSize": 7,
+          "confusionMatrix": {
+            "rows": "expected",
+            "columns": "candidate_prediction",
+            "values": {
+              "duplicate": {
+                "duplicate": 0,
+                "related": 0,
+                "unrelated": 0
+              },
+              "related": {
+                "duplicate": 0,
+                "related": 0,
+                "unrelated": 0
+              },
+              "unrelated": {
+                "duplicate": 0,
+                "related": 0,
+                "unrelated": 7
+              }
+            }
+          },
+          "perClass": {
+            "duplicate": {
+              "support": 0,
+              "predicted": 0,
+              "precision": null,
+              "recall": null,
+              "f1": null
+            },
+            "related": {
+              "support": 0,
+              "predicted": 0,
+              "precision": null,
+              "recall": null,
+              "f1": null
+            },
+            "unrelated": {
+              "support": 7,
+              "predicted": 7,
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            }
+          },
+          "macroF1": 1,
+          "macroPolicy": "Mean over labels with actual support or predictions; undefined precision/recall contributes zero for such a label. No samples -> null. Per-class absent denominators remain null.",
+          "candidateClassification": {
+            "macroPrecision": 1,
+            "macroRecall": 1,
+            "macroF1": 1,
+            "microPrecision": 1,
+            "microRecall": 1,
+            "microF1": 1
+          },
+          "reviewCandidateDetection": {
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "tp": 0,
+            "fp": 0,
+            "fn": 0
+          }
+        }
+      },
+      "perLanguage": {
+        "en→bn": {
+          "sampleSize": 6,
+          "confusionMatrix": {
+            "rows": "expected",
+            "columns": "candidate_prediction",
+            "values": {
+              "duplicate": {
+                "duplicate": 0,
+                "related": 2,
+                "unrelated": 0
+              },
+              "related": {
+                "duplicate": 0,
+                "related": 2,
+                "unrelated": 0
+              },
+              "unrelated": {
+                "duplicate": 0,
+                "related": 1,
+                "unrelated": 1
+              }
+            }
+          },
+          "perClass": {
+            "duplicate": {
+              "support": 2,
+              "predicted": 0,
+              "precision": null,
+              "recall": 0,
+              "f1": 0
+            },
+            "related": {
+              "support": 2,
+              "predicted": 5,
+              "precision": 0.4,
+              "recall": 1,
+              "f1": 0.5714285714285714
+            },
+            "unrelated": {
+              "support": 2,
+              "predicted": 1,
+              "precision": 1,
+              "recall": 0.5,
+              "f1": 0.6666666666666666
+            }
+          },
+          "macroF1": 0.41269841269841273,
+          "macroPolicy": "Mean over labels with actual support or predictions; undefined precision/recall contributes zero for such a label. No samples -> null. Per-class absent denominators remain null.",
+          "candidateClassification": {
+            "macroPrecision": 0.4666666666666666,
+            "macroRecall": 0.5,
+            "macroF1": 0.41269841269841273,
+            "microPrecision": 0.5,
+            "microRecall": 0.5,
+            "microF1": 0.5
+          },
+          "reviewCandidateDetection": {
+            "precision": 0.8,
+            "recall": 1,
+            "f1": 0.8888888888888888,
+            "tp": 4,
+            "fp": 1,
+            "fn": 0
+          }
+        },
+        "en→en": {
+          "sampleSize": 9,
+          "confusionMatrix": {
+            "rows": "expected",
+            "columns": "candidate_prediction",
+            "values": {
+              "duplicate": {
+                "duplicate": 3,
+                "related": 0,
+                "unrelated": 0
+              },
+              "related": {
+                "duplicate": 0,
+                "related": 3,
+                "unrelated": 0
+              },
+              "unrelated": {
+                "duplicate": 0,
+                "related": 1,
+                "unrelated": 2
+              }
+            }
+          },
+          "perClass": {
+            "duplicate": {
+              "support": 3,
+              "predicted": 3,
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "related": {
+              "support": 3,
+              "predicted": 4,
+              "precision": 0.75,
+              "recall": 1,
+              "f1": 0.8571428571428571
+            },
+            "unrelated": {
+              "support": 3,
+              "predicted": 2,
+              "precision": 1,
+              "recall": 0.6666666666666666,
+              "f1": 0.8
+            }
+          },
+          "macroF1": 0.8857142857142858,
+          "macroPolicy": "Mean over labels with actual support or predictions; undefined precision/recall contributes zero for such a label. No samples -> null. Per-class absent denominators remain null.",
+          "candidateClassification": {
+            "macroPrecision": 0.9166666666666666,
+            "macroRecall": 0.8888888888888888,
+            "macroF1": 0.8857142857142858,
+            "microPrecision": 0.8888888888888888,
+            "microRecall": 0.8888888888888888,
+            "microF1": 0.8888888888888888
+          },
+          "reviewCandidateDetection": {
+            "precision": 0.8571428571428571,
+            "recall": 1,
+            "f1": 0.9230769230769231,
+            "tp": 6,
+            "fp": 1,
+            "fn": 0
+          }
+        },
+        "en→gu": {
+          "sampleSize": 9,
+          "confusionMatrix": {
+            "rows": "expected",
+            "columns": "candidate_prediction",
+            "values": {
+              "duplicate": {
+                "duplicate": 0,
+                "related": 3,
+                "unrelated": 0
+              },
+              "related": {
+                "duplicate": 0,
+                "related": 3,
+                "unrelated": 0
+              },
+              "unrelated": {
+                "duplicate": 0,
+                "related": 1,
+                "unrelated": 2
+              }
+            }
+          },
+          "perClass": {
+            "duplicate": {
+              "support": 3,
+              "predicted": 0,
+              "precision": null,
+              "recall": 0,
+              "f1": 0
+            },
+            "related": {
+              "support": 3,
+              "predicted": 7,
+              "precision": 0.42857142857142855,
+              "recall": 1,
+              "f1": 0.6
+            },
+            "unrelated": {
+              "support": 3,
+              "predicted": 2,
+              "precision": 1,
+              "recall": 0.6666666666666666,
+              "f1": 0.8
+            }
+          },
+          "macroF1": 0.4666666666666666,
+          "macroPolicy": "Mean over labels with actual support or predictions; undefined precision/recall contributes zero for such a label. No samples -> null. Per-class absent denominators remain null.",
+          "candidateClassification": {
+            "macroPrecision": 0.4761904761904762,
+            "macroRecall": 0.5555555555555555,
+            "macroF1": 0.4666666666666666,
+            "microPrecision": 0.5555555555555556,
+            "microRecall": 0.5555555555555556,
+            "microF1": 0.5555555555555556
+          },
+          "reviewCandidateDetection": {
+            "precision": 0.8571428571428571,
+            "recall": 1,
+            "f1": 0.9230769230769231,
+            "tp": 6,
+            "fp": 1,
+            "fn": 0
+          }
+        },
+        "en→hi": {
+          "sampleSize": 9,
+          "confusionMatrix": {
+            "rows": "expected",
+            "columns": "candidate_prediction",
+            "values": {
+              "duplicate": {
+                "duplicate": 0,
+                "related": 3,
+                "unrelated": 0
+              },
+              "related": {
+                "duplicate": 0,
+                "related": 3,
+                "unrelated": 0
+              },
+              "unrelated": {
+                "duplicate": 0,
+                "related": 1,
+                "unrelated": 2
+              }
+            }
+          },
+          "perClass": {
+            "duplicate": {
+              "support": 3,
+              "predicted": 0,
+              "precision": null,
+              "recall": 0,
+              "f1": 0
+            },
+            "related": {
+              "support": 3,
+              "predicted": 7,
+              "precision": 0.42857142857142855,
+              "recall": 1,
+              "f1": 0.6
+            },
+            "unrelated": {
+              "support": 3,
+              "predicted": 2,
+              "precision": 1,
+              "recall": 0.6666666666666666,
+              "f1": 0.8
+            }
+          },
+          "macroF1": 0.4666666666666666,
+          "macroPolicy": "Mean over labels with actual support or predictions; undefined precision/recall contributes zero for such a label. No samples -> null. Per-class absent denominators remain null.",
+          "candidateClassification": {
+            "macroPrecision": 0.4761904761904762,
+            "macroRecall": 0.5555555555555555,
+            "macroF1": 0.4666666666666666,
+            "microPrecision": 0.5555555555555556,
+            "microRecall": 0.5555555555555556,
+            "microF1": 0.5555555555555556
+          },
+          "reviewCandidateDetection": {
+            "precision": 0.8571428571428571,
+            "recall": 1,
+            "f1": 0.9230769230769231,
+            "tp": 6,
+            "fp": 1,
+            "fn": 0
+          }
+        },
+        "en→kn": {
+          "sampleSize": 6,
+          "confusionMatrix": {
+            "rows": "expected",
+            "columns": "candidate_prediction",
+            "values": {
+              "duplicate": {
+                "duplicate": 0,
+                "related": 2,
+                "unrelated": 0
+              },
+              "related": {
+                "duplicate": 0,
+                "related": 2,
+                "unrelated": 0
+              },
+              "unrelated": {
+                "duplicate": 0,
+                "related": 1,
+                "unrelated": 1
+              }
+            }
+          },
+          "perClass": {
+            "duplicate": {
+              "support": 2,
+              "predicted": 0,
+              "precision": null,
+              "recall": 0,
+              "f1": 0
+            },
+            "related": {
+              "support": 2,
+              "predicted": 5,
+              "precision": 0.4,
+              "recall": 1,
+              "f1": 0.5714285714285714
+            },
+            "unrelated": {
+              "support": 2,
+              "predicted": 1,
+              "precision": 1,
+              "recall": 0.5,
+              "f1": 0.6666666666666666
+            }
+          },
+          "macroF1": 0.41269841269841273,
+          "macroPolicy": "Mean over labels with actual support or predictions; undefined precision/recall contributes zero for such a label. No samples -> null. Per-class absent denominators remain null.",
+          "candidateClassification": {
+            "macroPrecision": 0.4666666666666666,
+            "macroRecall": 0.5,
+            "macroF1": 0.41269841269841273,
+            "microPrecision": 0.5,
+            "microRecall": 0.5,
+            "microF1": 0.5
+          },
+          "reviewCandidateDetection": {
+            "precision": 0.8,
+            "recall": 1,
+            "f1": 0.8888888888888888,
+            "tp": 4,
+            "fp": 1,
+            "fn": 0
+          }
+        },
+        "en→mixed": {
+          "sampleSize": 6,
+          "confusionMatrix": {
+            "rows": "expected",
+            "columns": "candidate_prediction",
+            "values": {
+              "duplicate": {
+                "duplicate": 2,
+                "related": 0,
+                "unrelated": 0
+              },
+              "related": {
+                "duplicate": 0,
+                "related": 2,
+                "unrelated": 0
+              },
+              "unrelated": {
+                "duplicate": 0,
+                "related": 0,
+                "unrelated": 2
+              }
+            }
+          },
+          "perClass": {
+            "duplicate": {
+              "support": 2,
+              "predicted": 2,
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "related": {
+              "support": 2,
+              "predicted": 2,
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "unrelated": {
+              "support": 2,
+              "predicted": 2,
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            }
+          },
+          "macroF1": 1,
+          "macroPolicy": "Mean over labels with actual support or predictions; undefined precision/recall contributes zero for such a label. No samples -> null. Per-class absent denominators remain null.",
+          "candidateClassification": {
+            "macroPrecision": 1,
+            "macroRecall": 1,
+            "macroF1": 1,
+            "microPrecision": 1,
+            "microRecall": 1,
+            "microF1": 1
+          },
+          "reviewCandidateDetection": {
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "tp": 4,
+            "fp": 0,
+            "fn": 0
+          }
+        },
+        "en→ta": {
+          "sampleSize": 9,
+          "confusionMatrix": {
+            "rows": "expected",
+            "columns": "candidate_prediction",
+            "values": {
+              "duplicate": {
+                "duplicate": 0,
+                "related": 3,
+                "unrelated": 0
+              },
+              "related": {
+                "duplicate": 0,
+                "related": 3,
+                "unrelated": 0
+              },
+              "unrelated": {
+                "duplicate": 0,
+                "related": 1,
+                "unrelated": 2
+              }
+            }
+          },
+          "perClass": {
+            "duplicate": {
+              "support": 3,
+              "predicted": 0,
+              "precision": null,
+              "recall": 0,
+              "f1": 0
+            },
+            "related": {
+              "support": 3,
+              "predicted": 7,
+              "precision": 0.42857142857142855,
+              "recall": 1,
+              "f1": 0.6
+            },
+            "unrelated": {
+              "support": 3,
+              "predicted": 2,
+              "precision": 1,
+              "recall": 0.6666666666666666,
+              "f1": 0.8
+            }
+          },
+          "macroF1": 0.4666666666666666,
+          "macroPolicy": "Mean over labels with actual support or predictions; undefined precision/recall contributes zero for such a label. No samples -> null. Per-class absent denominators remain null.",
+          "candidateClassification": {
+            "macroPrecision": 0.4761904761904762,
+            "macroRecall": 0.5555555555555555,
+            "macroF1": 0.4666666666666666,
+            "microPrecision": 0.5555555555555556,
+            "microRecall": 0.5555555555555556,
+            "microF1": 0.5555555555555556
+          },
+          "reviewCandidateDetection": {
+            "precision": 0.8571428571428571,
+            "recall": 1,
+            "f1": 0.9230769230769231,
+            "tp": 6,
+            "fp": 1,
+            "fn": 0
+          }
+        },
+        "en→te": {
+          "sampleSize": 6,
+          "confusionMatrix": {
+            "rows": "expected",
+            "columns": "candidate_prediction",
+            "values": {
+              "duplicate": {
+                "duplicate": 0,
+                "related": 2,
+                "unrelated": 0
+              },
+              "related": {
+                "duplicate": 0,
+                "related": 2,
+                "unrelated": 0
+              },
+              "unrelated": {
+                "duplicate": 0,
+                "related": 0,
+                "unrelated": 2
+              }
+            }
+          },
+          "perClass": {
+            "duplicate": {
+              "support": 2,
+              "predicted": 0,
+              "precision": null,
+              "recall": 0,
+              "f1": 0
+            },
+            "related": {
+              "support": 2,
+              "predicted": 4,
+              "precision": 0.5,
+              "recall": 1,
+              "f1": 0.6666666666666666
+            },
+            "unrelated": {
+              "support": 2,
+              "predicted": 2,
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            }
+          },
+          "macroF1": 0.5555555555555555,
+          "macroPolicy": "Mean over labels with actual support or predictions; undefined precision/recall contributes zero for such a label. No samples -> null. Per-class absent denominators remain null.",
+          "candidateClassification": {
+            "macroPrecision": 0.5,
+            "macroRecall": 0.6666666666666666,
+            "macroF1": 0.5555555555555555,
+            "microPrecision": 0.6666666666666666,
+            "microRecall": 0.6666666666666666,
+            "microF1": 0.6666666666666666
+          },
+          "reviewCandidateDetection": {
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "tp": 4,
+            "fp": 0,
+            "fn": 0
+          }
+        }
+      }
+    },
+    "heldout": {
+      "sampleSize": 24,
+      "confusionMatrix": {
+        "rows": "expected",
+        "columns": "candidate_prediction",
+        "values": {
+          "duplicate": {
+            "duplicate": 2,
+            "related": 6,
+            "unrelated": 0
+          },
+          "related": {
+            "duplicate": 0,
+            "related": 8,
+            "unrelated": 0
+          },
+          "unrelated": {
+            "duplicate": 0,
+            "related": 3,
+            "unrelated": 5
+          }
+        }
+      },
+      "perClass": {
+        "duplicate": {
+          "support": 8,
+          "predicted": 2,
+          "precision": 1,
+          "recall": 0.25,
+          "f1": 0.4
+        },
+        "related": {
+          "support": 8,
+          "predicted": 17,
+          "precision": 0.47058823529411764,
+          "recall": 1,
+          "f1": 0.64
+        },
+        "unrelated": {
+          "support": 8,
+          "predicted": 5,
+          "precision": 1,
+          "recall": 0.625,
+          "f1": 0.7692307692307693
+        }
+      },
+      "macroF1": 0.6030769230769231,
+      "macroPolicy": "Mean over labels with actual support or predictions; undefined precision/recall contributes zero for such a label. No samples -> null. Per-class absent denominators remain null.",
+      "candidateClassification": {
+        "macroPrecision": 0.823529411764706,
+        "macroRecall": 0.625,
+        "macroF1": 0.6030769230769231,
+        "microPrecision": 0.625,
+        "microRecall": 0.625,
+        "microF1": 0.625
+      },
+      "reviewCandidateDetection": {
+        "precision": 0.8421052631578947,
+        "recall": 1,
+        "f1": 0.9142857142857143,
+        "tp": 16,
+        "fp": 3,
+        "fn": 0
+      },
+      "perMode": {
+        "lexical_fallback": {
+          "sampleSize": 21,
+          "confusionMatrix": {
+            "rows": "expected",
+            "columns": "candidate_prediction",
+            "values": {
+              "duplicate": {
+                "duplicate": 2,
+                "related": 6,
+                "unrelated": 0
+              },
+              "related": {
+                "duplicate": 0,
+                "related": 8,
+                "unrelated": 0
+              },
+              "unrelated": {
+                "duplicate": 0,
+                "related": 3,
+                "unrelated": 2
+              }
+            }
+          },
+          "perClass": {
+            "duplicate": {
+              "support": 8,
+              "predicted": 2,
+              "precision": 1,
+              "recall": 0.25,
+              "f1": 0.4
+            },
+            "related": {
+              "support": 8,
+              "predicted": 17,
+              "precision": 0.47058823529411764,
+              "recall": 1,
+              "f1": 0.64
+            },
+            "unrelated": {
+              "support": 5,
+              "predicted": 2,
+              "precision": 1,
+              "recall": 0.4,
+              "f1": 0.5714285714285714
+            }
+          },
+          "macroF1": 0.5371428571428571,
+          "macroPolicy": "Mean over labels with actual support or predictions; undefined precision/recall contributes zero for such a label. No samples -> null. Per-class absent denominators remain null.",
+          "candidateClassification": {
+            "macroPrecision": 0.823529411764706,
+            "macroRecall": 0.5499999999999999,
+            "macroF1": 0.5371428571428571,
+            "microPrecision": 0.5714285714285714,
+            "microRecall": 0.5714285714285714,
+            "microF1": 0.5714285714285714
+          },
+          "reviewCandidateDetection": {
+            "precision": 0.8421052631578947,
+            "recall": 1,
+            "f1": 0.9142857142857143,
+            "tp": 16,
+            "fp": 3,
+            "fn": 0
+          }
+        },
+        "not_compared_different_institution": {
+          "sampleSize": 3,
+          "confusionMatrix": {
+            "rows": "expected",
+            "columns": "candidate_prediction",
+            "values": {
+              "duplicate": {
+                "duplicate": 0,
+                "related": 0,
+                "unrelated": 0
+              },
+              "related": {
+                "duplicate": 0,
+                "related": 0,
+                "unrelated": 0
+              },
+              "unrelated": {
+                "duplicate": 0,
+                "related": 0,
+                "unrelated": 3
+              }
+            }
+          },
+          "perClass": {
+            "duplicate": {
+              "support": 0,
+              "predicted": 0,
+              "precision": null,
+              "recall": null,
+              "f1": null
+            },
+            "related": {
+              "support": 0,
+              "predicted": 0,
+              "precision": null,
+              "recall": null,
+              "f1": null
+            },
+            "unrelated": {
+              "support": 3,
+              "predicted": 3,
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            }
+          },
+          "macroF1": 1,
+          "macroPolicy": "Mean over labels with actual support or predictions; undefined precision/recall contributes zero for such a label. No samples -> null. Per-class absent denominators remain null.",
+          "candidateClassification": {
+            "macroPrecision": 1,
+            "macroRecall": 1,
+            "macroF1": 1,
+            "microPrecision": 1,
+            "microRecall": 1,
+            "microF1": 1
+          },
+          "reviewCandidateDetection": {
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "tp": 0,
+            "fp": 0,
+            "fn": 0
+          }
+        }
+      },
+      "perLanguage": {
+        "en→bn": {
+          "sampleSize": 3,
+          "confusionMatrix": {
+            "rows": "expected",
+            "columns": "candidate_prediction",
+            "values": {
+              "duplicate": {
+                "duplicate": 0,
+                "related": 1,
+                "unrelated": 0
+              },
+              "related": {
+                "duplicate": 0,
+                "related": 1,
+                "unrelated": 0
+              },
+              "unrelated": {
+                "duplicate": 0,
+                "related": 0,
+                "unrelated": 1
+              }
+            }
+          },
+          "perClass": {
+            "duplicate": {
+              "support": 1,
+              "predicted": 0,
+              "precision": null,
+              "recall": 0,
+              "f1": 0
+            },
+            "related": {
+              "support": 1,
+              "predicted": 2,
+              "precision": 0.5,
+              "recall": 1,
+              "f1": 0.6666666666666666
+            },
+            "unrelated": {
+              "support": 1,
+              "predicted": 1,
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            }
+          },
+          "macroF1": 0.5555555555555555,
+          "macroPolicy": "Mean over labels with actual support or predictions; undefined precision/recall contributes zero for such a label. No samples -> null. Per-class absent denominators remain null.",
+          "candidateClassification": {
+            "macroPrecision": 0.5,
+            "macroRecall": 0.6666666666666666,
+            "macroF1": 0.5555555555555555,
+            "microPrecision": 0.6666666666666666,
+            "microRecall": 0.6666666666666666,
+            "microF1": 0.6666666666666666
+          },
+          "reviewCandidateDetection": {
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "tp": 2,
+            "fp": 0,
+            "fn": 0
+          }
+        },
+        "en→en": {
+          "sampleSize": 3,
+          "confusionMatrix": {
+            "rows": "expected",
+            "columns": "candidate_prediction",
+            "values": {
+              "duplicate": {
+                "duplicate": 1,
+                "related": 0,
+                "unrelated": 0
+              },
+              "related": {
+                "duplicate": 0,
+                "related": 1,
+                "unrelated": 0
+              },
+              "unrelated": {
+                "duplicate": 0,
+                "related": 0,
+                "unrelated": 1
+              }
+            }
+          },
+          "perClass": {
+            "duplicate": {
+              "support": 1,
+              "predicted": 1,
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "related": {
+              "support": 1,
+              "predicted": 1,
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "unrelated": {
+              "support": 1,
+              "predicted": 1,
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            }
+          },
+          "macroF1": 1,
+          "macroPolicy": "Mean over labels with actual support or predictions; undefined precision/recall contributes zero for such a label. No samples -> null. Per-class absent denominators remain null.",
+          "candidateClassification": {
+            "macroPrecision": 1,
+            "macroRecall": 1,
+            "macroF1": 1,
+            "microPrecision": 1,
+            "microRecall": 1,
+            "microF1": 1
+          },
+          "reviewCandidateDetection": {
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "tp": 2,
+            "fp": 0,
+            "fn": 0
+          }
+        },
+        "en→gu": {
+          "sampleSize": 3,
+          "confusionMatrix": {
+            "rows": "expected",
+            "columns": "candidate_prediction",
+            "values": {
+              "duplicate": {
+                "duplicate": 0,
+                "related": 1,
+                "unrelated": 0
+              },
+              "related": {
+                "duplicate": 0,
+                "related": 1,
+                "unrelated": 0
+              },
+              "unrelated": {
+                "duplicate": 0,
+                "related": 1,
+                "unrelated": 0
+              }
+            }
+          },
+          "perClass": {
+            "duplicate": {
+              "support": 1,
+              "predicted": 0,
+              "precision": null,
+              "recall": 0,
+              "f1": 0
+            },
+            "related": {
+              "support": 1,
+              "predicted": 3,
+              "precision": 0.3333333333333333,
+              "recall": 1,
+              "f1": 0.5
+            },
+            "unrelated": {
+              "support": 1,
+              "predicted": 0,
+              "precision": null,
+              "recall": 0,
+              "f1": 0
+            }
+          },
+          "macroF1": 0.16666666666666666,
+          "macroPolicy": "Mean over labels with actual support or predictions; undefined precision/recall contributes zero for such a label. No samples -> null. Per-class absent denominators remain null.",
+          "candidateClassification": {
+            "macroPrecision": 0.1111111111111111,
+            "macroRecall": 0.3333333333333333,
+            "macroF1": 0.16666666666666666,
+            "microPrecision": 0.3333333333333333,
+            "microRecall": 0.3333333333333333,
+            "microF1": 0.3333333333333333
+          },
+          "reviewCandidateDetection": {
+            "precision": 0.6666666666666666,
+            "recall": 1,
+            "f1": 0.8,
+            "tp": 2,
+            "fp": 1,
+            "fn": 0
+          }
+        },
+        "en→hi": {
+          "sampleSize": 3,
+          "confusionMatrix": {
+            "rows": "expected",
+            "columns": "candidate_prediction",
+            "values": {
+              "duplicate": {
+                "duplicate": 0,
+                "related": 1,
+                "unrelated": 0
+              },
+              "related": {
+                "duplicate": 0,
+                "related": 1,
+                "unrelated": 0
+              },
+              "unrelated": {
+                "duplicate": 0,
+                "related": 0,
+                "unrelated": 1
+              }
+            }
+          },
+          "perClass": {
+            "duplicate": {
+              "support": 1,
+              "predicted": 0,
+              "precision": null,
+              "recall": 0,
+              "f1": 0
+            },
+            "related": {
+              "support": 1,
+              "predicted": 2,
+              "precision": 0.5,
+              "recall": 1,
+              "f1": 0.6666666666666666
+            },
+            "unrelated": {
+              "support": 1,
+              "predicted": 1,
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            }
+          },
+          "macroF1": 0.5555555555555555,
+          "macroPolicy": "Mean over labels with actual support or predictions; undefined precision/recall contributes zero for such a label. No samples -> null. Per-class absent denominators remain null.",
+          "candidateClassification": {
+            "macroPrecision": 0.5,
+            "macroRecall": 0.6666666666666666,
+            "macroF1": 0.5555555555555555,
+            "microPrecision": 0.6666666666666666,
+            "microRecall": 0.6666666666666666,
+            "microF1": 0.6666666666666666
+          },
+          "reviewCandidateDetection": {
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "tp": 2,
+            "fp": 0,
+            "fn": 0
+          }
+        },
+        "en→kn": {
+          "sampleSize": 3,
+          "confusionMatrix": {
+            "rows": "expected",
+            "columns": "candidate_prediction",
+            "values": {
+              "duplicate": {
+                "duplicate": 0,
+                "related": 1,
+                "unrelated": 0
+              },
+              "related": {
+                "duplicate": 0,
+                "related": 1,
+                "unrelated": 0
+              },
+              "unrelated": {
+                "duplicate": 0,
+                "related": 0,
+                "unrelated": 1
+              }
+            }
+          },
+          "perClass": {
+            "duplicate": {
+              "support": 1,
+              "predicted": 0,
+              "precision": null,
+              "recall": 0,
+              "f1": 0
+            },
+            "related": {
+              "support": 1,
+              "predicted": 2,
+              "precision": 0.5,
+              "recall": 1,
+              "f1": 0.6666666666666666
+            },
+            "unrelated": {
+              "support": 1,
+              "predicted": 1,
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            }
+          },
+          "macroF1": 0.5555555555555555,
+          "macroPolicy": "Mean over labels with actual support or predictions; undefined precision/recall contributes zero for such a label. No samples -> null. Per-class absent denominators remain null.",
+          "candidateClassification": {
+            "macroPrecision": 0.5,
+            "macroRecall": 0.6666666666666666,
+            "macroF1": 0.5555555555555555,
+            "microPrecision": 0.6666666666666666,
+            "microRecall": 0.6666666666666666,
+            "microF1": 0.6666666666666666
+          },
+          "reviewCandidateDetection": {
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "tp": 2,
+            "fp": 0,
+            "fn": 0
+          }
+        },
+        "en→mixed": {
+          "sampleSize": 3,
+          "confusionMatrix": {
+            "rows": "expected",
+            "columns": "candidate_prediction",
+            "values": {
+              "duplicate": {
+                "duplicate": 1,
+                "related": 0,
+                "unrelated": 0
+              },
+              "related": {
+                "duplicate": 0,
+                "related": 1,
+                "unrelated": 0
+              },
+              "unrelated": {
+                "duplicate": 0,
+                "related": 1,
+                "unrelated": 0
+              }
+            }
+          },
+          "perClass": {
+            "duplicate": {
+              "support": 1,
+              "predicted": 1,
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "related": {
+              "support": 1,
+              "predicted": 2,
+              "precision": 0.5,
+              "recall": 1,
+              "f1": 0.6666666666666666
+            },
+            "unrelated": {
+              "support": 1,
+              "predicted": 0,
+              "precision": null,
+              "recall": 0,
+              "f1": 0
+            }
+          },
+          "macroF1": 0.5555555555555555,
+          "macroPolicy": "Mean over labels with actual support or predictions; undefined precision/recall contributes zero for such a label. No samples -> null. Per-class absent denominators remain null.",
+          "candidateClassification": {
+            "macroPrecision": 0.5,
+            "macroRecall": 0.6666666666666666,
+            "macroF1": 0.5555555555555555,
+            "microPrecision": 0.6666666666666666,
+            "microRecall": 0.6666666666666666,
+            "microF1": 0.6666666666666666
+          },
+          "reviewCandidateDetection": {
+            "precision": 0.6666666666666666,
+            "recall": 1,
+            "f1": 0.8,
+            "tp": 2,
+            "fp": 1,
+            "fn": 0
+          }
+        },
+        "en→ta": {
+          "sampleSize": 3,
+          "confusionMatrix": {
+            "rows": "expected",
+            "columns": "candidate_prediction",
+            "values": {
+              "duplicate": {
+                "duplicate": 0,
+                "related": 1,
+                "unrelated": 0
+              },
+              "related": {
+                "duplicate": 0,
+                "related": 1,
+                "unrelated": 0
+              },
+              "unrelated": {
+                "duplicate": 0,
+                "related": 0,
+                "unrelated": 1
+              }
+            }
+          },
+          "perClass": {
+            "duplicate": {
+              "support": 1,
+              "predicted": 0,
+              "precision": null,
+              "recall": 0,
+              "f1": 0
+            },
+            "related": {
+              "support": 1,
+              "predicted": 2,
+              "precision": 0.5,
+              "recall": 1,
+              "f1": 0.6666666666666666
+            },
+            "unrelated": {
+              "support": 1,
+              "predicted": 1,
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            }
+          },
+          "macroF1": 0.5555555555555555,
+          "macroPolicy": "Mean over labels with actual support or predictions; undefined precision/recall contributes zero for such a label. No samples -> null. Per-class absent denominators remain null.",
+          "candidateClassification": {
+            "macroPrecision": 0.5,
+            "macroRecall": 0.6666666666666666,
+            "macroF1": 0.5555555555555555,
+            "microPrecision": 0.6666666666666666,
+            "microRecall": 0.6666666666666666,
+            "microF1": 0.6666666666666666
+          },
+          "reviewCandidateDetection": {
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "tp": 2,
+            "fp": 0,
+            "fn": 0
+          }
+        },
+        "en→te": {
+          "sampleSize": 3,
+          "confusionMatrix": {
+            "rows": "expected",
+            "columns": "candidate_prediction",
+            "values": {
+              "duplicate": {
+                "duplicate": 0,
+                "related": 1,
+                "unrelated": 0
+              },
+              "related": {
+                "duplicate": 0,
+                "related": 1,
+                "unrelated": 0
+              },
+              "unrelated": {
+                "duplicate": 0,
+                "related": 1,
+                "unrelated": 0
+              }
+            }
+          },
+          "perClass": {
+            "duplicate": {
+              "support": 1,
+              "predicted": 0,
+              "precision": null,
+              "recall": 0,
+              "f1": 0
+            },
+            "related": {
+              "support": 1,
+              "predicted": 3,
+              "precision": 0.3333333333333333,
+              "recall": 1,
+              "f1": 0.5
+            },
+            "unrelated": {
+              "support": 1,
+              "predicted": 0,
+              "precision": null,
+              "recall": 0,
+              "f1": 0
+            }
+          },
+          "macroF1": 0.16666666666666666,
+          "macroPolicy": "Mean over labels with actual support or predictions; undefined precision/recall contributes zero for such a label. No samples -> null. Per-class absent denominators remain null.",
+          "candidateClassification": {
+            "macroPrecision": 0.1111111111111111,
+            "macroRecall": 0.3333333333333333,
+            "macroF1": 0.16666666666666666,
+            "microPrecision": 0.3333333333333333,
+            "microRecall": 0.3333333333333333,
+            "microF1": 0.3333333333333333
+          },
+          "reviewCandidateDetection": {
+            "precision": 0.6666666666666666,
+            "recall": 1,
+            "f1": 0.8,
+            "tp": 2,
+            "fp": 1,
+            "fn": 0
+          }
+        }
+      }
+    }
+  },
+  "limitations": "Synthetic template-based draft labels/translation; no independent native or subject-matter review. Small held-out language groups; no production accuracy claim, statistical confidence claim or training on held-out data.",
+  "rows": [
+    {
+      "id": "EVAL-001-duplicate",
+      "split": "tuning",
+      "expected": "duplicate",
+      "predicted": "duplicate",
+      "mode": "lexical_fallback",
+      "language": "en→en",
+      "combinedScore": 90,
+      "textScore": 100,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 7.79
+    },
+    {
+      "id": "EVAL-001-related",
+      "split": "tuning",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→en",
+      "combinedScore": 61,
+      "textScore": 76.38,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.42
+    },
+    {
+      "id": "EVAL-001-unrelated",
+      "split": "tuning",
+      "expected": "unrelated",
+      "predicted": "unrelated",
+      "mode": "not_compared_different_institution",
+      "language": "en→en",
+      "combinedScore": 0,
+      "ruleScore": 0,
+      "flagged": false,
+      "model": "none",
+      "revision": "none",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.27
+    },
+    {
+      "id": "EVAL-002-duplicate",
+      "split": "tuning",
+      "expected": "duplicate",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→hi",
+      "combinedScore": 78,
+      "textScore": 44.56,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 1.44
+    },
+    {
+      "id": "EVAL-002-related",
+      "split": "tuning",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→hi",
+      "combinedScore": 54,
+      "textScore": 42.81,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.46
+    },
+    {
+      "id": "EVAL-002-unrelated",
+      "split": "tuning",
+      "expected": "unrelated",
+      "predicted": "unrelated",
+      "mode": "lexical_fallback",
+      "language": "en→hi",
+      "combinedScore": 51,
+      "textScore": 31.53,
+      "ruleScore": 57,
+      "flagged": false,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.44
+    },
+    {
+      "id": "EVAL-003-duplicate",
+      "split": "tuning",
+      "expected": "duplicate",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→gu",
+      "combinedScore": 79,
+      "textScore": 51.62,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.38
+    },
+    {
+      "id": "EVAL-003-related",
+      "split": "tuning",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→gu",
+      "combinedScore": 54,
+      "textScore": 45.06,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.39
+    },
+    {
+      "id": "EVAL-003-unrelated",
+      "split": "tuning",
+      "expected": "unrelated",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→gu",
+      "combinedScore": 72,
+      "textScore": 50.08,
+      "ruleScore": 79,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.38
+    },
+    {
+      "id": "EVAL-004-duplicate",
+      "split": "tuning",
+      "expected": "duplicate",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→ta",
+      "combinedScore": 78,
+      "textScore": 46.17,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.64
+    },
+    {
+      "id": "EVAL-004-related",
+      "split": "tuning",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→ta",
+      "combinedScore": 55,
+      "textScore": 46.17,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.47
+    },
+    {
+      "id": "EVAL-004-unrelated",
+      "split": "tuning",
+      "expected": "unrelated",
+      "predicted": "unrelated",
+      "mode": "not_compared_different_institution",
+      "language": "en→ta",
+      "combinedScore": 0,
+      "ruleScore": 0,
+      "flagged": false,
+      "model": "none",
+      "revision": "none",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.37
+    },
+    {
+      "id": "EVAL-005-duplicate",
+      "split": "tuning",
+      "expected": "duplicate",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→te",
+      "combinedScore": 80,
+      "textScore": 56.36,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.34
+    },
+    {
+      "id": "EVAL-005-related",
+      "split": "tuning",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→te",
+      "combinedScore": 56,
+      "textScore": 50.08,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.37
+    },
+    {
+      "id": "EVAL-005-unrelated",
+      "split": "tuning",
+      "expected": "unrelated",
+      "predicted": "unrelated",
+      "mode": "lexical_fallback",
+      "language": "en→te",
+      "combinedScore": 53,
+      "textScore": 37.96,
+      "ruleScore": 57,
+      "flagged": false,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.44
+    },
+    {
+      "id": "EVAL-006-duplicate",
+      "split": "tuning",
+      "expected": "duplicate",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→bn",
+      "combinedScore": 79,
+      "textScore": 51.62,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.39
+    },
+    {
+      "id": "EVAL-006-related",
+      "split": "tuning",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→bn",
+      "combinedScore": 55,
+      "textScore": 47.37,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.37
+    },
+    {
+      "id": "EVAL-006-unrelated",
+      "split": "tuning",
+      "expected": "unrelated",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→bn",
+      "combinedScore": 72,
+      "textScore": 50.08,
+      "ruleScore": 79,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.31
+    },
+    {
+      "id": "EVAL-007-duplicate",
+      "split": "tuning",
+      "expected": "duplicate",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→kn",
+      "combinedScore": 78,
+      "textScore": 47.43,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.38
+    },
+    {
+      "id": "EVAL-007-related",
+      "split": "tuning",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→kn",
+      "combinedScore": 55,
+      "textScore": 46.17,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.37
+    },
+    {
+      "id": "EVAL-007-unrelated",
+      "split": "tuning",
+      "expected": "unrelated",
+      "predicted": "unrelated",
+      "mode": "not_compared_different_institution",
+      "language": "en→kn",
+      "combinedScore": 0,
+      "ruleScore": 0,
+      "flagged": false,
+      "model": "none",
+      "revision": "none",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.35
+    },
+    {
+      "id": "EVAL-008-duplicate",
+      "split": "tuning",
+      "expected": "duplicate",
+      "predicted": "duplicate",
+      "mode": "lexical_fallback",
+      "language": "en→mixed",
+      "combinedScore": 85,
+      "textScore": 76.38,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.28
+    },
+    {
+      "id": "EVAL-008-related",
+      "split": "tuning",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→mixed",
+      "combinedScore": 59,
+      "textScore": 66.7,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.25
+    },
+    {
+      "id": "EVAL-008-unrelated",
+      "split": "tuning",
+      "expected": "unrelated",
+      "predicted": "unrelated",
+      "mode": "lexical_fallback",
+      "language": "en→mixed",
+      "combinedScore": 58,
+      "textScore": 58.83,
+      "ruleScore": 57,
+      "flagged": false,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.3
+    },
+    {
+      "id": "EVAL-009-duplicate",
+      "split": "tuning",
+      "expected": "duplicate",
+      "predicted": "duplicate",
+      "mode": "lexical_fallback",
+      "language": "en→en",
+      "combinedScore": 90,
+      "textScore": 100,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.22
+    },
+    {
+      "id": "EVAL-009-related",
+      "split": "tuning",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→en",
+      "combinedScore": 59,
+      "textScore": 65.08,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.26
+    },
+    {
+      "id": "EVAL-009-unrelated",
+      "split": "tuning",
+      "expected": "unrelated",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→en",
+      "combinedScore": 74,
+      "textScore": 57.35,
+      "ruleScore": 79,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.22
+    },
+    {
+      "id": "EVAL-010-duplicate",
+      "split": "tuning",
+      "expected": "duplicate",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→hi",
+      "combinedScore": 80,
+      "textScore": 55.59,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.31
+    },
+    {
+      "id": "EVAL-010-related",
+      "split": "tuning",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→hi",
+      "combinedScore": 57,
+      "textScore": 56.61,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.35
+    },
+    {
+      "id": "EVAL-010-unrelated",
+      "split": "tuning",
+      "expected": "unrelated",
+      "predicted": "unrelated",
+      "mode": "not_compared_different_institution",
+      "language": "en→hi",
+      "combinedScore": 0,
+      "ruleScore": 0,
+      "flagged": false,
+      "model": "none",
+      "revision": "none",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.27
+    },
+    {
+      "id": "EVAL-011-duplicate",
+      "split": "tuning",
+      "expected": "duplicate",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→gu",
+      "combinedScore": 81,
+      "textScore": 59.48,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.27
+    },
+    {
+      "id": "EVAL-011-related",
+      "split": "tuning",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→gu",
+      "combinedScore": 57,
+      "textScore": 55.28,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.61
+    },
+    {
+      "id": "EVAL-011-unrelated",
+      "split": "tuning",
+      "expected": "unrelated",
+      "predicted": "unrelated",
+      "mode": "lexical_fallback",
+      "language": "en→gu",
+      "combinedScore": 53,
+      "textScore": 40.2,
+      "ruleScore": 57,
+      "flagged": false,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.46
+    },
+    {
+      "id": "EVAL-012-duplicate",
+      "split": "tuning",
+      "expected": "duplicate",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→ta",
+      "combinedScore": 81,
+      "textScore": 59.48,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.48
+    },
+    {
+      "id": "EVAL-012-related",
+      "split": "tuning",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→ta",
+      "combinedScore": 57,
+      "textScore": 56.43,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 1.11
+    },
+    {
+      "id": "EVAL-012-unrelated",
+      "split": "tuning",
+      "expected": "unrelated",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→ta",
+      "combinedScore": 58,
+      "textScore": 61.21,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.36
+    },
+    {
+      "id": "EVAL-013-duplicate",
+      "split": "tuning",
+      "expected": "duplicate",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→te",
+      "combinedScore": 78,
+      "textScore": 46.17,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.39
+    },
+    {
+      "id": "EVAL-013-related",
+      "split": "tuning",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→te",
+      "combinedScore": 54,
+      "textScore": 45,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.41
+    },
+    {
+      "id": "EVAL-013-unrelated",
+      "split": "tuning",
+      "expected": "unrelated",
+      "predicted": "unrelated",
+      "mode": "not_compared_different_institution",
+      "language": "en→te",
+      "combinedScore": 0,
+      "ruleScore": 0,
+      "flagged": false,
+      "model": "none",
+      "revision": "none",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.36
+    },
+    {
+      "id": "EVAL-014-duplicate",
+      "split": "tuning",
+      "expected": "duplicate",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→bn",
+      "combinedScore": 80,
+      "textScore": 54.57,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.39
+    },
+    {
+      "id": "EVAL-014-related",
+      "split": "tuning",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→bn",
+      "combinedScore": 56,
+      "textScore": 53.03,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.32
+    },
+    {
+      "id": "EVAL-014-unrelated",
+      "split": "tuning",
+      "expected": "unrelated",
+      "predicted": "unrelated",
+      "mode": "lexical_fallback",
+      "language": "en→bn",
+      "combinedScore": 53,
+      "textScore": 37.31,
+      "ruleScore": 57,
+      "flagged": false,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.34
+    },
+    {
+      "id": "EVAL-015-duplicate",
+      "split": "tuning",
+      "expected": "duplicate",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→kn",
+      "combinedScore": 81,
+      "textScore": 58.34,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.29
+    },
+    {
+      "id": "EVAL-015-related",
+      "split": "tuning",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→kn",
+      "combinedScore": 56,
+      "textScore": 51.45,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.35
+    },
+    {
+      "id": "EVAL-015-unrelated",
+      "split": "tuning",
+      "expected": "unrelated",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→kn",
+      "combinedScore": 57,
+      "textScore": 54.57,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.3
+    },
+    {
+      "id": "EVAL-016-duplicate",
+      "split": "tuning",
+      "expected": "duplicate",
+      "predicted": "duplicate",
+      "mode": "lexical_fallback",
+      "language": "en→mixed",
+      "combinedScore": 85,
+      "textScore": 78.95,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.31
+    },
+    {
+      "id": "EVAL-016-related",
+      "split": "tuning",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→mixed",
+      "combinedScore": 57,
+      "textScore": 55.64,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.34
+    },
+    {
+      "id": "EVAL-016-unrelated",
+      "split": "tuning",
+      "expected": "unrelated",
+      "predicted": "unrelated",
+      "mode": "not_compared_different_institution",
+      "language": "en→mixed",
+      "combinedScore": 0,
+      "ruleScore": 0,
+      "flagged": false,
+      "model": "none",
+      "revision": "none",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.29
+    },
+    {
+      "id": "EVAL-017-duplicate",
+      "split": "tuning",
+      "expected": "duplicate",
+      "predicted": "duplicate",
+      "mode": "lexical_fallback",
+      "language": "en→en",
+      "combinedScore": 90,
+      "textScore": 100,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.21
+    },
+    {
+      "id": "EVAL-017-related",
+      "split": "tuning",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→en",
+      "combinedScore": 61,
+      "textScore": 76.38,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.19
+    },
+    {
+      "id": "EVAL-017-unrelated",
+      "split": "tuning",
+      "expected": "unrelated",
+      "predicted": "unrelated",
+      "mode": "lexical_fallback",
+      "language": "en→en",
+      "combinedScore": 61,
+      "textScore": 76.38,
+      "ruleScore": 57,
+      "flagged": false,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.18
+    },
+    {
+      "id": "EVAL-018-duplicate",
+      "split": "tuning",
+      "expected": "duplicate",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→hi",
+      "combinedScore": 78,
+      "textScore": 44.56,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.63
+    },
+    {
+      "id": "EVAL-018-related",
+      "split": "tuning",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→hi",
+      "combinedScore": 54,
+      "textScore": 42.81,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.49
+    },
+    {
+      "id": "EVAL-018-unrelated",
+      "split": "tuning",
+      "expected": "unrelated",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→hi",
+      "combinedScore": 54,
+      "textScore": 42.81,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.3
+    },
+    {
+      "id": "EVAL-019-duplicate",
+      "split": "tuning",
+      "expected": "duplicate",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→gu",
+      "combinedScore": 79,
+      "textScore": 51.62,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.28
+    },
+    {
+      "id": "EVAL-019-related",
+      "split": "tuning",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→gu",
+      "combinedScore": 54,
+      "textScore": 45.06,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.35
+    },
+    {
+      "id": "EVAL-019-unrelated",
+      "split": "tuning",
+      "expected": "unrelated",
+      "predicted": "unrelated",
+      "mode": "not_compared_different_institution",
+      "language": "en→gu",
+      "combinedScore": 0,
+      "ruleScore": 0,
+      "flagged": false,
+      "model": "none",
+      "revision": "none",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.25
+    },
+    {
+      "id": "EVAL-020-duplicate",
+      "split": "tuning",
+      "expected": "duplicate",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→ta",
+      "combinedScore": 78,
+      "textScore": 46.17,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.45
+    },
+    {
+      "id": "EVAL-020-related",
+      "split": "tuning",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→ta",
+      "combinedScore": 55,
+      "textScore": 46.17,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.42
+    },
+    {
+      "id": "EVAL-020-unrelated",
+      "split": "tuning",
+      "expected": "unrelated",
+      "predicted": "unrelated",
+      "mode": "lexical_fallback",
+      "language": "en→ta",
+      "combinedScore": 52,
+      "textScore": 31.95,
+      "ruleScore": 57,
+      "flagged": false,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.53
+    },
+    {
+      "id": "EVAL-021-duplicate",
+      "split": "heldout",
+      "expected": "duplicate",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→te",
+      "combinedScore": 80,
+      "textScore": 56.36,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.29
+    },
+    {
+      "id": "EVAL-021-related",
+      "split": "heldout",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→te",
+      "combinedScore": 56,
+      "textScore": 50.08,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.33
+    },
+    {
+      "id": "EVAL-021-unrelated",
+      "split": "heldout",
+      "expected": "unrelated",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→te",
+      "combinedScore": 57,
+      "textScore": 54.57,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.27
+    },
+    {
+      "id": "EVAL-022-duplicate",
+      "split": "heldout",
+      "expected": "duplicate",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→bn",
+      "combinedScore": 80,
+      "textScore": 56.58,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.44
+    },
+    {
+      "id": "EVAL-022-related",
+      "split": "heldout",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→bn",
+      "combinedScore": 56,
+      "textScore": 52.38,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.39
+    },
+    {
+      "id": "EVAL-022-unrelated",
+      "split": "heldout",
+      "expected": "unrelated",
+      "predicted": "unrelated",
+      "mode": "not_compared_different_institution",
+      "language": "en→bn",
+      "combinedScore": 0,
+      "ruleScore": 0,
+      "flagged": false,
+      "model": "none",
+      "revision": "none",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.29
+    },
+    {
+      "id": "EVAL-023-duplicate",
+      "split": "heldout",
+      "expected": "duplicate",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→kn",
+      "combinedScore": 78,
+      "textScore": 47.43,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.38
+    },
+    {
+      "id": "EVAL-023-related",
+      "split": "heldout",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→kn",
+      "combinedScore": 55,
+      "textScore": 46.17,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.4
+    },
+    {
+      "id": "EVAL-023-unrelated",
+      "split": "heldout",
+      "expected": "unrelated",
+      "predicted": "unrelated",
+      "mode": "lexical_fallback",
+      "language": "en→kn",
+      "combinedScore": 52,
+      "textScore": 32.64,
+      "ruleScore": 57,
+      "flagged": false,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.39
+    },
+    {
+      "id": "EVAL-024-duplicate",
+      "split": "heldout",
+      "expected": "duplicate",
+      "predicted": "duplicate",
+      "mode": "lexical_fallback",
+      "language": "en→mixed",
+      "combinedScore": 85,
+      "textScore": 76.38,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.27
+    },
+    {
+      "id": "EVAL-024-related",
+      "split": "heldout",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→mixed",
+      "combinedScore": 59,
+      "textScore": 66.7,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.28
+    },
+    {
+      "id": "EVAL-024-unrelated",
+      "split": "heldout",
+      "expected": "unrelated",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→mixed",
+      "combinedScore": 57,
+      "textScore": 56.25,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.29
+    },
+    {
+      "id": "EVAL-025-duplicate",
+      "split": "heldout",
+      "expected": "duplicate",
+      "predicted": "duplicate",
+      "mode": "lexical_fallback",
+      "language": "en→en",
+      "combinedScore": 90,
+      "textScore": 100,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.22
+    },
+    {
+      "id": "EVAL-025-related",
+      "split": "heldout",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→en",
+      "combinedScore": 59,
+      "textScore": 65.08,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.23
+    },
+    {
+      "id": "EVAL-025-unrelated",
+      "split": "heldout",
+      "expected": "unrelated",
+      "predicted": "unrelated",
+      "mode": "not_compared_different_institution",
+      "language": "en→en",
+      "combinedScore": 0,
+      "ruleScore": 0,
+      "flagged": false,
+      "model": "none",
+      "revision": "none",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.23
+    },
+    {
+      "id": "EVAL-026-duplicate",
+      "split": "heldout",
+      "expected": "duplicate",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→hi",
+      "combinedScore": 77,
+      "textScore": 42.91,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 1.14
+    },
+    {
+      "id": "EVAL-026-related",
+      "split": "heldout",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→hi",
+      "combinedScore": 54,
+      "textScore": 43.92,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.48
+    },
+    {
+      "id": "EVAL-026-unrelated",
+      "split": "heldout",
+      "expected": "unrelated",
+      "predicted": "unrelated",
+      "mode": "lexical_fallback",
+      "language": "en→hi",
+      "combinedScore": 51,
+      "textScore": 30.12,
+      "ruleScore": 57,
+      "flagged": false,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.38
+    },
+    {
+      "id": "EVAL-027-duplicate",
+      "split": "heldout",
+      "expected": "duplicate",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→gu",
+      "combinedScore": 80,
+      "textScore": 54.57,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.25
+    },
+    {
+      "id": "EVAL-027-related",
+      "split": "heldout",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→gu",
+      "combinedScore": 56,
+      "textScore": 50.31,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.26
+    },
+    {
+      "id": "EVAL-027-unrelated",
+      "split": "heldout",
+      "expected": "unrelated",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→gu",
+      "combinedScore": 57,
+      "textScore": 54.57,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.23
+    },
+    {
+      "id": "EVAL-028-duplicate",
+      "split": "heldout",
+      "expected": "duplicate",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→ta",
+      "combinedScore": 80,
+      "textScore": 54.57,
+      "ruleScore": 87,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.3
+    },
+    {
+      "id": "EVAL-028-related",
+      "split": "heldout",
+      "expected": "related",
+      "predicted": "related",
+      "mode": "lexical_fallback",
+      "language": "en→ta",
+      "combinedScore": 56,
+      "textScore": 51.45,
+      "ruleScore": 57,
+      "flagged": true,
+      "model": "token-frequency-cosine",
+      "revision": "1",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.31
+    },
+    {
+      "id": "EVAL-028-unrelated",
+      "split": "heldout",
+      "expected": "unrelated",
+      "predicted": "unrelated",
+      "mode": "not_compared_different_institution",
+      "language": "en→ta",
+      "combinedScore": 0,
+      "ruleScore": 0,
+      "flagged": false,
+      "model": "none",
+      "revision": "none",
+      "preprocessingVersion": "unicode-nfkc-lower-v1",
+      "durationMs": 0.24
+    }
+  ]
+}

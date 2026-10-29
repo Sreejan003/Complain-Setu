@@ -4,6 +4,8 @@ const items: NavigationItem[] = [
   { key: "institutions", to: "/institution-dashboard", label: "Institution Dashboard", icon: "institutions", group: "main" },
   { key: "register", to: "/complaints/register", label: "Register Complaint", icon: "register", group: "main" },
   { key: "cases", to: "/cases", label: "Complaint Register", icon: "cases", group: "main" },
+  { key: "intake", to: "/intake", label: "Case Intake", icon: "register", group: "main" },
+  { key: "intake-config", to: "/admin/intake", label: "Case Intake Configuration", icon: "settings", group: "system" },
   { key: "assignment", to: "/bureau/dashboard?view=unassigned", label: "Officer Assignment", icon: "assignment", group: "operations" },
   { key: "coordination", to: "/coordination", label: "Bureau Coordination", icon: "coordination", group: "operations" },
   { key: "overlaps", to: "/overlaps", label: "Overlap Detection", icon: "overlaps", group: "operations" },
@@ -17,10 +19,10 @@ const items: NavigationItem[] = [
   { key: "settings", to: "/admin", label: "System Settings", icon: "settings", group: "system" },
 ];
 const roleKeys: Record<string, string[]> = {
-  SYSTEM_ADMIN: ["dashboard", "institutions", "users", "permissions", "bureaus", "audit", "settings", "notifications"],
-  COMPETENT_AUTHORITY: ["dashboard", "institutions", "cases", "coordination", "overlaps", "transfers", "reports", "notifications"],
-  BUREAU_HEAD: ["dashboard", "institutions", "register", "cases", "assignment", "coordination", "overlaps", "transfers", "reports", "notifications"],
-  CASE_OFFICER: ["dashboard", "institutions", "cases", "coordination", "overlaps", "reports", "notifications"],
+  SYSTEM_ADMIN: ["dashboard", "institutions", "users", "permissions", "bureaus", "audit", "settings", "intake-config", "notifications"],
+  COMPETENT_AUTHORITY: ["dashboard", "institutions", "cases", "intake", "coordination", "overlaps", "transfers", "reports", "notifications"],
+  BUREAU_HEAD: ["dashboard", "institutions", "register", "cases", "intake", "assignment", "coordination", "overlaps", "transfers", "reports", "notifications"],
+  CASE_OFFICER: ["dashboard", "institutions", "cases", "intake", "coordination", "overlaps", "reports", "notifications"],
   "Institutional User": ["institutions", "register", "notifications"],
 };
 export function navigationForRole(role: string): NavigationItem[] {
@@ -35,6 +37,7 @@ export function navigationActive(item: NavigationItem, pathname: string, search 
   if (target.hash) return pathname === target.pathname && hash === target.hash;
   if (target.search) return pathname === target.pathname && new URLSearchParams(search).get("view") === target.searchParams.get("view");
   if (item.key === "dashboard") return pathname === target.pathname && !(pathname === "/admin/dashboard" && ["#users", "#permissions", "#bureaus", "#audit"].includes(hash)) && !(pathname === "/bureau/dashboard" && new URLSearchParams(search).get("view") === "unassigned");
+  if (item.key === "reports" && pathname === "/reports") return true;
   if (item.key === "settings") return pathname === target.pathname;
   if (item.key === "institutions") return pathname === target.pathname || pathname.startsWith("/institutions/");
   return pathname === target.pathname || pathname.startsWith(target.pathname + "/");

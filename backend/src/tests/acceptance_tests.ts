@@ -223,7 +223,7 @@ export async function runAcceptanceTests(): Promise<{ passed: number; total: num
     assert.strictEqual(pairScore1.combinedScore, pairScore2.combinedScore, "Similarity scores are deterministic");
     assert.strictEqual(pairScore1.combinedScore >= 90, true, "Identical complaints receive high confidence score");
     assert.strictEqual(
-      pairScore1.semanticEngine.includes("SentenceTransformer") || pairScore1.semanticEngine.includes("TF-IDF Fallback"),
+      ["multilingual_embeddings", "lexical_fallback", "unavailable"].includes(pairScore1.similarity.mode) && !!pairScore1.similarity.preprocessingVersion,
       true,
       "Active detection engine explicitly identified"
     );

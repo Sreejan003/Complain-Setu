@@ -31,7 +31,6 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowe
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (user.role === "SYSTEM_ADMIN" && !["/", "/admin", "/admin/dashboard", "/notifications", "/institution-dashboard", "/institutions"].includes(location.pathname) && !location.pathname.startsWith("/institutions/")) return <Navigate to="/admin/dashboard" replace />;
   if (!canVisit(user.role,location.pathname) || (allowedRoles && allowedRoles.length > 0 && !allowedRoles.includes(user.role))) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center p-6">

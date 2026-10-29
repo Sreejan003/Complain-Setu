@@ -1,5 +1,5 @@
 import { STATUS_TRANSITIONS, COMPLAINT_CATEGORIES, PRIORITIES, DEFAULT_ESCALATION_CONFIG } from "../config/constants.js";
-import { roleOf, authorize, caseCapabilities, effectiveProfile } from "../security/rbac.js";
+import { roleOf, authorize, caseCapabilities, effectiveProfile, requestScope } from "../security/rbac.js";
 import {coordinationAccess} from "../security/coordination.js";
 import { Router, Response } from "express";
 import multer from "multer";
@@ -10,13 +10,15 @@ import { v4 as uuidv4 } from "uuid";
 import { store } from "../db/store.js";
 import { requireAuth, requireRole, AuthenticatedRequest, canAccessComplaint, canMutateComplaint } from "../middleware/auth.js";
 import { detectOverlapsForComplaint } from "../services/overlapEngine.js";
+import { afterPersistence, LiveEvent, onPersistenceRollback, onPersistenceCommit } from "../db/unitOfWork.js";
 
 const validDate = (value: unknown) => typeof value==="string" && /^\d{4}-\d{2}-\d{2}$/.test(value) && Number.isFinite(Date.parse(value)) && new Date(value).toISOString().slice(0,10)===value;
 export const complaintsRouter = Router();
 complaintsRouter.use(requireAuth, (req: AuthenticatedRequest, res, next) => {
   const role = roleOf(req.user!.role);
   if (role === "SYSTEM_ADMIN") return res.status(403).json({error:"System administration does not grant complaint access."});
-  const id = req.path.split("/")[1];
+  let id: string;
+  try { id = decodeURIComponent(req.path.split("/")[1] || ""); } catch { return res.status(404).json({error:"Complaint not found in authorized scope."}); }
   if (id && !["stream", "check-overlap"].includes(id) && !store.getComplaintById(id)) return res.status(404).json({error:"Complaint not found in authorized scope."});
   if (req.method === "PATCH" && req.path.endsWith("/status")) {
     const complaint=store.getComplaintById(id)!;
@@ -56,24 +58,21 @@ interface ClientConnection {
 }
 const sseClients: ClientConnection[] = [];
 
-export function broadcastCaseEvent(event: {
-  type: string;
-  complaintId?: string;
-  complaintRef?: string;
-  institutionId?: string;
-  [key: string]: any;
-}) {
-  const payload = JSON.stringify({ ...event, timestamp: new Date().toISOString() });
+export function broadcastCaseEvent(event: LiveEvent) { afterPersistence(event,()=>dispatchCaseEvent(event)); }
+export function dispatchCaseEvent(event: LiveEvent) {
   for (let i = sseClients.length - 1; i >= 0; i--) {
     const client = sseClients[i];
     try {
       const current = store.getProfileById(client.user.id);
-      const complaint = event.complaintId ? store.getComplaintById(event.complaintId) : undefined;
+      const complaint = event.complaintId ? store.getCoordinationSource(event.complaintId) : undefined;
       if (!current?.isActive || (current.sessionVersion || current.updatedAt) !== (client.user.sessionVersion || client.user.updatedAt)) {client.res.end();sseClients.splice(i,1);continue;}
       if(event.type==="COORDINATION_UPDATED"){
         const session=store.getCoordinationSessions().find(s=>s.id===event.sessionId);
         if(!session||!coordinationAccess(effectiveProfile(current),session,store.getCoordinationSource(session.primaryComplaintId)).read)continue;
       }else if (!complaint || !canAccessComplaint(current, complaint)) continue;
+      const payload = JSON.stringify({ ...event,
+        ...("hasOverlapAlert" in event && complaint ? { hasOverlapAlert: requestScope.run(effectiveProfile(current), () => store.hasVisibleOverlap(complaint.id)) } : {}),
+        timestamp: new Date().toISOString() });
       client.res.write(`data: ${payload}\n\n`);
     } catch {
       sseClients.splice(i, 1);
@@ -161,6 +160,7 @@ complaintsRouter.get("/", requireAuth, (req: AuthenticatedRequest, res: Response
     sortOrder: sortOrder as "asc" | "desc"
   });
 
+  if(typeof search==="string"&&search.trim())store.addAuditLog({userId:req.user!.id,userName:req.user!.fullName,action:"CASE_SEARCH_PERFORMED",entityType:"CaseSearch",entityId:"complaint-register",details:{returned:results.data.length}});
   return res.json(results);
 });
 
@@ -188,7 +188,7 @@ complaintsRouter.post("/check-overlap", requireAuth, async (req: AuthenticatedRe
   };
 
   const existingCases = store.getComplaints({ institutionId: institution.id, limit: 100 }).data;
-  const detectionResult = await detectOverlapsForComplaint(mockComplaint, institution, existingCases);
+  const detectionResult = await detectOverlapsForComplaint(mockComplaint, institution, existingCases, store.getOverlapSettings());
 
   return res.json(detectionResult);
 });
@@ -219,6 +219,8 @@ complaintsRouter.get("/:id", requireAuth, (req: AuthenticatedRequest, res: Respo
   const overlapAlerts = store.getOverlapAlerts({}).data.filter(
     o => o.complaintIdA === complaint.id || o.complaintIdB === complaint.id
   );
+
+  store.addAuditLog({userId:req.user!.id,userName:req.user!.fullName,action:"CASE_VIEWED",entityType:"Complaint",entityId:complaint.id,details:{confidentiality:complaint.security?.level||"internal"}});
 
   return res.json({
     complaint,
@@ -522,6 +524,7 @@ complaintsRouter.get(
       return res.status(404).json({ error: "Document file not found on storage." });
     }
 
+    store.addAuditLog({userId:req.user!.id,userName:req.user!.fullName,action:"EVIDENCE_DOWNLOAD_AUTHORIZED",entityType:"Complaint",entityId:complaint.id,details:{documentId:doc.id}});
     res.setHeader("Content-Disposition", `attachment; filename="${encodeURIComponent(doc.originalName)}"`);
     res.setHeader("Content-Type", doc.mimeType || "application/octet-stream");
     return fs.createReadStream(filePath).pipe(res);
@@ -552,6 +555,8 @@ complaintsRouter.post(
       }
 
       const documentType = req.body.documentType || "Complaint Evidence";
+      const newUploadPath = path.join(UPLOAD_DIR,path.basename(req.file.filename));
+      onPersistenceRollback(()=>{if(fs.existsSync(newUploadPath))fs.unlinkSync(newUploadPath);});
       const docId = uuidv4();
 
       const newDoc = store.addDocument({
@@ -612,7 +617,7 @@ complaintsRouter.delete(
       const filePath = path.join(UPLOAD_DIR, doc.fileName);
       if (fs.existsSync(filePath)) {
         try {
-          fs.unlinkSync(filePath);
+          onPersistenceCommit(()=>{if(fs.existsSync(filePath))fs.unlinkSync(filePath);});
         } catch (e) {
           console.warn("Failed to delete file from disk:", e);
         }

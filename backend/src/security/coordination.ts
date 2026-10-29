@@ -1,9 +1,10 @@
 import type { Profile, Complaint } from "../models/types.js";
 import type { CoordinationSession } from "../models/coordination.js";
 import { effectiveProfile, mayRead } from "./rbac.js";
+import { confidentialityAllows } from "./confidentiality.js";
 export function coordinationAccess(profile: Profile, s: CoordinationSession, c: Complaint | undefined) {
   const u = effectiveProfile(profile), role = u.role;
-  const valid = u.isActive && ["COMPETENT_AUTHORITY", "BUREAU_HEAD", "CASE_OFFICER"].includes(role) && (!u.region || u.region === s.region);
+  const valid = u.isActive && !!c && confidentialityAllows(u, c, "read") && ["COMPETENT_AUTHORITY", "BUREAU_HEAD", "CASE_OFFICER"].includes(role) && (!u.region || u.region === s.region);
   const authority = valid && role === "COMPETENT_AUTHORITY" && (!u.bureauId || [s.leadBureauId, ...s.participants.filter(p => p.status === "Accepted").map(p => p.bureauId)].includes(u.bureauId));
   const leadHead = valid && ((role === "BUREAU_HEAD" && u.bureauId === s.leadBureauId) || (authority && !!u.permissions?.includes("COORDINATE_CROSS_BUREAU")));
   const leadOfficer = valid && role === "CASE_OFFICER" && u.id === s.leadOfficerId && !!c && mayRead(u, c, s.region);

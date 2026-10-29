@@ -34,6 +34,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 .venv/
+ai_service/.model-cache/
 env/
 venv/
 

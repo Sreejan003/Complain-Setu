@@ -1,0 +1,13 @@
+import {Router,type Response,type NextFunction} from "express";
+import {requireAuth,type AuthenticatedRequest} from "../middleware/auth.js";
+import {store} from "../db/store.js";
+import {reporting,ReportError,authorizeReportData} from "../services/reporting.js";
+import {reportFile} from "../services/reportFiles.js";
+export const reportingRouter=Router();reportingRouter.use(requireAuth);
+const route=(operation:(req:AuthenticatedRequest,res:Response)=>unknown)=>(req:AuthenticatedRequest,res:Response,next:NextFunction)=>{Promise.resolve().then(()=>operation(req,res)).catch(error=>{if(error instanceof ReportError)res.status(error.status).json({error:error.status===404?"Report not found in authorized scope.":"Report could not be completed. Check permissions, period, filters and current version.",code:error.code});else next(error);});};
+reportingRouter.post("/preview",route((req,res)=>{const data=reporting.view(req.user!,req.body);store.addAuditLog({userId:req.user!.id,userName:req.user!.fullName,action:"REPORT_PREVIEWED",entityType:"CaseReport",entityId:"filtered-register",details:{rows:data.total,filterFields:Object.keys(data.filters)}});return res.json(data);}));
+reportingRouter.get("/schedules",route((req,res)=>res.json(reporting.schedules(req.user!))));
+reportingRouter.post("/schedules",route((req,res)=>res.json(reporting.saveSchedule(req.user!,req.body))));
+reportingRouter.post("/schedules/:id/generate",route((req,res)=>{const pack=reporting.generate(req.user!,req.params.id);return res.json({id:pack.id,period:pack.period,total:pack.data.total});}));
+reportingRouter.post("/export/:format",route(async(req,res)=>{const data=reporting.view(req.user!,req.body),file=await reportFile(data,req.params.format);authorizeReportData(req.user!,data);store.addAuditLog({userId:req.user!.id,userName:req.user!.fullName,action:"REPORT_EXPORTED",entityType:"CaseReport",entityId:"filtered-register",details:{format:req.params.format,rows:data.total}});res.setHeader("Content-Type",file.type);res.setHeader("Content-Disposition",`attachment; filename="authorized-report.${req.params.format}"`);return res.send(file.bytes);}));
+reportingRouter.get("/packs/:id/:format",route(async(req,res)=>{if(!["csv","xlsx","pdf"].includes(req.params.format))throw new ReportError("INVALID_REPORT_FORMAT");const pack=reporting.pack(req.user!,req.params.id),file=await reportFile(pack.data,req.params.format);reporting.download(req.user!,pack.id,req.params.format as "csv"|"xlsx"|"pdf");res.setHeader("Content-Type",file.type);res.setHeader("Content-Disposition",`attachment; filename="scheduled-report.${req.params.format}"`);return res.send(file.bytes);}));

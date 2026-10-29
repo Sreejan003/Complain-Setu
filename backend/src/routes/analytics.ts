@@ -100,6 +100,7 @@ analyticsRouter.get(
     ]);
 
     const csvContent = [headers.join(","), ...rows.map(r => r.join(","))].join("\r\n");
+    store.addAuditLog({userId:req.user!.id,userName:req.user!.fullName,action:"REPORT_EXPORTED",entityType:"CaseReport",entityId:"complaint-register",details:{format:"csv",rows:complaints.length,filterFields:Object.entries(filter).filter(([,value])=>value!==undefined).map(([key])=>key)}});
 
     res.setHeader("Content-Type", "text/csv; charset=utf-8");
     res.setHeader("Content-Disposition", `attachment; filename="aicte_complaints_${new Date().toISOString().split("T")[0]}.csv"`);

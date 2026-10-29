@@ -31,6 +31,9 @@ async function handleResponse<T>(res: Response): Promise<T> {
 }
 
 export const api = {
+  async reportDownload(path:string,name:string,body?:unknown){const response=await fetch(`${API_BASE}/reports/${path}`,{method:body===undefined?"GET":"POST",headers:{...getAuthHeader(),"Content-Type":"application/json"},...(body===undefined?{}:{body:JSON.stringify(body)})});if(!response.ok){await handleResponse(response);return;}const url=URL.createObjectURL(await response.blob()),link=document.createElement("a");link.href=url;link.download=name;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);},
+  async importFile<T>(path:string,file:File,fields:Record<string,string>={}){const form=new FormData();form.set("file",file);for(const[key,value]of Object.entries(fields))form.set(key,value);return handleResponse<T>(await fetch(`${API_BASE}/imports/${path}`,{method:"POST",headers:getAuthHeader(),body:form}));},
+  async importDownload(path:string,name:string){const response=await fetch(`${API_BASE}/imports/${path}`,{headers:getAuthHeader()});if(!response.ok){await handleResponse(response);return;}const url=URL.createObjectURL(await response.blob()),link=document.createElement("a");link.href=url;link.download=name;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);},
   async request<T = any>(path: string, method = "GET", body?: unknown): Promise<T> {
     const res=await fetch(API_BASE+"/"+path,{method,headers:{...getAuthHeader(),"Content-Type":"application/json"},...(body!==undefined?{body:JSON.stringify(body)}:{})});
     return handleResponse<T>(res);
@@ -110,7 +113,7 @@ export const api = {
   },
 
   async getComplaintDetails(id: string): Promise<{ complaint: Complaint; allowedActions?: any; permittedStatuses?: string[]; history: CaseHistory[]; relatedCases: RelatedCase[]; overlapAlerts: OverlapAlert[] }> {
-    const res = await fetch(`${API_BASE}/complaints/${id}`, {
+    const res = await fetch(`${API_BASE}/complaints/${encodeURIComponent(id)}`, {
       headers: { ...getAuthHeader() }
     });
     return handleResponse(res);
@@ -268,6 +271,7 @@ export const api = {
       decision: "Confirmed Related" | "Confirmed Duplicate" | "Marked Unrelated" | "Dismissed" | "Resolved";
       remarks: string;
       linkAsRelated?: boolean;
+      expectedUpdatedAt?: string;
     }
   ): Promise<OverlapAlert> {
     const res = await fetch(`${API_BASE}/overlaps/${id}/review`, {

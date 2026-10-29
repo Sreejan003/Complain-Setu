@@ -2,6 +2,7 @@ import { ModalFrame } from "../components/ui/Interface.js";
 import { tr, localizeLabel, localizeError, useLocaleRender } from "../i18n/index.js";
 import { formatDate, formatNumber } from "../i18n/localeUtils.js";
 import { CoordinationPanel } from "../components/common/CoordinationPanel.js";
+import { OverlapSignals } from "../components/common/OverlapSignals.js";
 import React, { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
@@ -117,7 +118,7 @@ export const OverlapCenter: React.FC = () => {
       await api.reviewOverlapAlert(targetAlert.id, {
         decision: decisionType,
         remarks: reviewRemarks,
-        linkAsRelated
+        linkAsRelated, expectedUpdatedAt: targetAlert.updatedAt
       });
 
       setDecisionModalOpen(false);
@@ -232,7 +233,7 @@ export const OverlapCenter: React.FC = () => {
                   </span>
                   {alert.confidenceCategory && (
                     <span className="text-xs font-semibold px-2 py-0.5 rounded-lg bg-slate-100 text-slate-700 border border-slate-200">
-                      {alert.confidenceCategory}
+                      {alert.assessment ? tr("complaints:overlapSettings." + alert.assessment.relationshipCandidate) : alert.confidenceCategory}
                     </span>
                   )}
                   {alert.detectionMethod && (
@@ -249,7 +250,7 @@ export const OverlapCenter: React.FC = () => {
                   </span>
                   {alert.semanticSimilarityScore !== undefined && (
                     <span className="text-xs font-bold bg-[#eff6ff] text-[#1e40af] border border-[#bfdbfe] px-2 py-0.5 rounded-lg flex items-center space-x-1">
-                      <span>{tr("overlaps:semanticScore")}{alert.semanticSimilarityScore}%</span>
+                      <span>{alert.assessment ? tr("complaints:overlapSettings.text") + ": " : tr("overlaps:semanticScore")}{alert.semanticSimilarityScore}/100</span>
                     </span>
                   )}
                 </div>
@@ -297,6 +298,7 @@ export const OverlapCenter: React.FC = () => {
 
               {/* Reasons & Recommended Action */}
               <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm space-y-3">
+                <OverlapSignals assessment={alert.assessment}/>
                 {alert.explanation ? (
                   <div className="space-y-2">
                     <p className="text-sm text-slate-700">{tr("navigation:ui.similarityNotice")}</p><details><summary className="text-sm font-medium cursor-pointer text-aicte-navy-700">{tr("navigation:ui.showTechnicalDetails")}</summary><div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs mt-3">
@@ -319,7 +321,7 @@ export const OverlapCenter: React.FC = () => {
                       <div className="bg-white p-2 rounded-lg border border-amber-200">
                         <span className="text-slate-500 block text-xs font-bold uppercase">{tr("overlaps:semanticAlignment")}</span>
                         <span className="font-bold text-aicte-navy-700">
-                          {alert.explanation.semanticMatch.score}% ({alert.explanation.semanticMatch.engine.split(" ")[0]})
+                          {alert.explanation.semanticMatch.mode === "unavailable" ? tr("complaints:text.mode.unavailable") : <>{alert.explanation.semanticMatch.score}/100 ({alert.explanation.semanticMatch.engine})</>}
                         </span>
                       </div>
                     </div>

@@ -1,6 +1,7 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import type { Profile, Complaint, Institution } from "../models/types.js";
 import { STATUS_TRANSITIONS } from "../config/constants.js";
+import { confidentialityAllows } from "./confidentiality.js";
 
 export const CORE_ROLES = ["SYSTEM_ADMIN", "COMPETENT_AUTHORITY", "BUREAU_HEAD", "CASE_OFFICER"] as const;
 export type CoreRole = typeof CORE_ROLES[number];
@@ -30,6 +31,10 @@ export function effectiveProfile(user: Profile): Profile {
     bureauId: user.bureauId || (user.role === "Regulation Bureau Officer" ? "RB" : user.role === "PGRC Officer" ? "PGRC" : undefined) };
 }
 export function mayRead(user: Profile, complaint: Complaint, region?: string): boolean {
+  return mayReadBase(user, complaint, region) && confidentialityAllows(user, complaint, "read");
+}
+/** Role/jurisdiction check without the additional confidentiality gate; security management must apply both explicitly. */
+export function mayReadBase(user: Profile, complaint: Complaint, region?: string): boolean {
   user = effectiveProfile(user);
   if (!user.isActive || !knownRole(user.role)) return false;
   const role = roleOf(user.role);
@@ -51,6 +56,9 @@ export function authorize(user: Profile, action: Action, resource?: Complaint, c
   if (!user.isActive || !knownRole(role)) return false;
   if (action === "admin.manage") return role === "SYSTEM_ADMIN";
   if (role === "SYSTEM_ADMIN" || !resource) return false;
+  if (!confidentialityAllows(user, resource, "read")) return false;
+  if (action === "evidence.upload" && !confidentialityAllows(user, resource, "evidence")) return false;
+  if (action === "case.dispose" && resource.security?.reviewStatus === "pending") return false;
   if (action === "transfer.respond") {
     const receiving = context.receivingBureauId;
     return !!receiving && context.pending === true && !!user.permissions?.includes("APPROVE_TRANSFERS") &&

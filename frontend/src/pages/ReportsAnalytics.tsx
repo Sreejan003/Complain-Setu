@@ -69,7 +69,10 @@ export const ReportsAnalytics: React.FC = () => {
   const handleExportCsv = async () => {
     const filters: Record<string, string> = {};
     if (selectedBureau) filters.bureau = selectedBureau;
-    try { await api.downloadCsv(filters); } catch(error:any) { window.alert(localizeError(error.message)); }
+    const now=new Date();
+    if(selectedPeriod==="30d"||selectedPeriod==="90d")filters.receivedFrom=new Date(now.getTime()-Number(selectedPeriod.slice(0,-1))*86400000).toISOString().slice(0,10);
+    if(selectedPeriod==="current-quarter"){const month=Math.floor(now.getUTCMonth()/3)*3;filters.receivedFrom=new Date(Date.UTC(now.getUTCFullYear(),month,1)).toISOString().slice(0,10);filters.receivedTo=new Date(Date.UTC(now.getUTCFullYear(),month+3,0)).toISOString().slice(0,10);}
+    try { await api.reportDownload("export/csv","authorized-report.csv",{filters}); } catch(error:any) { window.alert(localizeError(error.message)); }
   };
 
   const handlePrint = () => {
@@ -114,6 +117,7 @@ export const ReportsAnalytics: React.FC = () => {
         </div>
       </div>
 
+      <Link className="btn-secondary inline-block print:hidden" to="/reports">{tr("complaints:reporting.title")}</Link>
       {/* Filter and Period Selection Toolbar */}
       <div className="bg-white border border-[#e5eaf0] rounded-lg p-3 shadow-none flex flex-wrap items-center justify-between gap-3 print:hidden">
         <div className="flex flex-wrap items-center gap-3">
@@ -126,7 +130,7 @@ export const ReportsAnalytics: React.FC = () => {
               { id: "all", label: "All Records" },
               { id: "30d", label: "Past 30 Days" },
               { id: "90d", label: "Past 90 Days" },
-              { id: "q1", label: "Q1 2026" }
+              { id: "current-quarter", label: tr("complaints:reporting.currentQuarter")+" "+new Date().getUTCFullYear()+" / Q"+(Math.floor(new Date().getUTCMonth()/3)+1) }
             ].map(p => (
               <button
                 key={p.id}

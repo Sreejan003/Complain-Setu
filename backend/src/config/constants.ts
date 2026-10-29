@@ -84,6 +84,7 @@ export const OVERLAP_STATUSES = [
   "Confirmed Related",
   "Confirmed Duplicate",
   "Marked Unrelated",
+  "Dismissed",
   "Resolved"
 ] as const;
 

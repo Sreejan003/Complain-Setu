@@ -1,0 +1,13 @@
+import{Router,type Response,type NextFunction}from"express";
+import{requireAuth,type AuthenticatedRequest}from"../middleware/auth.js";
+import{slaPolicyService,SlaPolicyError}from"../services/slaPolicies.js";
+import{slaAlertService}from"../services/slaAlerts.js";
+export const slaPoliciesRouter=Router(),caseSlaRouter=Router(),slaAlertsRouter=Router();
+const route=(operation:(req:AuthenticatedRequest)=>unknown)=>(req:AuthenticatedRequest,res:Response,next:NextFunction)=>{try{res.json(operation(req));}catch(error){if(error instanceof SlaPolicyError)res.status(error.status).json({error:error.status===404?"Record not found in authorized scope.":"SLA action could not be completed. Check policy, access, version, permitted pause reason and review justification.",code:error.code});else next(error);}};
+slaPoliciesRouter.use(requireAuth);caseSlaRouter.use(requireAuth);slaAlertsRouter.use(requireAuth);
+slaPoliciesRouter.get("/",route(req=>slaPolicyService.configuration(req.user!)));
+slaPoliciesRouter.put("/",route(req=>slaPolicyService.configure(req.user!,req.body)));
+caseSlaRouter.get("/:id",route(req=>slaPolicyService.view(req.user!,req.params.id)));
+caseSlaRouter.post("/:id",route(req=>slaPolicyService.act(req.user!,req.params.id,req.body)));
+slaAlertsRouter.get("/",route(req=>slaAlertService.list(req.user!)));
+slaAlertsRouter.post("/:id/acknowledge",route(req=>slaAlertService.acknowledge(req.user!,req.params.id)));

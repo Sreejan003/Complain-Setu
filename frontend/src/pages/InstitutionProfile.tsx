@@ -24,17 +24,20 @@ import {
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, BarChart, Bar, XAxis, YAxis } from "recharts";
 import { api } from "../services/api.js";
 import { Institution, Complaint, OverlapAlert, ComplaintDocument } from "../services/types.js";
+import { CaseFamilyPanel } from "../components/common/CaseFamilyPanel.js";
+import { useAuth } from "../context/AuthContext.js";
 
 export const InstitutionProfile: React.FC = () => {
   useLocaleRender();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [institution, setInstitution] = useState<Institution | null>(null);
   const [complaints, setComplaints] = useState<Complaint[]>([]);
   const [overlapAlerts, setOverlapAlerts] = useState<OverlapAlert[]>([]);
   const [documents, setDocuments] = useState<ComplaintDocument[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"complaints" | "overlaps" | "history" | "documents" | "analytics">("complaints");
+  const [activeTab, setActiveTab] = useState<"complaints" | "overlaps" | "history" | "documents" | "analytics" | "family">(new URLSearchParams(window.location.search).get("view") === "family" ? "family" : "complaints");
 
   useEffect(() => {
     async function loadProfile() {
@@ -190,7 +193,7 @@ export const InstitutionProfile: React.FC = () => {
         </div>
       </div>
 
-      {/* Profile 5-Tabs Navigation */}
+        {/* Institution profile navigation */}
       <div className="border border-[#e5eaf0] bg-white rounded-lg px-2 flex flex-wrap gap-1 text-xs font-medium">
         <button
           onClick={() => setActiveTab("complaints")}
@@ -204,6 +207,7 @@ export const InstitutionProfile: React.FC = () => {
           <span>{tr("complaints:allComplaints")}{complaints.length})</span>
         </button>
 
+        {["COMPETENT_AUTHORITY", "BUREAU_HEAD", "CASE_OFFICER"].includes(user?.role || "") && <button onClick={() => setActiveTab("family")} className={`py-2 px-3 border-b-2 flex items-center gap-1.5 cursor-pointer ${activeTab === "family" ? "border-[#003366] text-aicte-navy-700 font-bold bg-[#f1f5f9]" : "border-transparent text-slate-600 hover:text-aicte-navy-700"}`}><GitMerge className="w-3.5 h-3.5"/>{tr("complaints:family.title")}</button>}
         <button
           onClick={() => setActiveTab("overlaps")}
           className={`py-2 px-3 border-b-2 flex items-center space-x-1.5 transition cursor-pointer ${
@@ -253,6 +257,7 @@ export const InstitutionProfile: React.FC = () => {
         </button>
       </div>
 
+      {activeTab === "family" && institution && ["COMPETENT_AUTHORITY", "BUREAU_HEAD", "CASE_OFFICER"].includes(user?.role || "") && <CaseFamilyPanel institutionId={institution.id}/>}
       {/* Tab 1: All Complaints */}
       {activeTab === "complaints" && (
         <div className="bg-white border border-[#e5eaf0] rounded-lg shadow-none overflow-hidden">

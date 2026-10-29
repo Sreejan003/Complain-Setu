@@ -3,6 +3,13 @@ import { tr, localizeLabel, localizeError, useLocaleRender } from "../i18n/index
 import { formatDate, formatNumber } from "../i18n/localeUtils.js";
 import { WorkflowRequests } from "../components/common/WorkflowRequests.js";
 import {CoordinationCaseLink} from "../components/common/CrossBureauCoordinationWorkspace.js";
+import { CaseMetadata } from "../components/common/CaseMetadata.js";
+import { CaseSecurityPanel } from "../components/common/CaseSecurityPanel.js";
+import { ComplaintLanguagePanel } from "../components/common/ComplaintLanguagePanel.js";
+import { CaseOverlapPanel } from "../components/common/CaseOverlapPanel.js";
+import { CaseFamilyLink } from "../components/common/CaseFamilyPanel.js";
+import{CaseSlaPanel}from"../components/common/CaseSlaPanel.js";
+import{slaDaysRemaining}from"../services/sla.js";
 import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import {
@@ -111,7 +118,7 @@ export const ComplaintDetails: React.FC = () => {
       setRelatedCases(res.relatedCases);
       setOverlapAlerts(res.overlapAlerts);
 
-      const docs = await api.getComplaintDocuments(id);
+      const docs = await api.getComplaintDocuments(res.complaint.id);
       setDocuments(docs || []);
 
       // Check active transfers for this complaint
@@ -307,10 +314,8 @@ export const ComplaintDetails: React.FC = () => {
 
   const getNextAction = () => complaint.nextAction || "No next action recorded";
 
-  const isOverdue = complaint.expectedDisposalDate < new Date().toISOString().slice(0,10) && complaint.status !== "Disposed";
-  const daysDiff = Math.ceil(
-    (new Date(complaint.expectedDisposalDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
-  );
+  const daysDiff=slaDaysRemaining(complaint.expectedDisposalDate,complaint.sla?.policy.timezone);
+  const isOverdue = daysDiff<0 && complaint.status !== "Disposed";
 
   const slaStatusText =
     complaint.status === "Disposed"
@@ -577,6 +582,12 @@ export const ComplaintDetails: React.FC = () => {
       <nav className="tab-bar" aria-label={tr("navigation:ui.pageContext")}>{["overview", "timeline", "documents", "coordination", "related"].map(tab => <button className="tab-button" type="button" aria-pressed={detailTab === tab} onClick={() => setDetailTab(tab)} key={tab}>{tr("navigation:ui.caseTabs." + tab)}{tab === "documents" ? ` (${formatNumber(documents.length)})` : tab === "related" ? ` (${formatNumber(relatedCases.length + overlapAlerts.length)})` : ""}</button>)}</nav>
       <div className="space-y-5">
         <div className="space-y-5" hidden={["timeline", "coordination"].includes(detailTab)}>
+          {detailTab === "overview" && <CaseMetadata complaint={complaint}/>}
+          {detailTab === "overview" && <CaseSecurityPanel caseId={complaint.id} onChanged={() => window.location.reload()}/>}
+          {detailTab === "overview" && <ComplaintLanguagePanel caseId={complaint.id}/>}
+          {detailTab === "overview" && user?.role !== "Institutional User" && <CaseOverlapPanel caseId={complaint.id}/>}
+          {detailTab === "overview" && user?.role !== "Institutional User" && <CaseFamilyLink caseId={complaint.id}/>}
+          {detailTab === "overview" && user?.role !== "Institutional User" && <CaseSlaPanel caseId={complaint.id}/>}
           {/* Grievance Statement */}
           <div hidden={detailTab !== "overview"} className="bg-white border border-[#e5eaf0] rounded-lg shadow-none overflow-hidden">
             <div className="bg-[#f8fafc] px-4 py-2.5 border-b border-[#e5eaf0] flex items-center justify-between">

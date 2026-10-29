@@ -42,6 +42,7 @@ export interface WorkflowRequest {
 }
 
 export interface Institution {
+  matching?: import("./intake.js").InstitutionIdentifiers;
   id: string;
   aictePermanentId: string;
   name: string;
@@ -64,6 +65,13 @@ export interface Institution {
 }
 
 export interface Complaint {
+  sla?:import("./slaPolicy.js").CaseSla;
+  entityReferences?: import("./overlapSettings.js").InstitutionEntityReference[];
+  entityReferencesVersion?: number;
+  textAnalysis?: import("./textAnalysis.js").TextAnalysis;
+  security?: import("./confidentiality.js").CaseSecurity;
+  identityEnvelope?: import("./confidentiality.js").IdentityEnvelope;
+  metadata?: import("./intake.js").CaseMetadata;
   id: string;
   complaintId: string; // e.g. AICTE/RB/2026/00142
   institutionId: string;
@@ -105,6 +113,7 @@ export interface CaseAssignment {
 }
 
 export interface CaseHistory {
+  familyMergeId?: string;
   id: string;
   complaintId: string;
   actionType: string;
@@ -154,6 +163,7 @@ export interface RelatedCase {
 }
 
 export interface OverlapExplanation {
+  assessment?: import("./overlapSettings.js").OverlapAssessment;
   institutionMatch: {
     matched: boolean;
     score: number;
@@ -177,7 +187,11 @@ export interface OverlapExplanation {
     details: string;
   };
   semanticMatch: {
-    score: number;
+    mode?: import("./textAnalysis.js").SimilarityMode;
+    model?: string;
+    revision?: string;
+    preprocessingVersion?: string;
+    score?: number;
     engine: string;
     details: string;
   };
@@ -186,6 +200,7 @@ export interface OverlapExplanation {
 }
 
 export interface OverlapAlert {
+  assessment?: import("./overlapSettings.js").OverlapAssessment;
   id: string;
   alertId: string;
   institutionId: string;
@@ -214,7 +229,7 @@ export interface OverlapAlert {
   reviewedBy?: string;
   reviewedByName?: string;
   reviewedAt?: string;
-  confidenceCategory?: "High-Confidence Duplicate" | "Related Grievance" | "Low-Confidence Match";
+  confidenceCategory?: "High-Confidence Duplicate" | "Related Grievance" | "Low-Confidence Match" | "Possible Duplicate — Review Required" | "Possible Related Case — Review Required" | "Mandatory Review — Relationship Undetermined";
   detectionMethod?: string;
   reviewRemarks?: string;
   createdAt: string;
@@ -222,6 +237,7 @@ export interface OverlapAlert {
 }
 
 export interface Notification {
+  slaAlertId?:string;
   id: string;
   recipientId?: string;
   recipientRole?: string;
@@ -273,5 +289,6 @@ export interface DetectionResult {
     explanation?: OverlapExplanation;
     isCrossBureau: boolean;
     recommendation: string;
+    assessment?: import("./overlapSettings.js").OverlapAssessment;
   }[];
 }

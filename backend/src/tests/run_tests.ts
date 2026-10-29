@@ -281,7 +281,7 @@ async function runTests() {
     const evalFallback = await evaluateComplaintPair(caseB, caseA, mockInstA);
     assert(evalFallback.ruleScore > 0, "Rule score must be calculated regardless of AI status");
     assert(evalFallback.reasons.length > 0, "Explainable match reasons must be generated");
-    assert(Boolean(evalFallback.semanticEngine.includes("Fallback") || evalFallback.semanticEngine.includes("SentenceTransformer")));
+    assert(["lexical_fallback", "multilingual_embeddings"].includes(evalFallback.similarity.mode));
     console.log(`  ✓ Passed: Reliable fallback confirmed (Engine: ${evalFallback.semanticEngine}, Rule Score: ${evalFallback.ruleScore})`);
     passed++;
 
@@ -421,7 +421,7 @@ async function runTests() {
     // -------------------------------------------------------------------
     console.log("Test 17: In-process lexical/cosine fallback provides reliable engine tag...");
     assert(
-      evalWithExp.semanticEngine.includes("TF-IDF") || evalWithExp.semanticEngine.includes("MiniLM") || evalWithExp.semanticEngine.includes("in-process"),
+      ["lexical_fallback", "multilingual_embeddings"].includes(evalWithExp.similarity.mode) && !!evalWithExp.similarity.preprocessingVersion,
       "Fallback engine tag must be informative"
     );
     assert(evalWithExp.semanticScore !== undefined && evalWithExp.semanticScore > 0, "Semantic score must be computed even without external AI service");

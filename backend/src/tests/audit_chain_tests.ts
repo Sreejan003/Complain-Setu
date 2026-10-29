@@ -1,0 +1,14 @@
+import assert from "node:assert/strict";
+import {randomUUID} from "node:crypto";
+import {auditDigest,deterministicJson,initializeAuditIntegrity,appendPendingAuditEvents,verifyAuditIntegrity} from "../security/auditChain.js";
+import type {AuditLog} from "../models/types.js";
+const event=(action:string):AuditLog=>({id:randomUUID(),action,entityType:"SystemOperation",entityId:"synthetic",createdAt:"2026-01-01T00:00:00Z",details:{b:2,a:1}});
+assert.equal(deterministicJson({z:[2,1],a:{b:1,a:0}}),'{"a":{"a":0,"b":1},"z":[2,1]}');assert.equal(auditDigest({a:1,b:2}),auditDigest({b:2,a:1}));assert.notEqual(auditDigest([1,2]),auditDigest([2,1]));
+const legacy=[event("legacy")],logs=[...legacy],state=initializeAuditIntegrity(logs);logs.push(event("one"),event("two"),event("three"));appendPendingAuditEvents(logs,state);assert.equal(verifyAuditIntegrity(logs,state).valid,true);
+const checkpoint={id:randomUUID(),sequence:3,hash:state.entries[2].hash,genesisHash:state.genesisHash,legacyDigest:state.legacyDigest,createdAt:"2026-01-01T00:00:00Z",createdBy:"test"};assert.equal(verifyAuditIntegrity(logs,state,checkpoint).valid,true);
+const changed=structuredClone(logs);changed[1].action="tampered";assert.equal(verifyAuditIntegrity(changed,state).code,"CHAIN_MISMATCH");assert.equal(verifyAuditIntegrity([logs[0],logs[2],logs[1],logs[3]],state).valid,false);assert.equal(verifyAuditIntegrity(logs.slice(0,3),state).code,"EVENT_COUNT_MISMATCH");
+const truncated={...structuredClone(state),entries:state.entries.slice(0,2)};assert.equal(verifyAuditIntegrity(logs.slice(0,3),truncated,checkpoint).code,"CHECKPOINT_MISMATCH");
+const rewritten=[event("rewritten legacy"),...logs.slice(1)],replacement=initializeAuditIntegrity(rewritten.slice(0,1));appendPendingAuditEvents(rewritten,replacement);assert.equal(verifyAuditIntegrity(rewritten,replacement).valid,true);assert.equal(verifyAuditIntegrity(rewritten,replacement,checkpoint).valid,false);
+assert.equal(verifyAuditIntegrity(logs,{...state,entries:[null]} as any).valid,false);assert.equal(verifyAuditIntegrity(logs,{...state,entries:[...state.entries].reverse()}).valid,false);
+assert.throws(()=>appendPendingAuditEvents(changed,state));assert.equal(state.entries.length,3);
+console.log("PASS Audit chain arithmetic, canonical object keys/array order, legacy anchor, alteration, deletion, reordering, malformed state, fail-closed append, and independent checkpoint detection of tail truncation/full rewrite.");

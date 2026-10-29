@@ -7,6 +7,15 @@ export function canVisit(role: string, path: string) {
   if(path==="/"||path==="/notifications")return true;
   if(path.endsWith("/dashboard"))return path===dashboardPath(role);
   if(path==="/admin")return role==="SYSTEM_ADMIN";
+  if(path==="/admin/intake")return role==="SYSTEM_ADMIN";
+  if(path==="/admin/confidentiality")return role==="SYSTEM_ADMIN";
+  if(path==="/admin/overlap-settings")return role==="SYSTEM_ADMIN";
+  if(path==="/admin/sla-policies")return role==="SYSTEM_ADMIN";
+  if(path==="/reports")return ["COMPETENT_AUTHORITY","BUREAU_HEAD","CASE_OFFICER"].includes(role);
+  if(path==="/sla-alerts")return ["COMPETENT_AUTHORITY","BUREAU_HEAD","CASE_OFFICER"].includes(role);
+  if(path==="/admin/audit-integrity")return role==="SYSTEM_ADMIN";
+  if(path==="/intake")return ["COMPETENT_AUTHORITY","BUREAU_HEAD","CASE_OFFICER"].includes(role);
+  if(path==="/imports")return ["COMPETENT_AUTHORITY","BUREAU_HEAD","CASE_OFFICER"].includes(role);
   if(path==="/institution-dashboard"||path==="/institutions"||path.startsWith("/institutions/"))return true;
   if(role==="SYSTEM_ADMIN")return false;
   if(path==="/coordination"||path.startsWith("/coordination/"))return ["COMPETENT_AUTHORITY","BUREAU_HEAD","CASE_OFFICER"].includes(role);

@@ -1,0 +1,5062 @@
+{
+  "version": "synthetic-overlap-v1",
+  "createdBy": "synthetic fixture generator",
+  "description": "84 draft-labeled pairs in 28 disjoint family groups. No operational records, official findings, statutory rules or approved translations.",
+  "smokeFamiliesExcluded": [
+    "smoke-only-salary-not-in-tuning-or-heldout"
+  ],
+  "splitRule": "First 20 family groups are tuning; final 8 held out. Labels/splits fixed before any evaluation. No held-out tuning.",
+  "cases": [
+    {
+      "id": "EVAL-001-A",
+      "familyId": "EVAL-001-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-1",
+      "institutionName": "Synthetic Institution 1",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-1",
+      "language": "en",
+      "category": "Capitation Fee / Overcharging",
+      "title": "",
+      "description": "The institution collected an additional admission fee from students in this programme. [EVAL-001 | 2025-01-10 | SYNTHETIC-PROGRAMME-1]",
+      "receivedDate": "2025-01-10",
+      "currentBureauId": "RB",
+      "receivingBureauId": "RB",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-01-10T00:00:00.000Z",
+      "updatedAt": "2025-01-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "portal",
+        "externalReference": "EVAL-001-SOURCE",
+        "normalizedExternalReference": "EVAL-001-SOURCE",
+        "sourceReceivedDate": "2025-01-10",
+        "programme": "SYNTHETIC-PROGRAMME-1",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-01-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-001-B",
+      "familyId": "EVAL-001-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-1",
+      "institutionName": "Synthetic Institution 1",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-1",
+      "language": "en",
+      "category": "Capitation Fee / Overcharging",
+      "title": "",
+      "description": "The institution collected an additional admission fee from students in this programme. [EVAL-001 | 2025-01-10 | SYNTHETIC-PROGRAMME-1]",
+      "receivedDate": "2025-01-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-01-10T00:00:00.000Z",
+      "updatedAt": "2025-01-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-001-SOURCE",
+        "normalizedExternalReference": "EVAL-001-SOURCE",
+        "sourceReceivedDate": "2025-01-10",
+        "programme": "SYNTHETIC-PROGRAMME-1",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-01-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-001-C",
+      "familyId": "EVAL-001-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-1",
+      "institutionName": "Synthetic Institution 1",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-1",
+      "language": "en",
+      "category": "Admission Guideline Violations",
+      "title": "",
+      "description": "Students request verification of admission receipts for the same programme and admission round. [EVAL-001 | 2025-01-10 | SYNTHETIC-PROGRAMME-1]",
+      "receivedDate": "2025-01-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-01-10T00:00:00.000Z",
+      "updatedAt": "2025-01-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-001-VERIFY",
+        "normalizedExternalReference": "EVAL-001-VERIFY",
+        "sourceReceivedDate": "2025-01-10",
+        "programme": "SYNTHETIC-PROGRAMME-1",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-01-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-001-D",
+      "familyId": "EVAL-001-independent",
+      "institutionId": "SYNTHETIC-INSTITUTION-1-OTHER",
+      "institutionName": "Other synthetic institution",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-1-OTHER",
+      "language": "en",
+      "category": "Capitation Fee / Overcharging",
+      "title": "",
+      "description": "The institution collected an additional admission fee from students in this programme. [EVAL-001 | 2025-01-10 | SYNTHETIC-PROGRAMME-1]",
+      "receivedDate": "2025-01-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-01-10T00:00:00.000Z",
+      "updatedAt": "2025-01-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-001-INDEPENDENT",
+        "normalizedExternalReference": "EVAL-001-INDEPENDENT",
+        "sourceReceivedDate": "2025-01-10",
+        "programme": "SYNTHETIC-PROGRAMME-1",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-01-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-002-A",
+      "familyId": "EVAL-002-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-2",
+      "institutionName": "Synthetic Institution 2",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-2",
+      "language": "en",
+      "category": "Withholding of Certificates & Documents",
+      "title": "",
+      "description": "Original certificates have not been returned after students completed this programme. [EVAL-002 | 2025-02-10 | SYNTHETIC-PROGRAMME-2]",
+      "receivedDate": "2025-02-10",
+      "currentBureauId": "RB",
+      "receivingBureauId": "RB",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-02-10T00:00:00.000Z",
+      "updatedAt": "2025-02-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "portal",
+        "externalReference": "EVAL-002-SOURCE",
+        "normalizedExternalReference": "EVAL-002-SOURCE",
+        "sourceReceivedDate": "2025-02-10",
+        "programme": "SYNTHETIC-PROGRAMME-2",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-02-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-002-B",
+      "familyId": "EVAL-002-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-2",
+      "institutionName": "Synthetic Institution 2",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-2",
+      "language": "hi",
+      "category": "Withholding of Certificates & Documents",
+      "title": "",
+      "description": "पाठ्यक्रम पूरा होने के बाद भी छात्रों के मूल प्रमाणपत्र वापस नहीं किए गए। [EVAL-002 | 2025-02-10 | SYNTHETIC-PROGRAMME-2]",
+      "receivedDate": "2025-02-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-02-10T00:00:00.000Z",
+      "updatedAt": "2025-02-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-002-SOURCE",
+        "normalizedExternalReference": "EVAL-002-SOURCE",
+        "sourceReceivedDate": "2025-02-10",
+        "programme": "SYNTHETIC-PROGRAMME-2",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-02-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-002-C",
+      "familyId": "EVAL-002-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-2",
+      "institutionName": "Synthetic Institution 2",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-2",
+      "language": "hi",
+      "category": "Harassment & Grievance Redressal Failure",
+      "title": "",
+      "description": "उन्हीं छात्रों ने प्रमाणपत्र जारी होने से पहले पूरी हुई निकासी प्रक्रिया के रिकॉर्ड की जाँच माँगी है। [EVAL-002 | 2025-02-10 | SYNTHETIC-PROGRAMME-2]",
+      "receivedDate": "2025-02-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-02-10T00:00:00.000Z",
+      "updatedAt": "2025-02-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-002-VERIFY",
+        "normalizedExternalReference": "EVAL-002-VERIFY",
+        "sourceReceivedDate": "2025-02-10",
+        "programme": "SYNTHETIC-PROGRAMME-2",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-02-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-002-D",
+      "familyId": "EVAL-002-independent",
+      "institutionId": "SYNTHETIC-INSTITUTION-2",
+      "institutionName": "Synthetic Institution 2",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-2",
+      "language": "hi",
+      "category": "Withholding of Certificates & Documents",
+      "title": "",
+      "description": "पाठ्यक्रम पूरा होने के बाद भी छात्रों के मूल प्रमाणपत्र वापस नहीं किए गए। [EVAL-002-OLD | 2023-01-10 | SYNTHETIC-PROGRAMME-2-OLD-COHORT]",
+      "receivedDate": "2023-01-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Disposed",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2023-01-10T00:00:00.000Z",
+      "updatedAt": "2023-03-01T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-002-INDEPENDENT",
+        "normalizedExternalReference": "EVAL-002-INDEPENDENT",
+        "sourceReceivedDate": "2023-01-10",
+        "programme": "SYNTHETIC-PROGRAMME-2-OLD-COHORT",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-02-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      },
+      "disposalDate": "2023-03-01"
+    },
+    {
+      "id": "EVAL-003-A",
+      "familyId": "EVAL-003-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-3",
+      "institutionName": "Synthetic Institution 3",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-3",
+      "language": "en",
+      "category": "Infrastructure & Lab Deficiencies",
+      "title": "",
+      "description": "Required equipment is missing from the laboratory used by this programme's current students. [EVAL-003 | 2025-03-10 | SYNTHETIC-PROGRAMME-3]",
+      "receivedDate": "2025-03-10",
+      "currentBureauId": "RB",
+      "receivingBureauId": "RB",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-03-10T00:00:00.000Z",
+      "updatedAt": "2025-03-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "portal",
+        "externalReference": "EVAL-003-SOURCE",
+        "normalizedExternalReference": "EVAL-003-SOURCE",
+        "sourceReceivedDate": "2025-03-10",
+        "programme": "SYNTHETIC-PROGRAMME-3",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-03-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-003-B",
+      "familyId": "EVAL-003-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-3",
+      "institutionName": "Synthetic Institution 3",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-3",
+      "language": "gu",
+      "category": "Infrastructure & Lab Deficiencies",
+      "title": "",
+      "description": "આ અભ્યાસક્રમના વર્તમાન વિદ્યાર્થીઓની પ્રયોગશાળામાં જરૂરી સાધનો નથી. [EVAL-003 | 2025-03-10 | SYNTHETIC-PROGRAMME-3]",
+      "receivedDate": "2025-03-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-03-10T00:00:00.000Z",
+      "updatedAt": "2025-03-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-003-SOURCE",
+        "normalizedExternalReference": "EVAL-003-SOURCE",
+        "sourceReceivedDate": "2025-03-10",
+        "programme": "SYNTHETIC-PROGRAMME-3",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-03-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-003-C",
+      "familyId": "EVAL-003-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-3",
+      "institutionName": "Synthetic Institution 3",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-3",
+      "language": "gu",
+      "category": "Approval Norms Violation",
+      "title": "",
+      "description": "નિરીક્ષણ વિનંતીમાં એ જ અભ્યાસક્રમ અને સમયના પ્રયોગશાળા સાધનોના રેકોર્ડની તપાસ માંગી છે. [EVAL-003 | 2025-03-10 | SYNTHETIC-PROGRAMME-3]",
+      "receivedDate": "2025-03-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-03-10T00:00:00.000Z",
+      "updatedAt": "2025-03-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-003-VERIFY",
+        "normalizedExternalReference": "EVAL-003-VERIFY",
+        "sourceReceivedDate": "2025-03-10",
+        "programme": "SYNTHETIC-PROGRAMME-3",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-03-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-003-D",
+      "familyId": "EVAL-003-independent",
+      "institutionId": "SYNTHETIC-INSTITUTION-3",
+      "institutionName": "Synthetic Institution 3",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-3",
+      "language": "gu",
+      "category": "Infrastructure & Lab Deficiencies",
+      "title": "",
+      "description": "અલગ વિનંતી સંસ્થાના રમત દિવસના આમંત્રણની રચના વિશે છે. [EVAL-003 | 2025-03-10 | SYNTHETIC-PROGRAMME-3]",
+      "receivedDate": "2025-03-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-03-10T00:00:00.000Z",
+      "updatedAt": "2025-03-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-003-INDEPENDENT",
+        "normalizedExternalReference": "EVAL-003-INDEPENDENT",
+        "sourceReceivedDate": "2025-03-10",
+        "programme": "SYNTHETIC-PROGRAMME-3",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-03-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-004-A",
+      "familyId": "EVAL-004-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-4",
+      "institutionName": "Synthetic Institution 4",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-4",
+      "language": "en",
+      "category": "Faculty Shortage / Irregularities",
+      "title": "",
+      "description": "Students report a shortage of qualified teachers for this programme during the current teaching period. [EVAL-004 | 2025-04-10 | SYNTHETIC-PROGRAMME-4]",
+      "receivedDate": "2025-04-10",
+      "currentBureauId": "RB",
+      "receivingBureauId": "RB",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-04-10T00:00:00.000Z",
+      "updatedAt": "2025-04-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "portal",
+        "externalReference": "EVAL-004-SOURCE",
+        "normalizedExternalReference": "EVAL-004-SOURCE",
+        "sourceReceivedDate": "2025-04-10",
+        "programme": "SYNTHETIC-PROGRAMME-4",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-04-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-004-B",
+      "familyId": "EVAL-004-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-4",
+      "institutionName": "Synthetic Institution 4",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-4",
+      "language": "ta",
+      "category": "Faculty Shortage / Irregularities",
+      "title": "",
+      "description": "நடப்பு கற்பித்தல் காலத்தில் இந்தப் படிப்பிற்குத் தகுதியான ஆசிரியர்கள் குறைவாக இருப்பதாக மாணவர்கள் தெரிவிக்கின்றனர். [EVAL-004 | 2025-04-10 | SYNTHETIC-PROGRAMME-4]",
+      "receivedDate": "2025-04-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-04-10T00:00:00.000Z",
+      "updatedAt": "2025-04-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-004-SOURCE",
+        "normalizedExternalReference": "EVAL-004-SOURCE",
+        "sourceReceivedDate": "2025-04-10",
+        "programme": "SYNTHETIC-PROGRAMME-4",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-04-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-004-C",
+      "familyId": "EVAL-004-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-4",
+      "institutionName": "Synthetic Institution 4",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-4",
+      "language": "ta",
+      "category": "Approval Norms Violation",
+      "title": "",
+      "description": "தொடர்புடைய சரிபார்ப்புக் கோரிக்கை அதே படிப்பு மற்றும் காலத்திற்கான ஆசிரியர் நியமனப் பதிவுகளைக் கேட்கிறது. [EVAL-004 | 2025-04-10 | SYNTHETIC-PROGRAMME-4]",
+      "receivedDate": "2025-04-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-04-10T00:00:00.000Z",
+      "updatedAt": "2025-04-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-004-VERIFY",
+        "normalizedExternalReference": "EVAL-004-VERIFY",
+        "sourceReceivedDate": "2025-04-10",
+        "programme": "SYNTHETIC-PROGRAMME-4",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-04-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-004-D",
+      "familyId": "EVAL-004-independent",
+      "institutionId": "SYNTHETIC-INSTITUTION-4-OTHER",
+      "institutionName": "Other synthetic institution",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-4-OTHER",
+      "language": "ta",
+      "category": "Faculty Shortage / Irregularities",
+      "title": "",
+      "description": "நடப்பு கற்பித்தல் காலத்தில் இந்தப் படிப்பிற்குத் தகுதியான ஆசிரியர்கள் குறைவாக இருப்பதாக மாணவர்கள் தெரிவிக்கின்றனர். [EVAL-004 | 2025-04-10 | SYNTHETIC-PROGRAMME-4]",
+      "receivedDate": "2025-04-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-04-10T00:00:00.000Z",
+      "updatedAt": "2025-04-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-004-INDEPENDENT",
+        "normalizedExternalReference": "EVAL-004-INDEPENDENT",
+        "sourceReceivedDate": "2025-04-10",
+        "programme": "SYNTHETIC-PROGRAMME-4",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-04-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-005-A",
+      "familyId": "EVAL-005-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-5",
+      "institutionName": "Synthetic Institution 5",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-5",
+      "language": "en",
+      "category": "Withholding of Certificates & Documents",
+      "title": "",
+      "description": "Original certificates have not been returned after students completed this programme. [EVAL-005 | 2025-05-10 | SYNTHETIC-PROGRAMME-5]",
+      "receivedDate": "2025-05-10",
+      "currentBureauId": "RB",
+      "receivingBureauId": "RB",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-05-10T00:00:00.000Z",
+      "updatedAt": "2025-05-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "portal",
+        "externalReference": "EVAL-005-SOURCE",
+        "normalizedExternalReference": "EVAL-005-SOURCE",
+        "sourceReceivedDate": "2025-05-10",
+        "programme": "SYNTHETIC-PROGRAMME-5",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-05-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-005-B",
+      "familyId": "EVAL-005-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-5",
+      "institutionName": "Synthetic Institution 5",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-5",
+      "language": "te",
+      "category": "Withholding of Certificates & Documents",
+      "title": "",
+      "description": "కోర్సు పూర్తయినా విద్యార్థుల అసలు ధ్రువపత్రాలు తిరిగి ఇవ్వలేదు. [EVAL-005 | 2025-05-10 | SYNTHETIC-PROGRAMME-5]",
+      "receivedDate": "2025-05-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-05-10T00:00:00.000Z",
+      "updatedAt": "2025-05-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-005-SOURCE",
+        "normalizedExternalReference": "EVAL-005-SOURCE",
+        "sourceReceivedDate": "2025-05-10",
+        "programme": "SYNTHETIC-PROGRAMME-5",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-05-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-005-C",
+      "familyId": "EVAL-005-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-5",
+      "institutionName": "Synthetic Institution 5",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-5",
+      "language": "te",
+      "category": "Harassment & Grievance Redressal Failure",
+      "title": "",
+      "description": "అదే విద్యార్థులు ధ్రువపత్రాల విడుదలకు ముందు పూర్తయిన అనుమతి ప్రక్రియ రికార్డుల తనిఖీ కోరుతున్నారు. [EVAL-005 | 2025-05-10 | SYNTHETIC-PROGRAMME-5]",
+      "receivedDate": "2025-05-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-05-10T00:00:00.000Z",
+      "updatedAt": "2025-05-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-005-VERIFY",
+        "normalizedExternalReference": "EVAL-005-VERIFY",
+        "sourceReceivedDate": "2025-05-10",
+        "programme": "SYNTHETIC-PROGRAMME-5",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-05-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-005-D",
+      "familyId": "EVAL-005-independent",
+      "institutionId": "SYNTHETIC-INSTITUTION-5",
+      "institutionName": "Synthetic Institution 5",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-5",
+      "language": "te",
+      "category": "Withholding of Certificates & Documents",
+      "title": "",
+      "description": "కోర్సు పూర్తయినా విద్యార్థుల అసలు ధ్రువపత్రాలు తిరిగి ఇవ్వలేదు. [EVAL-005-OLD | 2023-01-10 | SYNTHETIC-PROGRAMME-5-OLD-COHORT]",
+      "receivedDate": "2023-01-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Disposed",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2023-01-10T00:00:00.000Z",
+      "updatedAt": "2023-03-01T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-005-INDEPENDENT",
+        "normalizedExternalReference": "EVAL-005-INDEPENDENT",
+        "sourceReceivedDate": "2023-01-10",
+        "programme": "SYNTHETIC-PROGRAMME-5-OLD-COHORT",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-05-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      },
+      "disposalDate": "2023-03-01"
+    },
+    {
+      "id": "EVAL-006-A",
+      "familyId": "EVAL-006-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-6",
+      "institutionName": "Synthetic Institution 6",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-6",
+      "language": "en",
+      "category": "Infrastructure & Lab Deficiencies",
+      "title": "",
+      "description": "Required equipment is missing from the laboratory used by this programme's current students. [EVAL-006 | 2025-06-10 | SYNTHETIC-PROGRAMME-6]",
+      "receivedDate": "2025-06-10",
+      "currentBureauId": "RB",
+      "receivingBureauId": "RB",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-06-10T00:00:00.000Z",
+      "updatedAt": "2025-06-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "portal",
+        "externalReference": "EVAL-006-SOURCE",
+        "normalizedExternalReference": "EVAL-006-SOURCE",
+        "sourceReceivedDate": "2025-06-10",
+        "programme": "SYNTHETIC-PROGRAMME-6",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-06-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-006-B",
+      "familyId": "EVAL-006-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-6",
+      "institutionName": "Synthetic Institution 6",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-6",
+      "language": "bn",
+      "category": "Infrastructure & Lab Deficiencies",
+      "title": "",
+      "description": "এই পাঠক্রমের বর্তমান ছাত্রদের পরীক্ষাগারে প্রয়োজনীয় সরঞ্জাম নেই। [EVAL-006 | 2025-06-10 | SYNTHETIC-PROGRAMME-6]",
+      "receivedDate": "2025-06-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-06-10T00:00:00.000Z",
+      "updatedAt": "2025-06-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-006-SOURCE",
+        "normalizedExternalReference": "EVAL-006-SOURCE",
+        "sourceReceivedDate": "2025-06-10",
+        "programme": "SYNTHETIC-PROGRAMME-6",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-06-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-006-C",
+      "familyId": "EVAL-006-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-6",
+      "institutionName": "Synthetic Institution 6",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-6",
+      "language": "bn",
+      "category": "Approval Norms Violation",
+      "title": "",
+      "description": "পরিদর্শনের অনুরোধে একই পাঠক্রম ও সময়ের পরীক্ষাগারের সরঞ্জামের নথি চাওয়া হয়েছে। [EVAL-006 | 2025-06-10 | SYNTHETIC-PROGRAMME-6]",
+      "receivedDate": "2025-06-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-06-10T00:00:00.000Z",
+      "updatedAt": "2025-06-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-006-VERIFY",
+        "normalizedExternalReference": "EVAL-006-VERIFY",
+        "sourceReceivedDate": "2025-06-10",
+        "programme": "SYNTHETIC-PROGRAMME-6",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-06-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-006-D",
+      "familyId": "EVAL-006-independent",
+      "institutionId": "SYNTHETIC-INSTITUTION-6",
+      "institutionName": "Synthetic Institution 6",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-6",
+      "language": "bn",
+      "category": "Infrastructure & Lab Deficiencies",
+      "title": "",
+      "description": "একটি আলাদা অনুরোধ প্রতিষ্ঠানের ক্রীড়া দিবসের আমন্ত্রণের নকশা সম্পর্কে। [EVAL-006 | 2025-06-10 | SYNTHETIC-PROGRAMME-6]",
+      "receivedDate": "2025-06-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-06-10T00:00:00.000Z",
+      "updatedAt": "2025-06-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-006-INDEPENDENT",
+        "normalizedExternalReference": "EVAL-006-INDEPENDENT",
+        "sourceReceivedDate": "2025-06-10",
+        "programme": "SYNTHETIC-PROGRAMME-6",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-06-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-007-A",
+      "familyId": "EVAL-007-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-7",
+      "institutionName": "Synthetic Institution 7",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-7",
+      "language": "en",
+      "category": "Faculty Shortage / Irregularities",
+      "title": "",
+      "description": "Students report a shortage of qualified teachers for this programme during the current teaching period. [EVAL-007 | 2025-07-10 | SYNTHETIC-PROGRAMME-7]",
+      "receivedDate": "2025-07-10",
+      "currentBureauId": "RB",
+      "receivingBureauId": "RB",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-07-10T00:00:00.000Z",
+      "updatedAt": "2025-07-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "portal",
+        "externalReference": "EVAL-007-SOURCE",
+        "normalizedExternalReference": "EVAL-007-SOURCE",
+        "sourceReceivedDate": "2025-07-10",
+        "programme": "SYNTHETIC-PROGRAMME-7",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-07-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-007-B",
+      "familyId": "EVAL-007-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-7",
+      "institutionName": "Synthetic Institution 7",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-7",
+      "language": "kn",
+      "category": "Faculty Shortage / Irregularities",
+      "title": "",
+      "description": "ಪ್ರಸ್ತುತ ಬೋಧನಾ ಅವಧಿಯಲ್ಲಿ ಈ ಕೋರ್ಸಿಗೆ ಅರ್ಹ ಶಿಕ್ಷಕರ ಕೊರತೆಯನ್ನು ವಿದ್ಯಾರ್ಥಿಗಳು ತಿಳಿಸಿದ್ದಾರೆ. [EVAL-007 | 2025-07-10 | SYNTHETIC-PROGRAMME-7]",
+      "receivedDate": "2025-07-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-07-10T00:00:00.000Z",
+      "updatedAt": "2025-07-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-007-SOURCE",
+        "normalizedExternalReference": "EVAL-007-SOURCE",
+        "sourceReceivedDate": "2025-07-10",
+        "programme": "SYNTHETIC-PROGRAMME-7",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-07-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-007-C",
+      "familyId": "EVAL-007-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-7",
+      "institutionName": "Synthetic Institution 7",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-7",
+      "language": "kn",
+      "category": "Approval Norms Violation",
+      "title": "",
+      "description": "ಸಂಬಂಧಿತ ಪರಿಶೀಲನಾ ವಿನಂತಿಯು ಅದೇ ಕೋರ್ಸ್ ಮತ್ತು ಅವಧಿಯ ಶಿಕ್ಷಕರ ನೇಮಕಾತಿ ದಾಖಲೆಗಳನ್ನು ಕೇಳುತ್ತದೆ. [EVAL-007 | 2025-07-10 | SYNTHETIC-PROGRAMME-7]",
+      "receivedDate": "2025-07-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-07-10T00:00:00.000Z",
+      "updatedAt": "2025-07-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-007-VERIFY",
+        "normalizedExternalReference": "EVAL-007-VERIFY",
+        "sourceReceivedDate": "2025-07-10",
+        "programme": "SYNTHETIC-PROGRAMME-7",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-07-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-007-D",
+      "familyId": "EVAL-007-independent",
+      "institutionId": "SYNTHETIC-INSTITUTION-7-OTHER",
+      "institutionName": "Other synthetic institution",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-7-OTHER",
+      "language": "kn",
+      "category": "Faculty Shortage / Irregularities",
+      "title": "",
+      "description": "ಪ್ರಸ್ತುತ ಬೋಧನಾ ಅವಧಿಯಲ್ಲಿ ಈ ಕೋರ್ಸಿಗೆ ಅರ್ಹ ಶಿಕ್ಷಕರ ಕೊರತೆಯನ್ನು ವಿದ್ಯಾರ್ಥಿಗಳು ತಿಳಿಸಿದ್ದಾರೆ. [EVAL-007 | 2025-07-10 | SYNTHETIC-PROGRAMME-7]",
+      "receivedDate": "2025-07-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-07-10T00:00:00.000Z",
+      "updatedAt": "2025-07-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-007-INDEPENDENT",
+        "normalizedExternalReference": "EVAL-007-INDEPENDENT",
+        "sourceReceivedDate": "2025-07-10",
+        "programme": "SYNTHETIC-PROGRAMME-7",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-07-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-008-A",
+      "familyId": "EVAL-008-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-8",
+      "institutionName": "Synthetic Institution 8",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-8",
+      "language": "en",
+      "category": "Capitation Fee / Overcharging",
+      "title": "",
+      "description": "The institution collected an additional admission fee from students in this programme. [EVAL-008 | 2025-08-10 | SYNTHETIC-PROGRAMME-8]",
+      "receivedDate": "2025-08-10",
+      "currentBureauId": "RB",
+      "receivingBureauId": "RB",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-08-10T00:00:00.000Z",
+      "updatedAt": "2025-08-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "portal",
+        "externalReference": "EVAL-008-SOURCE",
+        "normalizedExternalReference": "EVAL-008-SOURCE",
+        "sourceReceivedDate": "2025-08-10",
+        "programme": "SYNTHETIC-PROGRAMME-8",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-08-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-008-B",
+      "familyId": "EVAL-008-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-8",
+      "institutionName": "Synthetic Institution 8",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-8",
+      "language": "mixed",
+      "category": "Capitation Fee / Overcharging",
+      "title": "",
+      "description": "Students से इस programme के लिए extra admission fee ली गई। [EVAL-008 | 2025-08-10 | SYNTHETIC-PROGRAMME-8]",
+      "receivedDate": "2025-08-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-08-10T00:00:00.000Z",
+      "updatedAt": "2025-08-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-008-SOURCE",
+        "normalizedExternalReference": "EVAL-008-SOURCE",
+        "sourceReceivedDate": "2025-08-10",
+        "programme": "SYNTHETIC-PROGRAMME-8",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-08-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-008-C",
+      "familyId": "EVAL-008-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-8",
+      "institutionName": "Synthetic Institution 8",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-8",
+      "language": "mixed",
+      "category": "Admission Guideline Violations",
+      "title": "",
+      "description": "उसी admission round की fee receipts का verification चाहिए। [EVAL-008 | 2025-08-10 | SYNTHETIC-PROGRAMME-8]",
+      "receivedDate": "2025-08-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-08-10T00:00:00.000Z",
+      "updatedAt": "2025-08-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-008-VERIFY",
+        "normalizedExternalReference": "EVAL-008-VERIFY",
+        "sourceReceivedDate": "2025-08-10",
+        "programme": "SYNTHETIC-PROGRAMME-8",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-08-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-008-D",
+      "familyId": "EVAL-008-independent",
+      "institutionId": "SYNTHETIC-INSTITUTION-8",
+      "institutionName": "Synthetic Institution 8",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-8",
+      "language": "mixed",
+      "category": "Capitation Fee / Overcharging",
+      "title": "",
+      "description": "Students से इस programme के लिए extra admission fee ली गई। [EVAL-008-OLD | 2023-01-10 | SYNTHETIC-PROGRAMME-8-OLD-COHORT]",
+      "receivedDate": "2023-01-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Disposed",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2023-01-10T00:00:00.000Z",
+      "updatedAt": "2023-03-01T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-008-INDEPENDENT",
+        "normalizedExternalReference": "EVAL-008-INDEPENDENT",
+        "sourceReceivedDate": "2023-01-10",
+        "programme": "SYNTHETIC-PROGRAMME-8-OLD-COHORT",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-08-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      },
+      "disposalDate": "2023-03-01"
+    },
+    {
+      "id": "EVAL-009-A",
+      "familyId": "EVAL-009-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-9",
+      "institutionName": "Synthetic Institution 9",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-9",
+      "language": "en",
+      "category": "Infrastructure & Lab Deficiencies",
+      "title": "",
+      "description": "Required equipment is missing from the laboratory used by this programme's current students. [EVAL-009 | 2025-09-10 | SYNTHETIC-PROGRAMME-9]",
+      "receivedDate": "2025-09-10",
+      "currentBureauId": "RB",
+      "receivingBureauId": "RB",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-09-10T00:00:00.000Z",
+      "updatedAt": "2025-09-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "portal",
+        "externalReference": "EVAL-009-SOURCE",
+        "normalizedExternalReference": "EVAL-009-SOURCE",
+        "sourceReceivedDate": "2025-09-10",
+        "programme": "SYNTHETIC-PROGRAMME-9",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-09-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-009-B",
+      "familyId": "EVAL-009-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-9",
+      "institutionName": "Synthetic Institution 9",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-9",
+      "language": "en",
+      "category": "Infrastructure & Lab Deficiencies",
+      "title": "",
+      "description": "Required equipment is missing from the laboratory used by this programme's current students. [EVAL-009 | 2025-09-10 | SYNTHETIC-PROGRAMME-9]",
+      "receivedDate": "2025-09-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-09-10T00:00:00.000Z",
+      "updatedAt": "2025-09-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-009-SOURCE",
+        "normalizedExternalReference": "EVAL-009-SOURCE",
+        "sourceReceivedDate": "2025-09-10",
+        "programme": "SYNTHETIC-PROGRAMME-9",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-09-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-009-C",
+      "familyId": "EVAL-009-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-9",
+      "institutionName": "Synthetic Institution 9",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-9",
+      "language": "en",
+      "category": "Approval Norms Violation",
+      "title": "",
+      "description": "An inspection request asks which laboratory equipment records were supplied for the same programme and period. [EVAL-009 | 2025-09-10 | SYNTHETIC-PROGRAMME-9]",
+      "receivedDate": "2025-09-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-09-10T00:00:00.000Z",
+      "updatedAt": "2025-09-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-009-VERIFY",
+        "normalizedExternalReference": "EVAL-009-VERIFY",
+        "sourceReceivedDate": "2025-09-10",
+        "programme": "SYNTHETIC-PROGRAMME-9",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-09-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-009-D",
+      "familyId": "EVAL-009-independent",
+      "institutionId": "SYNTHETIC-INSTITUTION-9",
+      "institutionName": "Synthetic Institution 9",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-9",
+      "language": "en",
+      "category": "Infrastructure & Lab Deficiencies",
+      "title": "",
+      "description": "A separate request asks about the institution's sports-day invitation design. [EVAL-009 | 2025-09-10 | SYNTHETIC-PROGRAMME-9]",
+      "receivedDate": "2025-09-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-09-10T00:00:00.000Z",
+      "updatedAt": "2025-09-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-009-INDEPENDENT",
+        "normalizedExternalReference": "EVAL-009-INDEPENDENT",
+        "sourceReceivedDate": "2025-09-10",
+        "programme": "SYNTHETIC-PROGRAMME-9",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-09-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-010-A",
+      "familyId": "EVAL-010-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-10",
+      "institutionName": "Synthetic Institution 10",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-10",
+      "language": "en",
+      "category": "Faculty Shortage / Irregularities",
+      "title": "",
+      "description": "Students report a shortage of qualified teachers for this programme during the current teaching period. [EVAL-010 | 2025-10-10 | SYNTHETIC-PROGRAMME-10]",
+      "receivedDate": "2025-10-10",
+      "currentBureauId": "RB",
+      "receivingBureauId": "RB",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-10-10T00:00:00.000Z",
+      "updatedAt": "2025-10-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "portal",
+        "externalReference": "EVAL-010-SOURCE",
+        "normalizedExternalReference": "EVAL-010-SOURCE",
+        "sourceReceivedDate": "2025-10-10",
+        "programme": "SYNTHETIC-PROGRAMME-10",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-10-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-010-B",
+      "familyId": "EVAL-010-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-10",
+      "institutionName": "Synthetic Institution 10",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-10",
+      "language": "hi",
+      "category": "Faculty Shortage / Irregularities",
+      "title": "",
+      "description": "छात्र वर्तमान शिक्षण अवधि में इस पाठ्यक्रम के योग्य शिक्षकों की कमी बताते हैं। [EVAL-010 | 2025-10-10 | SYNTHETIC-PROGRAMME-10]",
+      "receivedDate": "2025-10-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-10-10T00:00:00.000Z",
+      "updatedAt": "2025-10-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-010-SOURCE",
+        "normalizedExternalReference": "EVAL-010-SOURCE",
+        "sourceReceivedDate": "2025-10-10",
+        "programme": "SYNTHETIC-PROGRAMME-10",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-10-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-010-C",
+      "familyId": "EVAL-010-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-10",
+      "institutionName": "Synthetic Institution 10",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-10",
+      "language": "hi",
+      "category": "Approval Norms Violation",
+      "title": "",
+      "description": "संबंधित जाँच अनुरोध उसी पाठ्यक्रम और अवधि के शिक्षक नियुक्ति रिकॉर्ड माँगता है। [EVAL-010 | 2025-10-10 | SYNTHETIC-PROGRAMME-10]",
+      "receivedDate": "2025-10-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-10-10T00:00:00.000Z",
+      "updatedAt": "2025-10-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-010-VERIFY",
+        "normalizedExternalReference": "EVAL-010-VERIFY",
+        "sourceReceivedDate": "2025-10-10",
+        "programme": "SYNTHETIC-PROGRAMME-10",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-10-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-010-D",
+      "familyId": "EVAL-010-independent",
+      "institutionId": "SYNTHETIC-INSTITUTION-10-OTHER",
+      "institutionName": "Other synthetic institution",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-10-OTHER",
+      "language": "hi",
+      "category": "Faculty Shortage / Irregularities",
+      "title": "",
+      "description": "छात्र वर्तमान शिक्षण अवधि में इस पाठ्यक्रम के योग्य शिक्षकों की कमी बताते हैं। [EVAL-010 | 2025-10-10 | SYNTHETIC-PROGRAMME-10]",
+      "receivedDate": "2025-10-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-10-10T00:00:00.000Z",
+      "updatedAt": "2025-10-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-010-INDEPENDENT",
+        "normalizedExternalReference": "EVAL-010-INDEPENDENT",
+        "sourceReceivedDate": "2025-10-10",
+        "programme": "SYNTHETIC-PROGRAMME-10",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-10-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-011-A",
+      "familyId": "EVAL-011-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-11",
+      "institutionName": "Synthetic Institution 11",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-11",
+      "language": "en",
+      "category": "Capitation Fee / Overcharging",
+      "title": "",
+      "description": "The institution collected an additional admission fee from students in this programme. [EVAL-011 | 2025-11-10 | SYNTHETIC-PROGRAMME-11]",
+      "receivedDate": "2025-11-10",
+      "currentBureauId": "RB",
+      "receivingBureauId": "RB",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-11-10T00:00:00.000Z",
+      "updatedAt": "2025-11-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "portal",
+        "externalReference": "EVAL-011-SOURCE",
+        "normalizedExternalReference": "EVAL-011-SOURCE",
+        "sourceReceivedDate": "2025-11-10",
+        "programme": "SYNTHETIC-PROGRAMME-11",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-11-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-011-B",
+      "familyId": "EVAL-011-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-11",
+      "institutionName": "Synthetic Institution 11",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-11",
+      "language": "gu",
+      "category": "Capitation Fee / Overcharging",
+      "title": "",
+      "description": "સંસ્થાએ આ અભ્યાસક્રમના વિદ્યાર્થીઓ પાસેથી વધારાની પ્રવેશ ફી લીધી. [EVAL-011 | 2025-11-10 | SYNTHETIC-PROGRAMME-11]",
+      "receivedDate": "2025-11-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-11-10T00:00:00.000Z",
+      "updatedAt": "2025-11-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-011-SOURCE",
+        "normalizedExternalReference": "EVAL-011-SOURCE",
+        "sourceReceivedDate": "2025-11-10",
+        "programme": "SYNTHETIC-PROGRAMME-11",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-11-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-011-C",
+      "familyId": "EVAL-011-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-11",
+      "institutionName": "Synthetic Institution 11",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-11",
+      "language": "gu",
+      "category": "Admission Guideline Violations",
+      "title": "",
+      "description": "વિદ્યાર્થીઓ એ જ અભ્યાસક્રમ અને પ્રવેશ ચક્રની ફીની રસીદોની તપાસ માંગે છે. [EVAL-011 | 2025-11-10 | SYNTHETIC-PROGRAMME-11]",
+      "receivedDate": "2025-11-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-11-10T00:00:00.000Z",
+      "updatedAt": "2025-11-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-011-VERIFY",
+        "normalizedExternalReference": "EVAL-011-VERIFY",
+        "sourceReceivedDate": "2025-11-10",
+        "programme": "SYNTHETIC-PROGRAMME-11",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-11-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-011-D",
+      "familyId": "EVAL-011-independent",
+      "institutionId": "SYNTHETIC-INSTITUTION-11",
+      "institutionName": "Synthetic Institution 11",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-11",
+      "language": "gu",
+      "category": "Capitation Fee / Overcharging",
+      "title": "",
+      "description": "સંસ્થાએ આ અભ્યાસક્રમના વિદ્યાર્થીઓ પાસેથી વધારાની પ્રવેશ ફી લીધી. [EVAL-011-OLD | 2023-01-10 | SYNTHETIC-PROGRAMME-11-OLD-COHORT]",
+      "receivedDate": "2023-01-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Disposed",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2023-01-10T00:00:00.000Z",
+      "updatedAt": "2023-03-01T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-011-INDEPENDENT",
+        "normalizedExternalReference": "EVAL-011-INDEPENDENT",
+        "sourceReceivedDate": "2023-01-10",
+        "programme": "SYNTHETIC-PROGRAMME-11-OLD-COHORT",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-11-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      },
+      "disposalDate": "2023-03-01"
+    },
+    {
+      "id": "EVAL-012-A",
+      "familyId": "EVAL-012-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-12",
+      "institutionName": "Synthetic Institution 12",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-12",
+      "language": "en",
+      "category": "Withholding of Certificates & Documents",
+      "title": "",
+      "description": "Original certificates have not been returned after students completed this programme. [EVAL-012 | 2025-12-10 | SYNTHETIC-PROGRAMME-12]",
+      "receivedDate": "2025-12-10",
+      "currentBureauId": "RB",
+      "receivingBureauId": "RB",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-12-10T00:00:00.000Z",
+      "updatedAt": "2025-12-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "portal",
+        "externalReference": "EVAL-012-SOURCE",
+        "normalizedExternalReference": "EVAL-012-SOURCE",
+        "sourceReceivedDate": "2025-12-10",
+        "programme": "SYNTHETIC-PROGRAMME-12",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-12-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-012-B",
+      "familyId": "EVAL-012-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-12",
+      "institutionName": "Synthetic Institution 12",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-12",
+      "language": "ta",
+      "category": "Withholding of Certificates & Documents",
+      "title": "",
+      "description": "படிப்பை முடித்த பின்னரும் மாணவர்களின் அசல் சான்றிதழ்கள் திருப்பித் தரப்படவில்லை. [EVAL-012 | 2025-12-10 | SYNTHETIC-PROGRAMME-12]",
+      "receivedDate": "2025-12-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-12-10T00:00:00.000Z",
+      "updatedAt": "2025-12-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-012-SOURCE",
+        "normalizedExternalReference": "EVAL-012-SOURCE",
+        "sourceReceivedDate": "2025-12-10",
+        "programme": "SYNTHETIC-PROGRAMME-12",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-12-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-012-C",
+      "familyId": "EVAL-012-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-12",
+      "institutionName": "Synthetic Institution 12",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-12",
+      "language": "ta",
+      "category": "Harassment & Grievance Redressal Failure",
+      "title": "",
+      "description": "அதே மாணவர்கள் சான்றிதழ் வழங்குவதற்கு முன் முடிக்கப்பட்ட அனுமதிப் பதிவுகளைச் சரிபார்க்கக் கோருகின்றனர். [EVAL-012 | 2025-12-10 | SYNTHETIC-PROGRAMME-12]",
+      "receivedDate": "2025-12-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-12-10T00:00:00.000Z",
+      "updatedAt": "2025-12-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-012-VERIFY",
+        "normalizedExternalReference": "EVAL-012-VERIFY",
+        "sourceReceivedDate": "2025-12-10",
+        "programme": "SYNTHETIC-PROGRAMME-12",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-12-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-012-D",
+      "familyId": "EVAL-012-independent",
+      "institutionId": "SYNTHETIC-INSTITUTION-12",
+      "institutionName": "Synthetic Institution 12",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-12",
+      "language": "ta",
+      "category": "Infrastructure & Lab Deficiencies",
+      "title": "",
+      "description": "புதிய நூலகப் புத்தகங்களைப் பட்டியலிடுவது பற்றி நிறுவனம் கேட்கிறது. [EVAL-012 | 2025-12-10 | SYNTHETIC-PROGRAMME-12]",
+      "receivedDate": "2025-12-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-12-10T00:00:00.000Z",
+      "updatedAt": "2025-12-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-012-INDEPENDENT",
+        "normalizedExternalReference": "EVAL-012-INDEPENDENT",
+        "sourceReceivedDate": "2025-12-10",
+        "programme": "SYNTHETIC-PROGRAMME-12",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-12-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-013-A",
+      "familyId": "EVAL-013-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-13",
+      "institutionName": "Synthetic Institution 13",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-13",
+      "language": "en",
+      "category": "Faculty Shortage / Irregularities",
+      "title": "",
+      "description": "Students report a shortage of qualified teachers for this programme during the current teaching period. [EVAL-013 | 2025-01-10 | SYNTHETIC-PROGRAMME-13]",
+      "receivedDate": "2025-01-10",
+      "currentBureauId": "RB",
+      "receivingBureauId": "RB",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-01-10T00:00:00.000Z",
+      "updatedAt": "2025-01-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "portal",
+        "externalReference": "EVAL-013-SOURCE",
+        "normalizedExternalReference": "EVAL-013-SOURCE",
+        "sourceReceivedDate": "2025-01-10",
+        "programme": "SYNTHETIC-PROGRAMME-13",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-01-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-013-B",
+      "familyId": "EVAL-013-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-13",
+      "institutionName": "Synthetic Institution 13",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-13",
+      "language": "te",
+      "category": "Faculty Shortage / Irregularities",
+      "title": "",
+      "description": "ప్రస్తుత బోధన కాలంలో ఈ కోర్సుకు అర్హతగల అధ్యాపకుల కొరత ఉందని విద్యార్థులు తెలిపారు. [EVAL-013 | 2025-01-10 | SYNTHETIC-PROGRAMME-13]",
+      "receivedDate": "2025-01-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-01-10T00:00:00.000Z",
+      "updatedAt": "2025-01-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-013-SOURCE",
+        "normalizedExternalReference": "EVAL-013-SOURCE",
+        "sourceReceivedDate": "2025-01-10",
+        "programme": "SYNTHETIC-PROGRAMME-13",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-01-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-013-C",
+      "familyId": "EVAL-013-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-13",
+      "institutionName": "Synthetic Institution 13",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-13",
+      "language": "te",
+      "category": "Approval Norms Violation",
+      "title": "",
+      "description": "సంబంధిత తనిఖీ అభ్యర్థన అదే కోర్సు మరియు కాలానికి సంబంధించిన అధ్యాపక నియామక రికార్డులను కోరుతోంది. [EVAL-013 | 2025-01-10 | SYNTHETIC-PROGRAMME-13]",
+      "receivedDate": "2025-01-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-01-10T00:00:00.000Z",
+      "updatedAt": "2025-01-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-013-VERIFY",
+        "normalizedExternalReference": "EVAL-013-VERIFY",
+        "sourceReceivedDate": "2025-01-10",
+        "programme": "SYNTHETIC-PROGRAMME-13",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-01-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-013-D",
+      "familyId": "EVAL-013-independent",
+      "institutionId": "SYNTHETIC-INSTITUTION-13-OTHER",
+      "institutionName": "Other synthetic institution",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-13-OTHER",
+      "language": "te",
+      "category": "Faculty Shortage / Irregularities",
+      "title": "",
+      "description": "ప్రస్తుత బోధన కాలంలో ఈ కోర్సుకు అర్హతగల అధ్యాపకుల కొరత ఉందని విద్యార్థులు తెలిపారు. [EVAL-013 | 2025-01-10 | SYNTHETIC-PROGRAMME-13]",
+      "receivedDate": "2025-01-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-01-10T00:00:00.000Z",
+      "updatedAt": "2025-01-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-013-INDEPENDENT",
+        "normalizedExternalReference": "EVAL-013-INDEPENDENT",
+        "sourceReceivedDate": "2025-01-10",
+        "programme": "SYNTHETIC-PROGRAMME-13",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-01-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-014-A",
+      "familyId": "EVAL-014-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-14",
+      "institutionName": "Synthetic Institution 14",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-14",
+      "language": "en",
+      "category": "Capitation Fee / Overcharging",
+      "title": "",
+      "description": "The institution collected an additional admission fee from students in this programme. [EVAL-014 | 2025-02-10 | SYNTHETIC-PROGRAMME-14]",
+      "receivedDate": "2025-02-10",
+      "currentBureauId": "RB",
+      "receivingBureauId": "RB",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-02-10T00:00:00.000Z",
+      "updatedAt": "2025-02-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "portal",
+        "externalReference": "EVAL-014-SOURCE",
+        "normalizedExternalReference": "EVAL-014-SOURCE",
+        "sourceReceivedDate": "2025-02-10",
+        "programme": "SYNTHETIC-PROGRAMME-14",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-02-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-014-B",
+      "familyId": "EVAL-014-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-14",
+      "institutionName": "Synthetic Institution 14",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-14",
+      "language": "bn",
+      "category": "Capitation Fee / Overcharging",
+      "title": "",
+      "description": "প্রতিষ্ঠান এই পাঠক্রমের ছাত্রদের থেকে অতিরিক্ত ভর্তি ফি নিয়েছে। [EVAL-014 | 2025-02-10 | SYNTHETIC-PROGRAMME-14]",
+      "receivedDate": "2025-02-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-02-10T00:00:00.000Z",
+      "updatedAt": "2025-02-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-014-SOURCE",
+        "normalizedExternalReference": "EVAL-014-SOURCE",
+        "sourceReceivedDate": "2025-02-10",
+        "programme": "SYNTHETIC-PROGRAMME-14",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-02-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-014-C",
+      "familyId": "EVAL-014-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-14",
+      "institutionName": "Synthetic Institution 14",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-14",
+      "language": "bn",
+      "category": "Admission Guideline Violations",
+      "title": "",
+      "description": "ছাত্ররা একই পাঠক্রম ও ভর্তি পর্বের ফি রসিদ যাচাই চাইছে। [EVAL-014 | 2025-02-10 | SYNTHETIC-PROGRAMME-14]",
+      "receivedDate": "2025-02-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-02-10T00:00:00.000Z",
+      "updatedAt": "2025-02-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-014-VERIFY",
+        "normalizedExternalReference": "EVAL-014-VERIFY",
+        "sourceReceivedDate": "2025-02-10",
+        "programme": "SYNTHETIC-PROGRAMME-14",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-02-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-014-D",
+      "familyId": "EVAL-014-independent",
+      "institutionId": "SYNTHETIC-INSTITUTION-14",
+      "institutionName": "Synthetic Institution 14",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-14",
+      "language": "bn",
+      "category": "Capitation Fee / Overcharging",
+      "title": "",
+      "description": "প্রতিষ্ঠান এই পাঠক্রমের ছাত্রদের থেকে অতিরিক্ত ভর্তি ফি নিয়েছে। [EVAL-014-OLD | 2023-01-10 | SYNTHETIC-PROGRAMME-14-OLD-COHORT]",
+      "receivedDate": "2023-01-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Disposed",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2023-01-10T00:00:00.000Z",
+      "updatedAt": "2023-03-01T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-014-INDEPENDENT",
+        "normalizedExternalReference": "EVAL-014-INDEPENDENT",
+        "sourceReceivedDate": "2023-01-10",
+        "programme": "SYNTHETIC-PROGRAMME-14-OLD-COHORT",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-02-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      },
+      "disposalDate": "2023-03-01"
+    },
+    {
+      "id": "EVAL-015-A",
+      "familyId": "EVAL-015-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-15",
+      "institutionName": "Synthetic Institution 15",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-15",
+      "language": "en",
+      "category": "Withholding of Certificates & Documents",
+      "title": "",
+      "description": "Original certificates have not been returned after students completed this programme. [EVAL-015 | 2025-03-10 | SYNTHETIC-PROGRAMME-15]",
+      "receivedDate": "2025-03-10",
+      "currentBureauId": "RB",
+      "receivingBureauId": "RB",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-03-10T00:00:00.000Z",
+      "updatedAt": "2025-03-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "portal",
+        "externalReference": "EVAL-015-SOURCE",
+        "normalizedExternalReference": "EVAL-015-SOURCE",
+        "sourceReceivedDate": "2025-03-10",
+        "programme": "SYNTHETIC-PROGRAMME-15",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-03-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-015-B",
+      "familyId": "EVAL-015-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-15",
+      "institutionName": "Synthetic Institution 15",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-15",
+      "language": "kn",
+      "category": "Withholding of Certificates & Documents",
+      "title": "",
+      "description": "ಕೋರ್ಸ್ ಪೂರ್ಣಗೊಂಡರೂ ವಿದ್ಯಾರ್ಥಿಗಳ ಮೂಲ ಪ್ರಮಾಣಪತ್ರಗಳನ್ನು ಹಿಂದಿರುಗಿಸಿಲ್ಲ. [EVAL-015 | 2025-03-10 | SYNTHETIC-PROGRAMME-15]",
+      "receivedDate": "2025-03-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-03-10T00:00:00.000Z",
+      "updatedAt": "2025-03-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-015-SOURCE",
+        "normalizedExternalReference": "EVAL-015-SOURCE",
+        "sourceReceivedDate": "2025-03-10",
+        "programme": "SYNTHETIC-PROGRAMME-15",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-03-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-015-C",
+      "familyId": "EVAL-015-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-15",
+      "institutionName": "Synthetic Institution 15",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-15",
+      "language": "kn",
+      "category": "Harassment & Grievance Redressal Failure",
+      "title": "",
+      "description": "ಅದೇ ವಿದ್ಯಾರ್ಥಿಗಳು ಪ್ರಮಾಣಪತ್ರ ಬಿಡುಗಡೆಗೆ ಮುನ್ನ ಪೂರ್ಣಗೊಂಡ ಅನುಮತಿ ದಾಖಲೆಗಳ ಪರಿಶೀಲನೆ ಕೋರಿದ್ದಾರೆ. [EVAL-015 | 2025-03-10 | SYNTHETIC-PROGRAMME-15]",
+      "receivedDate": "2025-03-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-03-10T00:00:00.000Z",
+      "updatedAt": "2025-03-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-015-VERIFY",
+        "normalizedExternalReference": "EVAL-015-VERIFY",
+        "sourceReceivedDate": "2025-03-10",
+        "programme": "SYNTHETIC-PROGRAMME-15",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-03-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-015-D",
+      "familyId": "EVAL-015-independent",
+      "institutionId": "SYNTHETIC-INSTITUTION-15",
+      "institutionName": "Synthetic Institution 15",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-15",
+      "language": "kn",
+      "category": "Infrastructure & Lab Deficiencies",
+      "title": "",
+      "description": "ಹೊಸ ಗ್ರಂಥಾಲಯ ಪುಸ್ತಕಗಳ ಪಟ್ಟಿ ಮಾಡುವ ಬಗ್ಗೆ ಸಂಸ್ಥೆ ಕೇಳುತ್ತಿದೆ. [EVAL-015 | 2025-03-10 | SYNTHETIC-PROGRAMME-15]",
+      "receivedDate": "2025-03-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-03-10T00:00:00.000Z",
+      "updatedAt": "2025-03-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-015-INDEPENDENT",
+        "normalizedExternalReference": "EVAL-015-INDEPENDENT",
+        "sourceReceivedDate": "2025-03-10",
+        "programme": "SYNTHETIC-PROGRAMME-15",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-03-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-016-A",
+      "familyId": "EVAL-016-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-16",
+      "institutionName": "Synthetic Institution 16",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-16",
+      "language": "en",
+      "category": "Infrastructure & Lab Deficiencies",
+      "title": "",
+      "description": "Required equipment is missing from the laboratory used by this programme's current students. [EVAL-016 | 2025-04-10 | SYNTHETIC-PROGRAMME-16]",
+      "receivedDate": "2025-04-10",
+      "currentBureauId": "RB",
+      "receivingBureauId": "RB",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-04-10T00:00:00.000Z",
+      "updatedAt": "2025-04-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "portal",
+        "externalReference": "EVAL-016-SOURCE",
+        "normalizedExternalReference": "EVAL-016-SOURCE",
+        "sourceReceivedDate": "2025-04-10",
+        "programme": "SYNTHETIC-PROGRAMME-16",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-04-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-016-B",
+      "familyId": "EVAL-016-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-16",
+      "institutionName": "Synthetic Institution 16",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-16",
+      "language": "mixed",
+      "category": "Infrastructure & Lab Deficiencies",
+      "title": "",
+      "description": "इस programme की laboratory में required equipment missing है। [EVAL-016 | 2025-04-10 | SYNTHETIC-PROGRAMME-16]",
+      "receivedDate": "2025-04-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-04-10T00:00:00.000Z",
+      "updatedAt": "2025-04-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-016-SOURCE",
+        "normalizedExternalReference": "EVAL-016-SOURCE",
+        "sourceReceivedDate": "2025-04-10",
+        "programme": "SYNTHETIC-PROGRAMME-16",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-04-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-016-C",
+      "familyId": "EVAL-016-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-16",
+      "institutionName": "Synthetic Institution 16",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-16",
+      "language": "mixed",
+      "category": "Approval Norms Violation",
+      "title": "",
+      "description": "उसी period के lab equipment records की inspection चाहिए। [EVAL-016 | 2025-04-10 | SYNTHETIC-PROGRAMME-16]",
+      "receivedDate": "2025-04-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-04-10T00:00:00.000Z",
+      "updatedAt": "2025-04-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-016-VERIFY",
+        "normalizedExternalReference": "EVAL-016-VERIFY",
+        "sourceReceivedDate": "2025-04-10",
+        "programme": "SYNTHETIC-PROGRAMME-16",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-04-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-016-D",
+      "familyId": "EVAL-016-independent",
+      "institutionId": "SYNTHETIC-INSTITUTION-16-OTHER",
+      "institutionName": "Other synthetic institution",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-16-OTHER",
+      "language": "mixed",
+      "category": "Infrastructure & Lab Deficiencies",
+      "title": "",
+      "description": "इस programme की laboratory में required equipment missing है। [EVAL-016 | 2025-04-10 | SYNTHETIC-PROGRAMME-16]",
+      "receivedDate": "2025-04-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-04-10T00:00:00.000Z",
+      "updatedAt": "2025-04-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-016-INDEPENDENT",
+        "normalizedExternalReference": "EVAL-016-INDEPENDENT",
+        "sourceReceivedDate": "2025-04-10",
+        "programme": "SYNTHETIC-PROGRAMME-16",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-04-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-017-A",
+      "familyId": "EVAL-017-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-17",
+      "institutionName": "Synthetic Institution 17",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-17",
+      "language": "en",
+      "category": "Capitation Fee / Overcharging",
+      "title": "",
+      "description": "The institution collected an additional admission fee from students in this programme. [EVAL-017 | 2025-05-10 | SYNTHETIC-PROGRAMME-17]",
+      "receivedDate": "2025-05-10",
+      "currentBureauId": "RB",
+      "receivingBureauId": "RB",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-05-10T00:00:00.000Z",
+      "updatedAt": "2025-05-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "portal",
+        "externalReference": "EVAL-017-SOURCE",
+        "normalizedExternalReference": "EVAL-017-SOURCE",
+        "sourceReceivedDate": "2025-05-10",
+        "programme": "SYNTHETIC-PROGRAMME-17",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-05-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-017-B",
+      "familyId": "EVAL-017-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-17",
+      "institutionName": "Synthetic Institution 17",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-17",
+      "language": "en",
+      "category": "Capitation Fee / Overcharging",
+      "title": "",
+      "description": "The institution collected an additional admission fee from students in this programme. [EVAL-017 | 2025-05-10 | SYNTHETIC-PROGRAMME-17]",
+      "receivedDate": "2025-05-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-05-10T00:00:00.000Z",
+      "updatedAt": "2025-05-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-017-SOURCE",
+        "normalizedExternalReference": "EVAL-017-SOURCE",
+        "sourceReceivedDate": "2025-05-10",
+        "programme": "SYNTHETIC-PROGRAMME-17",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-05-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-017-C",
+      "familyId": "EVAL-017-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-17",
+      "institutionName": "Synthetic Institution 17",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-17",
+      "language": "en",
+      "category": "Admission Guideline Violations",
+      "title": "",
+      "description": "Students request verification of admission receipts for the same programme and admission round. [EVAL-017 | 2025-05-10 | SYNTHETIC-PROGRAMME-17]",
+      "receivedDate": "2025-05-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-05-10T00:00:00.000Z",
+      "updatedAt": "2025-05-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-017-VERIFY",
+        "normalizedExternalReference": "EVAL-017-VERIFY",
+        "sourceReceivedDate": "2025-05-10",
+        "programme": "SYNTHETIC-PROGRAMME-17",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-05-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-017-D",
+      "familyId": "EVAL-017-independent",
+      "institutionId": "SYNTHETIC-INSTITUTION-17",
+      "institutionName": "Synthetic Institution 17",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-17",
+      "language": "en",
+      "category": "Capitation Fee / Overcharging",
+      "title": "",
+      "description": "The institution collected an additional admission fee from students in this programme. [EVAL-017-OLD | 2023-01-10 | SYNTHETIC-PROGRAMME-17-OLD-COHORT]",
+      "receivedDate": "2023-01-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Disposed",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2023-01-10T00:00:00.000Z",
+      "updatedAt": "2023-03-01T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-017-INDEPENDENT",
+        "normalizedExternalReference": "EVAL-017-INDEPENDENT",
+        "sourceReceivedDate": "2023-01-10",
+        "programme": "SYNTHETIC-PROGRAMME-17-OLD-COHORT",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-05-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      },
+      "disposalDate": "2023-03-01"
+    },
+    {
+      "id": "EVAL-018-A",
+      "familyId": "EVAL-018-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-18",
+      "institutionName": "Synthetic Institution 18",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-18",
+      "language": "en",
+      "category": "Withholding of Certificates & Documents",
+      "title": "",
+      "description": "Original certificates have not been returned after students completed this programme. [EVAL-018 | 2025-06-10 | SYNTHETIC-PROGRAMME-18]",
+      "receivedDate": "2025-06-10",
+      "currentBureauId": "RB",
+      "receivingBureauId": "RB",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-06-10T00:00:00.000Z",
+      "updatedAt": "2025-06-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "portal",
+        "externalReference": "EVAL-018-SOURCE",
+        "normalizedExternalReference": "EVAL-018-SOURCE",
+        "sourceReceivedDate": "2025-06-10",
+        "programme": "SYNTHETIC-PROGRAMME-18",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-06-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-018-B",
+      "familyId": "EVAL-018-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-18",
+      "institutionName": "Synthetic Institution 18",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-18",
+      "language": "hi",
+      "category": "Withholding of Certificates & Documents",
+      "title": "",
+      "description": "पाठ्यक्रम पूरा होने के बाद भी छात्रों के मूल प्रमाणपत्र वापस नहीं किए गए। [EVAL-018 | 2025-06-10 | SYNTHETIC-PROGRAMME-18]",
+      "receivedDate": "2025-06-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-06-10T00:00:00.000Z",
+      "updatedAt": "2025-06-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-018-SOURCE",
+        "normalizedExternalReference": "EVAL-018-SOURCE",
+        "sourceReceivedDate": "2025-06-10",
+        "programme": "SYNTHETIC-PROGRAMME-18",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-06-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-018-C",
+      "familyId": "EVAL-018-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-18",
+      "institutionName": "Synthetic Institution 18",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-18",
+      "language": "hi",
+      "category": "Harassment & Grievance Redressal Failure",
+      "title": "",
+      "description": "उन्हीं छात्रों ने प्रमाणपत्र जारी होने से पहले पूरी हुई निकासी प्रक्रिया के रिकॉर्ड की जाँच माँगी है। [EVAL-018 | 2025-06-10 | SYNTHETIC-PROGRAMME-18]",
+      "receivedDate": "2025-06-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-06-10T00:00:00.000Z",
+      "updatedAt": "2025-06-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-018-VERIFY",
+        "normalizedExternalReference": "EVAL-018-VERIFY",
+        "sourceReceivedDate": "2025-06-10",
+        "programme": "SYNTHETIC-PROGRAMME-18",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-06-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-018-D",
+      "familyId": "EVAL-018-independent",
+      "institutionId": "SYNTHETIC-INSTITUTION-18",
+      "institutionName": "Synthetic Institution 18",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-18",
+      "language": "hi",
+      "category": "Infrastructure & Lab Deficiencies",
+      "title": "",
+      "description": "संस्थान पुस्तकालय की नई पुस्तकों की सूची बनाने की जानकारी चाहता है। [EVAL-018 | 2025-06-10 | SYNTHETIC-PROGRAMME-18]",
+      "receivedDate": "2025-06-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-06-10T00:00:00.000Z",
+      "updatedAt": "2025-06-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-018-INDEPENDENT",
+        "normalizedExternalReference": "EVAL-018-INDEPENDENT",
+        "sourceReceivedDate": "2025-06-10",
+        "programme": "SYNTHETIC-PROGRAMME-18",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-06-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-019-A",
+      "familyId": "EVAL-019-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-19",
+      "institutionName": "Synthetic Institution 19",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-19",
+      "language": "en",
+      "category": "Infrastructure & Lab Deficiencies",
+      "title": "",
+      "description": "Required equipment is missing from the laboratory used by this programme's current students. [EVAL-019 | 2025-07-10 | SYNTHETIC-PROGRAMME-19]",
+      "receivedDate": "2025-07-10",
+      "currentBureauId": "RB",
+      "receivingBureauId": "RB",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-07-10T00:00:00.000Z",
+      "updatedAt": "2025-07-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "portal",
+        "externalReference": "EVAL-019-SOURCE",
+        "normalizedExternalReference": "EVAL-019-SOURCE",
+        "sourceReceivedDate": "2025-07-10",
+        "programme": "SYNTHETIC-PROGRAMME-19",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-07-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-019-B",
+      "familyId": "EVAL-019-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-19",
+      "institutionName": "Synthetic Institution 19",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-19",
+      "language": "gu",
+      "category": "Infrastructure & Lab Deficiencies",
+      "title": "",
+      "description": "આ અભ્યાસક્રમના વર્તમાન વિદ્યાર્થીઓની પ્રયોગશાળામાં જરૂરી સાધનો નથી. [EVAL-019 | 2025-07-10 | SYNTHETIC-PROGRAMME-19]",
+      "receivedDate": "2025-07-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-07-10T00:00:00.000Z",
+      "updatedAt": "2025-07-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-019-SOURCE",
+        "normalizedExternalReference": "EVAL-019-SOURCE",
+        "sourceReceivedDate": "2025-07-10",
+        "programme": "SYNTHETIC-PROGRAMME-19",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-07-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-019-C",
+      "familyId": "EVAL-019-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-19",
+      "institutionName": "Synthetic Institution 19",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-19",
+      "language": "gu",
+      "category": "Approval Norms Violation",
+      "title": "",
+      "description": "નિરીક્ષણ વિનંતીમાં એ જ અભ્યાસક્રમ અને સમયના પ્રયોગશાળા સાધનોના રેકોર્ડની તપાસ માંગી છે. [EVAL-019 | 2025-07-10 | SYNTHETIC-PROGRAMME-19]",
+      "receivedDate": "2025-07-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-07-10T00:00:00.000Z",
+      "updatedAt": "2025-07-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-019-VERIFY",
+        "normalizedExternalReference": "EVAL-019-VERIFY",
+        "sourceReceivedDate": "2025-07-10",
+        "programme": "SYNTHETIC-PROGRAMME-19",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-07-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-019-D",
+      "familyId": "EVAL-019-independent",
+      "institutionId": "SYNTHETIC-INSTITUTION-19-OTHER",
+      "institutionName": "Other synthetic institution",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-19-OTHER",
+      "language": "gu",
+      "category": "Infrastructure & Lab Deficiencies",
+      "title": "",
+      "description": "આ અભ્યાસક્રમના વર્તમાન વિદ્યાર્થીઓની પ્રયોગશાળામાં જરૂરી સાધનો નથી. [EVAL-019 | 2025-07-10 | SYNTHETIC-PROGRAMME-19]",
+      "receivedDate": "2025-07-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-07-10T00:00:00.000Z",
+      "updatedAt": "2025-07-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-019-INDEPENDENT",
+        "normalizedExternalReference": "EVAL-019-INDEPENDENT",
+        "sourceReceivedDate": "2025-07-10",
+        "programme": "SYNTHETIC-PROGRAMME-19",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-07-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-020-A",
+      "familyId": "EVAL-020-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-20",
+      "institutionName": "Synthetic Institution 20",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-20",
+      "language": "en",
+      "category": "Faculty Shortage / Irregularities",
+      "title": "",
+      "description": "Students report a shortage of qualified teachers for this programme during the current teaching period. [EVAL-020 | 2025-08-10 | SYNTHETIC-PROGRAMME-20]",
+      "receivedDate": "2025-08-10",
+      "currentBureauId": "RB",
+      "receivingBureauId": "RB",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-08-10T00:00:00.000Z",
+      "updatedAt": "2025-08-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "portal",
+        "externalReference": "EVAL-020-SOURCE",
+        "normalizedExternalReference": "EVAL-020-SOURCE",
+        "sourceReceivedDate": "2025-08-10",
+        "programme": "SYNTHETIC-PROGRAMME-20",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-08-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-020-B",
+      "familyId": "EVAL-020-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-20",
+      "institutionName": "Synthetic Institution 20",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-20",
+      "language": "ta",
+      "category": "Faculty Shortage / Irregularities",
+      "title": "",
+      "description": "நடப்பு கற்பித்தல் காலத்தில் இந்தப் படிப்பிற்குத் தகுதியான ஆசிரியர்கள் குறைவாக இருப்பதாக மாணவர்கள் தெரிவிக்கின்றனர். [EVAL-020 | 2025-08-10 | SYNTHETIC-PROGRAMME-20]",
+      "receivedDate": "2025-08-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-08-10T00:00:00.000Z",
+      "updatedAt": "2025-08-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-020-SOURCE",
+        "normalizedExternalReference": "EVAL-020-SOURCE",
+        "sourceReceivedDate": "2025-08-10",
+        "programme": "SYNTHETIC-PROGRAMME-20",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-08-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-020-C",
+      "familyId": "EVAL-020-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-20",
+      "institutionName": "Synthetic Institution 20",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-20",
+      "language": "ta",
+      "category": "Approval Norms Violation",
+      "title": "",
+      "description": "தொடர்புடைய சரிபார்ப்புக் கோரிக்கை அதே படிப்பு மற்றும் காலத்திற்கான ஆசிரியர் நியமனப் பதிவுகளைக் கேட்கிறது. [EVAL-020 | 2025-08-10 | SYNTHETIC-PROGRAMME-20]",
+      "receivedDate": "2025-08-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-08-10T00:00:00.000Z",
+      "updatedAt": "2025-08-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-020-VERIFY",
+        "normalizedExternalReference": "EVAL-020-VERIFY",
+        "sourceReceivedDate": "2025-08-10",
+        "programme": "SYNTHETIC-PROGRAMME-20",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-08-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-020-D",
+      "familyId": "EVAL-020-independent",
+      "institutionId": "SYNTHETIC-INSTITUTION-20",
+      "institutionName": "Synthetic Institution 20",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-20",
+      "language": "ta",
+      "category": "Faculty Shortage / Irregularities",
+      "title": "",
+      "description": "நடப்பு கற்பித்தல் காலத்தில் இந்தப் படிப்பிற்குத் தகுதியான ஆசிரியர்கள் குறைவாக இருப்பதாக மாணவர்கள் தெரிவிக்கின்றனர். [EVAL-020-OLD | 2023-01-10 | SYNTHETIC-PROGRAMME-20-OLD-COHORT]",
+      "receivedDate": "2023-01-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Disposed",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2023-01-10T00:00:00.000Z",
+      "updatedAt": "2023-03-01T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-020-INDEPENDENT",
+        "normalizedExternalReference": "EVAL-020-INDEPENDENT",
+        "sourceReceivedDate": "2023-01-10",
+        "programme": "SYNTHETIC-PROGRAMME-20-OLD-COHORT",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-08-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      },
+      "disposalDate": "2023-03-01"
+    },
+    {
+      "id": "EVAL-021-A",
+      "familyId": "EVAL-021-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-21",
+      "institutionName": "Synthetic Institution 21",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-21",
+      "language": "en",
+      "category": "Withholding of Certificates & Documents",
+      "title": "",
+      "description": "Original certificates have not been returned after students completed this programme. [EVAL-021 | 2025-09-10 | SYNTHETIC-PROGRAMME-21]",
+      "receivedDate": "2025-09-10",
+      "currentBureauId": "RB",
+      "receivingBureauId": "RB",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-09-10T00:00:00.000Z",
+      "updatedAt": "2025-09-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "portal",
+        "externalReference": "EVAL-021-SOURCE",
+        "normalizedExternalReference": "EVAL-021-SOURCE",
+        "sourceReceivedDate": "2025-09-10",
+        "programme": "SYNTHETIC-PROGRAMME-21",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-09-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-021-B",
+      "familyId": "EVAL-021-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-21",
+      "institutionName": "Synthetic Institution 21",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-21",
+      "language": "te",
+      "category": "Withholding of Certificates & Documents",
+      "title": "",
+      "description": "కోర్సు పూర్తయినా విద్యార్థుల అసలు ధ్రువపత్రాలు తిరిగి ఇవ్వలేదు. [EVAL-021 | 2025-09-10 | SYNTHETIC-PROGRAMME-21]",
+      "receivedDate": "2025-09-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-09-10T00:00:00.000Z",
+      "updatedAt": "2025-09-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-021-SOURCE",
+        "normalizedExternalReference": "EVAL-021-SOURCE",
+        "sourceReceivedDate": "2025-09-10",
+        "programme": "SYNTHETIC-PROGRAMME-21",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-09-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-021-C",
+      "familyId": "EVAL-021-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-21",
+      "institutionName": "Synthetic Institution 21",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-21",
+      "language": "te",
+      "category": "Harassment & Grievance Redressal Failure",
+      "title": "",
+      "description": "అదే విద్యార్థులు ధ్రువపత్రాల విడుదలకు ముందు పూర్తయిన అనుమతి ప్రక్రియ రికార్డుల తనిఖీ కోరుతున్నారు. [EVAL-021 | 2025-09-10 | SYNTHETIC-PROGRAMME-21]",
+      "receivedDate": "2025-09-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-09-10T00:00:00.000Z",
+      "updatedAt": "2025-09-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-021-VERIFY",
+        "normalizedExternalReference": "EVAL-021-VERIFY",
+        "sourceReceivedDate": "2025-09-10",
+        "programme": "SYNTHETIC-PROGRAMME-21",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-09-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-021-D",
+      "familyId": "EVAL-021-independent",
+      "institutionId": "SYNTHETIC-INSTITUTION-21",
+      "institutionName": "Synthetic Institution 21",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-21",
+      "language": "te",
+      "category": "Infrastructure & Lab Deficiencies",
+      "title": "",
+      "description": "కొత్త గ్రంథాలయ పుస్తకాల జాబితా తయారీ గురించి సంస్థ అడుగుతోంది. [EVAL-021 | 2025-09-10 | SYNTHETIC-PROGRAMME-21]",
+      "receivedDate": "2025-09-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-09-10T00:00:00.000Z",
+      "updatedAt": "2025-09-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-021-INDEPENDENT",
+        "normalizedExternalReference": "EVAL-021-INDEPENDENT",
+        "sourceReceivedDate": "2025-09-10",
+        "programme": "SYNTHETIC-PROGRAMME-21",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-09-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-022-A",
+      "familyId": "EVAL-022-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-22",
+      "institutionName": "Synthetic Institution 22",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-22",
+      "language": "en",
+      "category": "Infrastructure & Lab Deficiencies",
+      "title": "",
+      "description": "Required equipment is missing from the laboratory used by this programme's current students. [EVAL-022 | 2025-10-10 | SYNTHETIC-PROGRAMME-22]",
+      "receivedDate": "2025-10-10",
+      "currentBureauId": "RB",
+      "receivingBureauId": "RB",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-10-10T00:00:00.000Z",
+      "updatedAt": "2025-10-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "portal",
+        "externalReference": "EVAL-022-SOURCE",
+        "normalizedExternalReference": "EVAL-022-SOURCE",
+        "sourceReceivedDate": "2025-10-10",
+        "programme": "SYNTHETIC-PROGRAMME-22",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-10-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-022-B",
+      "familyId": "EVAL-022-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-22",
+      "institutionName": "Synthetic Institution 22",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-22",
+      "language": "bn",
+      "category": "Infrastructure & Lab Deficiencies",
+      "title": "",
+      "description": "এই পাঠক্রমের বর্তমান ছাত্রদের পরীক্ষাগারে প্রয়োজনীয় সরঞ্জাম নেই। [EVAL-022 | 2025-10-10 | SYNTHETIC-PROGRAMME-22]",
+      "receivedDate": "2025-10-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-10-10T00:00:00.000Z",
+      "updatedAt": "2025-10-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-022-SOURCE",
+        "normalizedExternalReference": "EVAL-022-SOURCE",
+        "sourceReceivedDate": "2025-10-10",
+        "programme": "SYNTHETIC-PROGRAMME-22",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-10-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-022-C",
+      "familyId": "EVAL-022-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-22",
+      "institutionName": "Synthetic Institution 22",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-22",
+      "language": "bn",
+      "category": "Approval Norms Violation",
+      "title": "",
+      "description": "পরিদর্শনের অনুরোধে একই পাঠক্রম ও সময়ের পরীক্ষাগারের সরঞ্জামের নথি চাওয়া হয়েছে। [EVAL-022 | 2025-10-10 | SYNTHETIC-PROGRAMME-22]",
+      "receivedDate": "2025-10-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-10-10T00:00:00.000Z",
+      "updatedAt": "2025-10-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-022-VERIFY",
+        "normalizedExternalReference": "EVAL-022-VERIFY",
+        "sourceReceivedDate": "2025-10-10",
+        "programme": "SYNTHETIC-PROGRAMME-22",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-10-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-022-D",
+      "familyId": "EVAL-022-independent",
+      "institutionId": "SYNTHETIC-INSTITUTION-22-OTHER",
+      "institutionName": "Other synthetic institution",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-22-OTHER",
+      "language": "bn",
+      "category": "Infrastructure & Lab Deficiencies",
+      "title": "",
+      "description": "এই পাঠক্রমের বর্তমান ছাত্রদের পরীক্ষাগারে প্রয়োজনীয় সরঞ্জাম নেই। [EVAL-022 | 2025-10-10 | SYNTHETIC-PROGRAMME-22]",
+      "receivedDate": "2025-10-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-10-10T00:00:00.000Z",
+      "updatedAt": "2025-10-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-022-INDEPENDENT",
+        "normalizedExternalReference": "EVAL-022-INDEPENDENT",
+        "sourceReceivedDate": "2025-10-10",
+        "programme": "SYNTHETIC-PROGRAMME-22",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-10-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-023-A",
+      "familyId": "EVAL-023-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-23",
+      "institutionName": "Synthetic Institution 23",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-23",
+      "language": "en",
+      "category": "Faculty Shortage / Irregularities",
+      "title": "",
+      "description": "Students report a shortage of qualified teachers for this programme during the current teaching period. [EVAL-023 | 2025-11-10 | SYNTHETIC-PROGRAMME-23]",
+      "receivedDate": "2025-11-10",
+      "currentBureauId": "RB",
+      "receivingBureauId": "RB",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-11-10T00:00:00.000Z",
+      "updatedAt": "2025-11-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "portal",
+        "externalReference": "EVAL-023-SOURCE",
+        "normalizedExternalReference": "EVAL-023-SOURCE",
+        "sourceReceivedDate": "2025-11-10",
+        "programme": "SYNTHETIC-PROGRAMME-23",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-11-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-023-B",
+      "familyId": "EVAL-023-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-23",
+      "institutionName": "Synthetic Institution 23",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-23",
+      "language": "kn",
+      "category": "Faculty Shortage / Irregularities",
+      "title": "",
+      "description": "ಪ್ರಸ್ತುತ ಬೋಧನಾ ಅವಧಿಯಲ್ಲಿ ಈ ಕೋರ್ಸಿಗೆ ಅರ್ಹ ಶಿಕ್ಷಕರ ಕೊರತೆಯನ್ನು ವಿದ್ಯಾರ್ಥಿಗಳು ತಿಳಿಸಿದ್ದಾರೆ. [EVAL-023 | 2025-11-10 | SYNTHETIC-PROGRAMME-23]",
+      "receivedDate": "2025-11-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-11-10T00:00:00.000Z",
+      "updatedAt": "2025-11-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-023-SOURCE",
+        "normalizedExternalReference": "EVAL-023-SOURCE",
+        "sourceReceivedDate": "2025-11-10",
+        "programme": "SYNTHETIC-PROGRAMME-23",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-11-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-023-C",
+      "familyId": "EVAL-023-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-23",
+      "institutionName": "Synthetic Institution 23",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-23",
+      "language": "kn",
+      "category": "Approval Norms Violation",
+      "title": "",
+      "description": "ಸಂಬಂಧಿತ ಪರಿಶೀಲನಾ ವಿನಂತಿಯು ಅದೇ ಕೋರ್ಸ್ ಮತ್ತು ಅವಧಿಯ ಶಿಕ್ಷಕರ ನೇಮಕಾತಿ ದಾಖಲೆಗಳನ್ನು ಕೇಳುತ್ತದೆ. [EVAL-023 | 2025-11-10 | SYNTHETIC-PROGRAMME-23]",
+      "receivedDate": "2025-11-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-11-10T00:00:00.000Z",
+      "updatedAt": "2025-11-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-023-VERIFY",
+        "normalizedExternalReference": "EVAL-023-VERIFY",
+        "sourceReceivedDate": "2025-11-10",
+        "programme": "SYNTHETIC-PROGRAMME-23",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-11-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-023-D",
+      "familyId": "EVAL-023-independent",
+      "institutionId": "SYNTHETIC-INSTITUTION-23",
+      "institutionName": "Synthetic Institution 23",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-23",
+      "language": "kn",
+      "category": "Faculty Shortage / Irregularities",
+      "title": "",
+      "description": "ಪ್ರಸ್ತುತ ಬೋಧನಾ ಅವಧಿಯಲ್ಲಿ ಈ ಕೋರ್ಸಿಗೆ ಅರ್ಹ ಶಿಕ್ಷಕರ ಕೊರತೆಯನ್ನು ವಿದ್ಯಾರ್ಥಿಗಳು ತಿಳಿಸಿದ್ದಾರೆ. [EVAL-023-OLD | 2023-01-10 | SYNTHETIC-PROGRAMME-23-OLD-COHORT]",
+      "receivedDate": "2023-01-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Disposed",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2023-01-10T00:00:00.000Z",
+      "updatedAt": "2023-03-01T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-023-INDEPENDENT",
+        "normalizedExternalReference": "EVAL-023-INDEPENDENT",
+        "sourceReceivedDate": "2023-01-10",
+        "programme": "SYNTHETIC-PROGRAMME-23-OLD-COHORT",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-11-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      },
+      "disposalDate": "2023-03-01"
+    },
+    {
+      "id": "EVAL-024-A",
+      "familyId": "EVAL-024-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-24",
+      "institutionName": "Synthetic Institution 24",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-24",
+      "language": "en",
+      "category": "Capitation Fee / Overcharging",
+      "title": "",
+      "description": "The institution collected an additional admission fee from students in this programme. [EVAL-024 | 2025-12-10 | SYNTHETIC-PROGRAMME-24]",
+      "receivedDate": "2025-12-10",
+      "currentBureauId": "RB",
+      "receivingBureauId": "RB",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-12-10T00:00:00.000Z",
+      "updatedAt": "2025-12-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "portal",
+        "externalReference": "EVAL-024-SOURCE",
+        "normalizedExternalReference": "EVAL-024-SOURCE",
+        "sourceReceivedDate": "2025-12-10",
+        "programme": "SYNTHETIC-PROGRAMME-24",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-12-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-024-B",
+      "familyId": "EVAL-024-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-24",
+      "institutionName": "Synthetic Institution 24",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-24",
+      "language": "mixed",
+      "category": "Capitation Fee / Overcharging",
+      "title": "",
+      "description": "Students से इस programme के लिए extra admission fee ली गई। [EVAL-024 | 2025-12-10 | SYNTHETIC-PROGRAMME-24]",
+      "receivedDate": "2025-12-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-12-10T00:00:00.000Z",
+      "updatedAt": "2025-12-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-024-SOURCE",
+        "normalizedExternalReference": "EVAL-024-SOURCE",
+        "sourceReceivedDate": "2025-12-10",
+        "programme": "SYNTHETIC-PROGRAMME-24",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-12-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-024-C",
+      "familyId": "EVAL-024-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-24",
+      "institutionName": "Synthetic Institution 24",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-24",
+      "language": "mixed",
+      "category": "Admission Guideline Violations",
+      "title": "",
+      "description": "उसी admission round की fee receipts का verification चाहिए। [EVAL-024 | 2025-12-10 | SYNTHETIC-PROGRAMME-24]",
+      "receivedDate": "2025-12-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-12-10T00:00:00.000Z",
+      "updatedAt": "2025-12-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-024-VERIFY",
+        "normalizedExternalReference": "EVAL-024-VERIFY",
+        "sourceReceivedDate": "2025-12-10",
+        "programme": "SYNTHETIC-PROGRAMME-24",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-12-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-024-D",
+      "familyId": "EVAL-024-independent",
+      "institutionId": "SYNTHETIC-INSTITUTION-24",
+      "institutionName": "Synthetic Institution 24",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-24",
+      "language": "mixed",
+      "category": "Infrastructure & Lab Deficiencies",
+      "title": "",
+      "description": "Next year की library purchase budget information चाहिए। [EVAL-024 | 2025-12-10 | SYNTHETIC-PROGRAMME-24]",
+      "receivedDate": "2025-12-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-12-10T00:00:00.000Z",
+      "updatedAt": "2025-12-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-024-INDEPENDENT",
+        "normalizedExternalReference": "EVAL-024-INDEPENDENT",
+        "sourceReceivedDate": "2025-12-10",
+        "programme": "SYNTHETIC-PROGRAMME-24",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-12-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-025-A",
+      "familyId": "EVAL-025-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-25",
+      "institutionName": "Synthetic Institution 25",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-25",
+      "language": "en",
+      "category": "Infrastructure & Lab Deficiencies",
+      "title": "",
+      "description": "Required equipment is missing from the laboratory used by this programme's current students. [EVAL-025 | 2025-01-10 | SYNTHETIC-PROGRAMME-25]",
+      "receivedDate": "2025-01-10",
+      "currentBureauId": "RB",
+      "receivingBureauId": "RB",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-01-10T00:00:00.000Z",
+      "updatedAt": "2025-01-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "portal",
+        "externalReference": "EVAL-025-SOURCE",
+        "normalizedExternalReference": "EVAL-025-SOURCE",
+        "sourceReceivedDate": "2025-01-10",
+        "programme": "SYNTHETIC-PROGRAMME-25",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-01-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-025-B",
+      "familyId": "EVAL-025-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-25",
+      "institutionName": "Synthetic Institution 25",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-25",
+      "language": "en",
+      "category": "Infrastructure & Lab Deficiencies",
+      "title": "",
+      "description": "Required equipment is missing from the laboratory used by this programme's current students. [EVAL-025 | 2025-01-10 | SYNTHETIC-PROGRAMME-25]",
+      "receivedDate": "2025-01-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-01-10T00:00:00.000Z",
+      "updatedAt": "2025-01-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-025-SOURCE",
+        "normalizedExternalReference": "EVAL-025-SOURCE",
+        "sourceReceivedDate": "2025-01-10",
+        "programme": "SYNTHETIC-PROGRAMME-25",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-01-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-025-C",
+      "familyId": "EVAL-025-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-25",
+      "institutionName": "Synthetic Institution 25",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-25",
+      "language": "en",
+      "category": "Approval Norms Violation",
+      "title": "",
+      "description": "An inspection request asks which laboratory equipment records were supplied for the same programme and period. [EVAL-025 | 2025-01-10 | SYNTHETIC-PROGRAMME-25]",
+      "receivedDate": "2025-01-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-01-10T00:00:00.000Z",
+      "updatedAt": "2025-01-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-025-VERIFY",
+        "normalizedExternalReference": "EVAL-025-VERIFY",
+        "sourceReceivedDate": "2025-01-10",
+        "programme": "SYNTHETIC-PROGRAMME-25",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-01-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-025-D",
+      "familyId": "EVAL-025-independent",
+      "institutionId": "SYNTHETIC-INSTITUTION-25-OTHER",
+      "institutionName": "Other synthetic institution",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-25-OTHER",
+      "language": "en",
+      "category": "Infrastructure & Lab Deficiencies",
+      "title": "",
+      "description": "Required equipment is missing from the laboratory used by this programme's current students. [EVAL-025 | 2025-01-10 | SYNTHETIC-PROGRAMME-25]",
+      "receivedDate": "2025-01-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-01-10T00:00:00.000Z",
+      "updatedAt": "2025-01-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-025-INDEPENDENT",
+        "normalizedExternalReference": "EVAL-025-INDEPENDENT",
+        "sourceReceivedDate": "2025-01-10",
+        "programme": "SYNTHETIC-PROGRAMME-25",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-01-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-026-A",
+      "familyId": "EVAL-026-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-26",
+      "institutionName": "Synthetic Institution 26",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-26",
+      "language": "en",
+      "category": "Faculty Shortage / Irregularities",
+      "title": "",
+      "description": "Students report a shortage of qualified teachers for this programme during the current teaching period. [EVAL-026 | 2025-02-10 | SYNTHETIC-PROGRAMME-26]",
+      "receivedDate": "2025-02-10",
+      "currentBureauId": "RB",
+      "receivingBureauId": "RB",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-02-10T00:00:00.000Z",
+      "updatedAt": "2025-02-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "portal",
+        "externalReference": "EVAL-026-SOURCE",
+        "normalizedExternalReference": "EVAL-026-SOURCE",
+        "sourceReceivedDate": "2025-02-10",
+        "programme": "SYNTHETIC-PROGRAMME-26",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-02-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-026-B",
+      "familyId": "EVAL-026-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-26",
+      "institutionName": "Synthetic Institution 26",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-26",
+      "language": "hi",
+      "category": "Faculty Shortage / Irregularities",
+      "title": "",
+      "description": "छात्र वर्तमान शिक्षण अवधि में इस पाठ्यक्रम के योग्य शिक्षकों की कमी बताते हैं। [EVAL-026 | 2025-02-10 | SYNTHETIC-PROGRAMME-26]",
+      "receivedDate": "2025-02-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-02-10T00:00:00.000Z",
+      "updatedAt": "2025-02-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-026-SOURCE",
+        "normalizedExternalReference": "EVAL-026-SOURCE",
+        "sourceReceivedDate": "2025-02-10",
+        "programme": "SYNTHETIC-PROGRAMME-26",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-02-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-026-C",
+      "familyId": "EVAL-026-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-26",
+      "institutionName": "Synthetic Institution 26",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-26",
+      "language": "hi",
+      "category": "Approval Norms Violation",
+      "title": "",
+      "description": "संबंधित जाँच अनुरोध उसी पाठ्यक्रम और अवधि के शिक्षक नियुक्ति रिकॉर्ड माँगता है। [EVAL-026 | 2025-02-10 | SYNTHETIC-PROGRAMME-26]",
+      "receivedDate": "2025-02-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-02-10T00:00:00.000Z",
+      "updatedAt": "2025-02-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-026-VERIFY",
+        "normalizedExternalReference": "EVAL-026-VERIFY",
+        "sourceReceivedDate": "2025-02-10",
+        "programme": "SYNTHETIC-PROGRAMME-26",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-02-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-026-D",
+      "familyId": "EVAL-026-independent",
+      "institutionId": "SYNTHETIC-INSTITUTION-26",
+      "institutionName": "Synthetic Institution 26",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-26",
+      "language": "hi",
+      "category": "Faculty Shortage / Irregularities",
+      "title": "",
+      "description": "छात्र वर्तमान शिक्षण अवधि में इस पाठ्यक्रम के योग्य शिक्षकों की कमी बताते हैं। [EVAL-026-OLD | 2023-01-10 | SYNTHETIC-PROGRAMME-26-OLD-COHORT]",
+      "receivedDate": "2023-01-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Disposed",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2023-01-10T00:00:00.000Z",
+      "updatedAt": "2023-03-01T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-026-INDEPENDENT",
+        "normalizedExternalReference": "EVAL-026-INDEPENDENT",
+        "sourceReceivedDate": "2023-01-10",
+        "programme": "SYNTHETIC-PROGRAMME-26-OLD-COHORT",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-02-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      },
+      "disposalDate": "2023-03-01"
+    },
+    {
+      "id": "EVAL-027-A",
+      "familyId": "EVAL-027-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-27",
+      "institutionName": "Synthetic Institution 27",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-27",
+      "language": "en",
+      "category": "Capitation Fee / Overcharging",
+      "title": "",
+      "description": "The institution collected an additional admission fee from students in this programme. [EVAL-027 | 2025-03-10 | SYNTHETIC-PROGRAMME-27]",
+      "receivedDate": "2025-03-10",
+      "currentBureauId": "RB",
+      "receivingBureauId": "RB",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-03-10T00:00:00.000Z",
+      "updatedAt": "2025-03-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "portal",
+        "externalReference": "EVAL-027-SOURCE",
+        "normalizedExternalReference": "EVAL-027-SOURCE",
+        "sourceReceivedDate": "2025-03-10",
+        "programme": "SYNTHETIC-PROGRAMME-27",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-03-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-027-B",
+      "familyId": "EVAL-027-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-27",
+      "institutionName": "Synthetic Institution 27",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-27",
+      "language": "gu",
+      "category": "Capitation Fee / Overcharging",
+      "title": "",
+      "description": "સંસ્થાએ આ અભ્યાસક્રમના વિદ્યાર્થીઓ પાસેથી વધારાની પ્રવેશ ફી લીધી. [EVAL-027 | 2025-03-10 | SYNTHETIC-PROGRAMME-27]",
+      "receivedDate": "2025-03-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-03-10T00:00:00.000Z",
+      "updatedAt": "2025-03-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-027-SOURCE",
+        "normalizedExternalReference": "EVAL-027-SOURCE",
+        "sourceReceivedDate": "2025-03-10",
+        "programme": "SYNTHETIC-PROGRAMME-27",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-03-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-027-C",
+      "familyId": "EVAL-027-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-27",
+      "institutionName": "Synthetic Institution 27",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-27",
+      "language": "gu",
+      "category": "Admission Guideline Violations",
+      "title": "",
+      "description": "વિદ્યાર્થીઓ એ જ અભ્યાસક્રમ અને પ્રવેશ ચક્રની ફીની રસીદોની તપાસ માંગે છે. [EVAL-027 | 2025-03-10 | SYNTHETIC-PROGRAMME-27]",
+      "receivedDate": "2025-03-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-03-10T00:00:00.000Z",
+      "updatedAt": "2025-03-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-027-VERIFY",
+        "normalizedExternalReference": "EVAL-027-VERIFY",
+        "sourceReceivedDate": "2025-03-10",
+        "programme": "SYNTHETIC-PROGRAMME-27",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-03-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-027-D",
+      "familyId": "EVAL-027-independent",
+      "institutionId": "SYNTHETIC-INSTITUTION-27",
+      "institutionName": "Synthetic Institution 27",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-27",
+      "language": "gu",
+      "category": "Infrastructure & Lab Deficiencies",
+      "title": "",
+      "description": "સંસ્થા આવતા વર્ષના પુસ્તકાલય ખરીદી બજેટની માહિતી માંગે છે. [EVAL-027 | 2025-03-10 | SYNTHETIC-PROGRAMME-27]",
+      "receivedDate": "2025-03-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-03-10T00:00:00.000Z",
+      "updatedAt": "2025-03-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-027-INDEPENDENT",
+        "normalizedExternalReference": "EVAL-027-INDEPENDENT",
+        "sourceReceivedDate": "2025-03-10",
+        "programme": "SYNTHETIC-PROGRAMME-27",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-03-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-028-A",
+      "familyId": "EVAL-028-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-28",
+      "institutionName": "Synthetic Institution 28",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-28",
+      "language": "en",
+      "category": "Withholding of Certificates & Documents",
+      "title": "",
+      "description": "Original certificates have not been returned after students completed this programme. [EVAL-028 | 2025-04-10 | SYNTHETIC-PROGRAMME-28]",
+      "receivedDate": "2025-04-10",
+      "currentBureauId": "RB",
+      "receivingBureauId": "RB",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-04-10T00:00:00.000Z",
+      "updatedAt": "2025-04-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "portal",
+        "externalReference": "EVAL-028-SOURCE",
+        "normalizedExternalReference": "EVAL-028-SOURCE",
+        "sourceReceivedDate": "2025-04-10",
+        "programme": "SYNTHETIC-PROGRAMME-28",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-04-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-028-B",
+      "familyId": "EVAL-028-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-28",
+      "institutionName": "Synthetic Institution 28",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-28",
+      "language": "ta",
+      "category": "Withholding of Certificates & Documents",
+      "title": "",
+      "description": "படிப்பை முடித்த பின்னரும் மாணவர்களின் அசல் சான்றிதழ்கள் திருப்பித் தரப்படவில்லை. [EVAL-028 | 2025-04-10 | SYNTHETIC-PROGRAMME-28]",
+      "receivedDate": "2025-04-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-04-10T00:00:00.000Z",
+      "updatedAt": "2025-04-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-028-SOURCE",
+        "normalizedExternalReference": "EVAL-028-SOURCE",
+        "sourceReceivedDate": "2025-04-10",
+        "programme": "SYNTHETIC-PROGRAMME-28",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-04-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-028-C",
+      "familyId": "EVAL-028-core",
+      "institutionId": "SYNTHETIC-INSTITUTION-28",
+      "institutionName": "Synthetic Institution 28",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-28",
+      "language": "ta",
+      "category": "Harassment & Grievance Redressal Failure",
+      "title": "",
+      "description": "அதே மாணவர்கள் சான்றிதழ் வழங்குவதற்கு முன் முடிக்கப்பட்ட அனுமதிப் பதிவுகளைச் சரிபார்க்கக் கோருகின்றனர். [EVAL-028 | 2025-04-10 | SYNTHETIC-PROGRAMME-28]",
+      "receivedDate": "2025-04-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-04-10T00:00:00.000Z",
+      "updatedAt": "2025-04-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-028-VERIFY",
+        "normalizedExternalReference": "EVAL-028-VERIFY",
+        "sourceReceivedDate": "2025-04-10",
+        "programme": "SYNTHETIC-PROGRAMME-28",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-04-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    },
+    {
+      "id": "EVAL-028-D",
+      "familyId": "EVAL-028-independent",
+      "institutionId": "SYNTHETIC-INSTITUTION-28-OTHER",
+      "institutionName": "Other synthetic institution",
+      "aictePermanentId": "SYNTHETIC-INSTITUTION-28-OTHER",
+      "language": "ta",
+      "category": "Withholding of Certificates & Documents",
+      "title": "",
+      "description": "படிப்பை முடித்த பின்னரும் மாணவர்களின் அசல் சான்றிதழ்கள் திருப்பித் தரப்படவில்லை. [EVAL-028 | 2025-04-10 | SYNTHETIC-PROGRAMME-28]",
+      "receivedDate": "2025-04-10",
+      "currentBureauId": "PGRC",
+      "receivingBureauId": "PGRC",
+      "status": "Under Process",
+      "priority": "Medium",
+      "expectedDisposalDate": "2099-01-01",
+      "hasOverlapAlert": false,
+      "createdAt": "2025-04-10T00:00:00.000Z",
+      "updatedAt": "2025-04-10T00:00:00.000Z",
+      "metadata": {
+        "recordKind": "complaint",
+        "caseTypeId": "grievance",
+        "sourceChannelId": "letter",
+        "externalReference": "EVAL-028-INDEPENDENT",
+        "normalizedExternalReference": "EVAL-028-INDEPENDENT",
+        "sourceReceivedDate": "2025-04-10",
+        "programme": "SYNTHETIC-PROGRAMME-28",
+        "provenance": {
+          "method": "manual_intake",
+          "enteredBy": "synthetic-evaluation",
+          "enteredAt": "2025-04-10T00:00:00.000Z",
+          "configurationVersion": 1
+        }
+      }
+    }
+  ],
+  "pairs": [
+    {
+      "id": "EVAL-001-duplicate",
+      "groupId": "EVAL-001",
+      "caseFamilyIds": [
+        "EVAL-001-core"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-001-A",
+      "caseB": "EVAL-001-B",
+      "label": "duplicate",
+      "rationale": "Same synthetic incident, institution, programme, period and source transaction reported through two channels.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-001-related",
+      "groupId": "EVAL-001",
+      "caseFamilyIds": [
+        "EVAL-001-core"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-001-A",
+      "caseB": "EVAL-001-C",
+      "label": "related",
+      "rationale": "A distinct verification proceeding concerns the same programme/event/period and supporting records; coordination is proposed, not duplication.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-001-unrelated",
+      "groupId": "EVAL-001",
+      "caseFamilyIds": [
+        "EVAL-001-core",
+        "EVAL-001-independent"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-001-A",
+      "caseB": "EVAL-001-D",
+      "label": "unrelated",
+      "rationale": "Similar complaint wording at a different institution; no shared proceeding or source obligation.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-002-duplicate",
+      "groupId": "EVAL-002",
+      "caseFamilyIds": [
+        "EVAL-002-core"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-002-A",
+      "caseB": "EVAL-002-B",
+      "label": "duplicate",
+      "rationale": "Same synthetic incident, institution, programme, period and source transaction reported through two channels.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-002-related",
+      "groupId": "EVAL-002",
+      "caseFamilyIds": [
+        "EVAL-002-core"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-002-A",
+      "caseB": "EVAL-002-C",
+      "label": "related",
+      "rationale": "A distinct verification proceeding concerns the same programme/event/period and supporting records; coordination is proposed, not duplication.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-002-unrelated",
+      "groupId": "EVAL-002",
+      "caseFamilyIds": [
+        "EVAL-002-core",
+        "EVAL-002-independent"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-002-A",
+      "caseB": "EVAL-002-D",
+      "label": "unrelated",
+      "rationale": "Similar issue at the same institution in a completed, separate 2023 cohort; no common transaction or pending obligation.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-003-duplicate",
+      "groupId": "EVAL-003",
+      "caseFamilyIds": [
+        "EVAL-003-core"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-003-A",
+      "caseB": "EVAL-003-B",
+      "label": "duplicate",
+      "rationale": "Same synthetic incident, institution, programme, period and source transaction reported through two channels.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-003-related",
+      "groupId": "EVAL-003",
+      "caseFamilyIds": [
+        "EVAL-003-core"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-003-A",
+      "caseB": "EVAL-003-C",
+      "label": "related",
+      "rationale": "A distinct verification proceeding concerns the same programme/event/period and supporting records; coordination is proposed, not duplication.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-003-unrelated",
+      "groupId": "EVAL-003",
+      "caseFamilyIds": [
+        "EVAL-003-core",
+        "EVAL-003-independent"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-003-A",
+      "caseB": "EVAL-003-D",
+      "label": "unrelated",
+      "rationale": "Same institution but an independent administrative subject, despite shared period/programme wording.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-004-duplicate",
+      "groupId": "EVAL-004",
+      "caseFamilyIds": [
+        "EVAL-004-core"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-004-A",
+      "caseB": "EVAL-004-B",
+      "label": "duplicate",
+      "rationale": "Same synthetic incident, institution, programme, period and source transaction reported through two channels.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-004-related",
+      "groupId": "EVAL-004",
+      "caseFamilyIds": [
+        "EVAL-004-core"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-004-A",
+      "caseB": "EVAL-004-C",
+      "label": "related",
+      "rationale": "A distinct verification proceeding concerns the same programme/event/period and supporting records; coordination is proposed, not duplication.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-004-unrelated",
+      "groupId": "EVAL-004",
+      "caseFamilyIds": [
+        "EVAL-004-core",
+        "EVAL-004-independent"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-004-A",
+      "caseB": "EVAL-004-D",
+      "label": "unrelated",
+      "rationale": "Similar complaint wording at a different institution; no shared proceeding or source obligation.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-005-duplicate",
+      "groupId": "EVAL-005",
+      "caseFamilyIds": [
+        "EVAL-005-core"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-005-A",
+      "caseB": "EVAL-005-B",
+      "label": "duplicate",
+      "rationale": "Same synthetic incident, institution, programme, period and source transaction reported through two channels.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-005-related",
+      "groupId": "EVAL-005",
+      "caseFamilyIds": [
+        "EVAL-005-core"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-005-A",
+      "caseB": "EVAL-005-C",
+      "label": "related",
+      "rationale": "A distinct verification proceeding concerns the same programme/event/period and supporting records; coordination is proposed, not duplication.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-005-unrelated",
+      "groupId": "EVAL-005",
+      "caseFamilyIds": [
+        "EVAL-005-core",
+        "EVAL-005-independent"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-005-A",
+      "caseB": "EVAL-005-D",
+      "label": "unrelated",
+      "rationale": "Similar issue at the same institution in a completed, separate 2023 cohort; no common transaction or pending obligation.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-006-duplicate",
+      "groupId": "EVAL-006",
+      "caseFamilyIds": [
+        "EVAL-006-core"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-006-A",
+      "caseB": "EVAL-006-B",
+      "label": "duplicate",
+      "rationale": "Same synthetic incident, institution, programme, period and source transaction reported through two channels.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-006-related",
+      "groupId": "EVAL-006",
+      "caseFamilyIds": [
+        "EVAL-006-core"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-006-A",
+      "caseB": "EVAL-006-C",
+      "label": "related",
+      "rationale": "A distinct verification proceeding concerns the same programme/event/period and supporting records; coordination is proposed, not duplication.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-006-unrelated",
+      "groupId": "EVAL-006",
+      "caseFamilyIds": [
+        "EVAL-006-core",
+        "EVAL-006-independent"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-006-A",
+      "caseB": "EVAL-006-D",
+      "label": "unrelated",
+      "rationale": "Same institution but an independent administrative subject, despite shared period/programme wording.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-007-duplicate",
+      "groupId": "EVAL-007",
+      "caseFamilyIds": [
+        "EVAL-007-core"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-007-A",
+      "caseB": "EVAL-007-B",
+      "label": "duplicate",
+      "rationale": "Same synthetic incident, institution, programme, period and source transaction reported through two channels.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-007-related",
+      "groupId": "EVAL-007",
+      "caseFamilyIds": [
+        "EVAL-007-core"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-007-A",
+      "caseB": "EVAL-007-C",
+      "label": "related",
+      "rationale": "A distinct verification proceeding concerns the same programme/event/period and supporting records; coordination is proposed, not duplication.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-007-unrelated",
+      "groupId": "EVAL-007",
+      "caseFamilyIds": [
+        "EVAL-007-core",
+        "EVAL-007-independent"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-007-A",
+      "caseB": "EVAL-007-D",
+      "label": "unrelated",
+      "rationale": "Similar complaint wording at a different institution; no shared proceeding or source obligation.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-008-duplicate",
+      "groupId": "EVAL-008",
+      "caseFamilyIds": [
+        "EVAL-008-core"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-008-A",
+      "caseB": "EVAL-008-B",
+      "label": "duplicate",
+      "rationale": "Same synthetic incident, institution, programme, period and source transaction reported through two channels.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-008-related",
+      "groupId": "EVAL-008",
+      "caseFamilyIds": [
+        "EVAL-008-core"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-008-A",
+      "caseB": "EVAL-008-C",
+      "label": "related",
+      "rationale": "A distinct verification proceeding concerns the same programme/event/period and supporting records; coordination is proposed, not duplication.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-008-unrelated",
+      "groupId": "EVAL-008",
+      "caseFamilyIds": [
+        "EVAL-008-core",
+        "EVAL-008-independent"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-008-A",
+      "caseB": "EVAL-008-D",
+      "label": "unrelated",
+      "rationale": "Similar issue at the same institution in a completed, separate 2023 cohort; no common transaction or pending obligation.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-009-duplicate",
+      "groupId": "EVAL-009",
+      "caseFamilyIds": [
+        "EVAL-009-core"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-009-A",
+      "caseB": "EVAL-009-B",
+      "label": "duplicate",
+      "rationale": "Same synthetic incident, institution, programme, period and source transaction reported through two channels.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-009-related",
+      "groupId": "EVAL-009",
+      "caseFamilyIds": [
+        "EVAL-009-core"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-009-A",
+      "caseB": "EVAL-009-C",
+      "label": "related",
+      "rationale": "A distinct verification proceeding concerns the same programme/event/period and supporting records; coordination is proposed, not duplication.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-009-unrelated",
+      "groupId": "EVAL-009",
+      "caseFamilyIds": [
+        "EVAL-009-core",
+        "EVAL-009-independent"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-009-A",
+      "caseB": "EVAL-009-D",
+      "label": "unrelated",
+      "rationale": "Same institution but an independent administrative subject, despite shared period/programme wording.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-010-duplicate",
+      "groupId": "EVAL-010",
+      "caseFamilyIds": [
+        "EVAL-010-core"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-010-A",
+      "caseB": "EVAL-010-B",
+      "label": "duplicate",
+      "rationale": "Same synthetic incident, institution, programme, period and source transaction reported through two channels.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-010-related",
+      "groupId": "EVAL-010",
+      "caseFamilyIds": [
+        "EVAL-010-core"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-010-A",
+      "caseB": "EVAL-010-C",
+      "label": "related",
+      "rationale": "A distinct verification proceeding concerns the same programme/event/period and supporting records; coordination is proposed, not duplication.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-010-unrelated",
+      "groupId": "EVAL-010",
+      "caseFamilyIds": [
+        "EVAL-010-core",
+        "EVAL-010-independent"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-010-A",
+      "caseB": "EVAL-010-D",
+      "label": "unrelated",
+      "rationale": "Similar complaint wording at a different institution; no shared proceeding or source obligation.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-011-duplicate",
+      "groupId": "EVAL-011",
+      "caseFamilyIds": [
+        "EVAL-011-core"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-011-A",
+      "caseB": "EVAL-011-B",
+      "label": "duplicate",
+      "rationale": "Same synthetic incident, institution, programme, period and source transaction reported through two channels.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-011-related",
+      "groupId": "EVAL-011",
+      "caseFamilyIds": [
+        "EVAL-011-core"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-011-A",
+      "caseB": "EVAL-011-C",
+      "label": "related",
+      "rationale": "A distinct verification proceeding concerns the same programme/event/period and supporting records; coordination is proposed, not duplication.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-011-unrelated",
+      "groupId": "EVAL-011",
+      "caseFamilyIds": [
+        "EVAL-011-core",
+        "EVAL-011-independent"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-011-A",
+      "caseB": "EVAL-011-D",
+      "label": "unrelated",
+      "rationale": "Similar issue at the same institution in a completed, separate 2023 cohort; no common transaction or pending obligation.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-012-duplicate",
+      "groupId": "EVAL-012",
+      "caseFamilyIds": [
+        "EVAL-012-core"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-012-A",
+      "caseB": "EVAL-012-B",
+      "label": "duplicate",
+      "rationale": "Same synthetic incident, institution, programme, period and source transaction reported through two channels.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-012-related",
+      "groupId": "EVAL-012",
+      "caseFamilyIds": [
+        "EVAL-012-core"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-012-A",
+      "caseB": "EVAL-012-C",
+      "label": "related",
+      "rationale": "A distinct verification proceeding concerns the same programme/event/period and supporting records; coordination is proposed, not duplication.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-012-unrelated",
+      "groupId": "EVAL-012",
+      "caseFamilyIds": [
+        "EVAL-012-core",
+        "EVAL-012-independent"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-012-A",
+      "caseB": "EVAL-012-D",
+      "label": "unrelated",
+      "rationale": "Same institution but an independent administrative subject, despite shared period/programme wording.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-013-duplicate",
+      "groupId": "EVAL-013",
+      "caseFamilyIds": [
+        "EVAL-013-core"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-013-A",
+      "caseB": "EVAL-013-B",
+      "label": "duplicate",
+      "rationale": "Same synthetic incident, institution, programme, period and source transaction reported through two channels.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-013-related",
+      "groupId": "EVAL-013",
+      "caseFamilyIds": [
+        "EVAL-013-core"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-013-A",
+      "caseB": "EVAL-013-C",
+      "label": "related",
+      "rationale": "A distinct verification proceeding concerns the same programme/event/period and supporting records; coordination is proposed, not duplication.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-013-unrelated",
+      "groupId": "EVAL-013",
+      "caseFamilyIds": [
+        "EVAL-013-core",
+        "EVAL-013-independent"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-013-A",
+      "caseB": "EVAL-013-D",
+      "label": "unrelated",
+      "rationale": "Similar complaint wording at a different institution; no shared proceeding or source obligation.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-014-duplicate",
+      "groupId": "EVAL-014",
+      "caseFamilyIds": [
+        "EVAL-014-core"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-014-A",
+      "caseB": "EVAL-014-B",
+      "label": "duplicate",
+      "rationale": "Same synthetic incident, institution, programme, period and source transaction reported through two channels.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-014-related",
+      "groupId": "EVAL-014",
+      "caseFamilyIds": [
+        "EVAL-014-core"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-014-A",
+      "caseB": "EVAL-014-C",
+      "label": "related",
+      "rationale": "A distinct verification proceeding concerns the same programme/event/period and supporting records; coordination is proposed, not duplication.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-014-unrelated",
+      "groupId": "EVAL-014",
+      "caseFamilyIds": [
+        "EVAL-014-core",
+        "EVAL-014-independent"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-014-A",
+      "caseB": "EVAL-014-D",
+      "label": "unrelated",
+      "rationale": "Similar issue at the same institution in a completed, separate 2023 cohort; no common transaction or pending obligation.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-015-duplicate",
+      "groupId": "EVAL-015",
+      "caseFamilyIds": [
+        "EVAL-015-core"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-015-A",
+      "caseB": "EVAL-015-B",
+      "label": "duplicate",
+      "rationale": "Same synthetic incident, institution, programme, period and source transaction reported through two channels.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-015-related",
+      "groupId": "EVAL-015",
+      "caseFamilyIds": [
+        "EVAL-015-core"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-015-A",
+      "caseB": "EVAL-015-C",
+      "label": "related",
+      "rationale": "A distinct verification proceeding concerns the same programme/event/period and supporting records; coordination is proposed, not duplication.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-015-unrelated",
+      "groupId": "EVAL-015",
+      "caseFamilyIds": [
+        "EVAL-015-core",
+        "EVAL-015-independent"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-015-A",
+      "caseB": "EVAL-015-D",
+      "label": "unrelated",
+      "rationale": "Same institution but an independent administrative subject, despite shared period/programme wording.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-016-duplicate",
+      "groupId": "EVAL-016",
+      "caseFamilyIds": [
+        "EVAL-016-core"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-016-A",
+      "caseB": "EVAL-016-B",
+      "label": "duplicate",
+      "rationale": "Same synthetic incident, institution, programme, period and source transaction reported through two channels.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-016-related",
+      "groupId": "EVAL-016",
+      "caseFamilyIds": [
+        "EVAL-016-core"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-016-A",
+      "caseB": "EVAL-016-C",
+      "label": "related",
+      "rationale": "A distinct verification proceeding concerns the same programme/event/period and supporting records; coordination is proposed, not duplication.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-016-unrelated",
+      "groupId": "EVAL-016",
+      "caseFamilyIds": [
+        "EVAL-016-core",
+        "EVAL-016-independent"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-016-A",
+      "caseB": "EVAL-016-D",
+      "label": "unrelated",
+      "rationale": "Similar complaint wording at a different institution; no shared proceeding or source obligation.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-017-duplicate",
+      "groupId": "EVAL-017",
+      "caseFamilyIds": [
+        "EVAL-017-core"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-017-A",
+      "caseB": "EVAL-017-B",
+      "label": "duplicate",
+      "rationale": "Same synthetic incident, institution, programme, period and source transaction reported through two channels.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-017-related",
+      "groupId": "EVAL-017",
+      "caseFamilyIds": [
+        "EVAL-017-core"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-017-A",
+      "caseB": "EVAL-017-C",
+      "label": "related",
+      "rationale": "A distinct verification proceeding concerns the same programme/event/period and supporting records; coordination is proposed, not duplication.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-017-unrelated",
+      "groupId": "EVAL-017",
+      "caseFamilyIds": [
+        "EVAL-017-core",
+        "EVAL-017-independent"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-017-A",
+      "caseB": "EVAL-017-D",
+      "label": "unrelated",
+      "rationale": "Similar issue at the same institution in a completed, separate 2023 cohort; no common transaction or pending obligation.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-018-duplicate",
+      "groupId": "EVAL-018",
+      "caseFamilyIds": [
+        "EVAL-018-core"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-018-A",
+      "caseB": "EVAL-018-B",
+      "label": "duplicate",
+      "rationale": "Same synthetic incident, institution, programme, period and source transaction reported through two channels.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-018-related",
+      "groupId": "EVAL-018",
+      "caseFamilyIds": [
+        "EVAL-018-core"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-018-A",
+      "caseB": "EVAL-018-C",
+      "label": "related",
+      "rationale": "A distinct verification proceeding concerns the same programme/event/period and supporting records; coordination is proposed, not duplication.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-018-unrelated",
+      "groupId": "EVAL-018",
+      "caseFamilyIds": [
+        "EVAL-018-core",
+        "EVAL-018-independent"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-018-A",
+      "caseB": "EVAL-018-D",
+      "label": "unrelated",
+      "rationale": "Same institution but an independent administrative subject, despite shared period/programme wording.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-019-duplicate",
+      "groupId": "EVAL-019",
+      "caseFamilyIds": [
+        "EVAL-019-core"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-019-A",
+      "caseB": "EVAL-019-B",
+      "label": "duplicate",
+      "rationale": "Same synthetic incident, institution, programme, period and source transaction reported through two channels.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-019-related",
+      "groupId": "EVAL-019",
+      "caseFamilyIds": [
+        "EVAL-019-core"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-019-A",
+      "caseB": "EVAL-019-C",
+      "label": "related",
+      "rationale": "A distinct verification proceeding concerns the same programme/event/period and supporting records; coordination is proposed, not duplication.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-019-unrelated",
+      "groupId": "EVAL-019",
+      "caseFamilyIds": [
+        "EVAL-019-core",
+        "EVAL-019-independent"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-019-A",
+      "caseB": "EVAL-019-D",
+      "label": "unrelated",
+      "rationale": "Similar complaint wording at a different institution; no shared proceeding or source obligation.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-020-duplicate",
+      "groupId": "EVAL-020",
+      "caseFamilyIds": [
+        "EVAL-020-core"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-020-A",
+      "caseB": "EVAL-020-B",
+      "label": "duplicate",
+      "rationale": "Same synthetic incident, institution, programme, period and source transaction reported through two channels.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-020-related",
+      "groupId": "EVAL-020",
+      "caseFamilyIds": [
+        "EVAL-020-core"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-020-A",
+      "caseB": "EVAL-020-C",
+      "label": "related",
+      "rationale": "A distinct verification proceeding concerns the same programme/event/period and supporting records; coordination is proposed, not duplication.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-020-unrelated",
+      "groupId": "EVAL-020",
+      "caseFamilyIds": [
+        "EVAL-020-core",
+        "EVAL-020-independent"
+      ],
+      "split": "tuning",
+      "caseA": "EVAL-020-A",
+      "caseB": "EVAL-020-D",
+      "label": "unrelated",
+      "rationale": "Similar issue at the same institution in a completed, separate 2023 cohort; no common transaction or pending obligation.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-021-duplicate",
+      "groupId": "EVAL-021",
+      "caseFamilyIds": [
+        "EVAL-021-core"
+      ],
+      "split": "heldout",
+      "caseA": "EVAL-021-A",
+      "caseB": "EVAL-021-B",
+      "label": "duplicate",
+      "rationale": "Same synthetic incident, institution, programme, period and source transaction reported through two channels.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-021-related",
+      "groupId": "EVAL-021",
+      "caseFamilyIds": [
+        "EVAL-021-core"
+      ],
+      "split": "heldout",
+      "caseA": "EVAL-021-A",
+      "caseB": "EVAL-021-C",
+      "label": "related",
+      "rationale": "A distinct verification proceeding concerns the same programme/event/period and supporting records; coordination is proposed, not duplication.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-021-unrelated",
+      "groupId": "EVAL-021",
+      "caseFamilyIds": [
+        "EVAL-021-core",
+        "EVAL-021-independent"
+      ],
+      "split": "heldout",
+      "caseA": "EVAL-021-A",
+      "caseB": "EVAL-021-D",
+      "label": "unrelated",
+      "rationale": "Same institution but an independent administrative subject, despite shared period/programme wording.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-022-duplicate",
+      "groupId": "EVAL-022",
+      "caseFamilyIds": [
+        "EVAL-022-core"
+      ],
+      "split": "heldout",
+      "caseA": "EVAL-022-A",
+      "caseB": "EVAL-022-B",
+      "label": "duplicate",
+      "rationale": "Same synthetic incident, institution, programme, period and source transaction reported through two channels.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-022-related",
+      "groupId": "EVAL-022",
+      "caseFamilyIds": [
+        "EVAL-022-core"
+      ],
+      "split": "heldout",
+      "caseA": "EVAL-022-A",
+      "caseB": "EVAL-022-C",
+      "label": "related",
+      "rationale": "A distinct verification proceeding concerns the same programme/event/period and supporting records; coordination is proposed, not duplication.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-022-unrelated",
+      "groupId": "EVAL-022",
+      "caseFamilyIds": [
+        "EVAL-022-core",
+        "EVAL-022-independent"
+      ],
+      "split": "heldout",
+      "caseA": "EVAL-022-A",
+      "caseB": "EVAL-022-D",
+      "label": "unrelated",
+      "rationale": "Similar complaint wording at a different institution; no shared proceeding or source obligation.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-023-duplicate",
+      "groupId": "EVAL-023",
+      "caseFamilyIds": [
+        "EVAL-023-core"
+      ],
+      "split": "heldout",
+      "caseA": "EVAL-023-A",
+      "caseB": "EVAL-023-B",
+      "label": "duplicate",
+      "rationale": "Same synthetic incident, institution, programme, period and source transaction reported through two channels.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-023-related",
+      "groupId": "EVAL-023",
+      "caseFamilyIds": [
+        "EVAL-023-core"
+      ],
+      "split": "heldout",
+      "caseA": "EVAL-023-A",
+      "caseB": "EVAL-023-C",
+      "label": "related",
+      "rationale": "A distinct verification proceeding concerns the same programme/event/period and supporting records; coordination is proposed, not duplication.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-023-unrelated",
+      "groupId": "EVAL-023",
+      "caseFamilyIds": [
+        "EVAL-023-core",
+        "EVAL-023-independent"
+      ],
+      "split": "heldout",
+      "caseA": "EVAL-023-A",
+      "caseB": "EVAL-023-D",
+      "label": "unrelated",
+      "rationale": "Similar issue at the same institution in a completed, separate 2023 cohort; no common transaction or pending obligation.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-024-duplicate",
+      "groupId": "EVAL-024",
+      "caseFamilyIds": [
+        "EVAL-024-core"
+      ],
+      "split": "heldout",
+      "caseA": "EVAL-024-A",
+      "caseB": "EVAL-024-B",
+      "label": "duplicate",
+      "rationale": "Same synthetic incident, institution, programme, period and source transaction reported through two channels.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-024-related",
+      "groupId": "EVAL-024",
+      "caseFamilyIds": [
+        "EVAL-024-core"
+      ],
+      "split": "heldout",
+      "caseA": "EVAL-024-A",
+      "caseB": "EVAL-024-C",
+      "label": "related",
+      "rationale": "A distinct verification proceeding concerns the same programme/event/period and supporting records; coordination is proposed, not duplication.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-024-unrelated",
+      "groupId": "EVAL-024",
+      "caseFamilyIds": [
+        "EVAL-024-core",
+        "EVAL-024-independent"
+      ],
+      "split": "heldout",
+      "caseA": "EVAL-024-A",
+      "caseB": "EVAL-024-D",
+      "label": "unrelated",
+      "rationale": "Same institution but an independent administrative subject, despite shared period/programme wording.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-025-duplicate",
+      "groupId": "EVAL-025",
+      "caseFamilyIds": [
+        "EVAL-025-core"
+      ],
+      "split": "heldout",
+      "caseA": "EVAL-025-A",
+      "caseB": "EVAL-025-B",
+      "label": "duplicate",
+      "rationale": "Same synthetic incident, institution, programme, period and source transaction reported through two channels.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-025-related",
+      "groupId": "EVAL-025",
+      "caseFamilyIds": [
+        "EVAL-025-core"
+      ],
+      "split": "heldout",
+      "caseA": "EVAL-025-A",
+      "caseB": "EVAL-025-C",
+      "label": "related",
+      "rationale": "A distinct verification proceeding concerns the same programme/event/period and supporting records; coordination is proposed, not duplication.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-025-unrelated",
+      "groupId": "EVAL-025",
+      "caseFamilyIds": [
+        "EVAL-025-core",
+        "EVAL-025-independent"
+      ],
+      "split": "heldout",
+      "caseA": "EVAL-025-A",
+      "caseB": "EVAL-025-D",
+      "label": "unrelated",
+      "rationale": "Similar complaint wording at a different institution; no shared proceeding or source obligation.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-026-duplicate",
+      "groupId": "EVAL-026",
+      "caseFamilyIds": [
+        "EVAL-026-core"
+      ],
+      "split": "heldout",
+      "caseA": "EVAL-026-A",
+      "caseB": "EVAL-026-B",
+      "label": "duplicate",
+      "rationale": "Same synthetic incident, institution, programme, period and source transaction reported through two channels.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-026-related",
+      "groupId": "EVAL-026",
+      "caseFamilyIds": [
+        "EVAL-026-core"
+      ],
+      "split": "heldout",
+      "caseA": "EVAL-026-A",
+      "caseB": "EVAL-026-C",
+      "label": "related",
+      "rationale": "A distinct verification proceeding concerns the same programme/event/period and supporting records; coordination is proposed, not duplication.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-026-unrelated",
+      "groupId": "EVAL-026",
+      "caseFamilyIds": [
+        "EVAL-026-core",
+        "EVAL-026-independent"
+      ],
+      "split": "heldout",
+      "caseA": "EVAL-026-A",
+      "caseB": "EVAL-026-D",
+      "label": "unrelated",
+      "rationale": "Similar issue at the same institution in a completed, separate 2023 cohort; no common transaction or pending obligation.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-027-duplicate",
+      "groupId": "EVAL-027",
+      "caseFamilyIds": [
+        "EVAL-027-core"
+      ],
+      "split": "heldout",
+      "caseA": "EVAL-027-A",
+      "caseB": "EVAL-027-B",
+      "label": "duplicate",
+      "rationale": "Same synthetic incident, institution, programme, period and source transaction reported through two channels.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-027-related",
+      "groupId": "EVAL-027",
+      "caseFamilyIds": [
+        "EVAL-027-core"
+      ],
+      "split": "heldout",
+      "caseA": "EVAL-027-A",
+      "caseB": "EVAL-027-C",
+      "label": "related",
+      "rationale": "A distinct verification proceeding concerns the same programme/event/period and supporting records; coordination is proposed, not duplication.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-027-unrelated",
+      "groupId": "EVAL-027",
+      "caseFamilyIds": [
+        "EVAL-027-core",
+        "EVAL-027-independent"
+      ],
+      "split": "heldout",
+      "caseA": "EVAL-027-A",
+      "caseB": "EVAL-027-D",
+      "label": "unrelated",
+      "rationale": "Same institution but an independent administrative subject, despite shared period/programme wording.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-028-duplicate",
+      "groupId": "EVAL-028",
+      "caseFamilyIds": [
+        "EVAL-028-core"
+      ],
+      "split": "heldout",
+      "caseA": "EVAL-028-A",
+      "caseB": "EVAL-028-B",
+      "label": "duplicate",
+      "rationale": "Same synthetic incident, institution, programme, period and source transaction reported through two channels.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-028-related",
+      "groupId": "EVAL-028",
+      "caseFamilyIds": [
+        "EVAL-028-core"
+      ],
+      "split": "heldout",
+      "caseA": "EVAL-028-A",
+      "caseB": "EVAL-028-C",
+      "label": "related",
+      "rationale": "A distinct verification proceeding concerns the same programme/event/period and supporting records; coordination is proposed, not duplication.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    },
+    {
+      "id": "EVAL-028-unrelated",
+      "groupId": "EVAL-028",
+      "caseFamilyIds": [
+        "EVAL-028-core",
+        "EVAL-028-independent"
+      ],
+      "split": "heldout",
+      "caseA": "EVAL-028-A",
+      "caseB": "EVAL-028-D",
+      "label": "unrelated",
+      "rationale": "Similar complaint wording at a different institution; no shared proceeding or source obligation.",
+      "labelReviewStatus": "draft_not_independently_reviewed"
+    }
+  ]
+}

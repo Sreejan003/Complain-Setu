@@ -1,6 +1,7 @@
 import { Router, Response } from "express";
 import { store } from "../db/store.js";
 import { requireAuth, requireRole, AuthenticatedRequest } from "../middleware/auth.js";
+import{deadlineDaysRemaining}from"../services/slaCalendar.js";
 
 export const institutionsRouter = Router();
 institutionsRouter.use(requireAuth, (req: AuthenticatedRequest,res,next)=>{
@@ -72,7 +73,7 @@ institutionsRouter.get("/:id/dashboard-metrics", requireAuth, (req: Authenticate
   const pendingCases = allCases.filter(c => c.status === "Pending");
   const underProcessCases = allCases.filter(c => c.status === "Under Process");
   const resolvedCases = allCases.filter(c => c.status === "Disposed");
-  const overdueCases = allCases.filter(c => ["Pending", "Under Process", "Escalated"].includes(c.status) && c.expectedDisposalDate < today);
+  const overdueCases = allCases.filter(c => ["Pending", "Under Process", "Escalated"].includes(c.status) && deadlineDaysRemaining(c)<0);
   const highPriorityCases = allCases.filter(c => c.priority === "Critical" || c.priority === "High");
 
   const overlaps = store.getOverlapAlerts({ institutionId: institution.id, limit: 100 }).data;
@@ -94,7 +95,7 @@ institutionsRouter.get("/:id/dashboard-metrics", requireAuth, (req: Authenticate
 
   // Urgent & Actionable Lists
   const upcomingDeadlines = allCases
-    .filter(c => ["Pending", "Under Process"].includes(c.status) && c.expectedDisposalDate >= today)
+    .filter(c => ["Pending", "Under Process"].includes(c.status) && deadlineDaysRemaining(c)>=0)
     .sort((a, b) => a.expectedDisposalDate.localeCompare(b.expectedDisposalDate))
     .slice(0, 5);
 
@@ -155,6 +156,7 @@ institutionsRouter.get("/:id", requireAuth, (req: AuthenticatedRequest, res: Res
   const overlapAlerts = store.getOverlapAlerts({ institutionId: institution.id, limit: 50 }).data;
   const documents = store.getDocuments({ institutionId: institution.id });
 
+  store.addAuditLog({userId:req.user!.id,userName:req.user!.fullName,action:"INSTITUTION_CASE_PROFILE_VIEWED",entityType:"InstitutionView",entityId:institution.id,details:{authorizedCases:complaints.length}});
   return res.json({
     institution,
     complaints,

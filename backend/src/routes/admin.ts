@@ -92,7 +92,8 @@ adminRouter.get("/system-status", requireAuth, async (_req: AuthenticatedRequest
   let aiServiceStatus = "Fallback (In-Process Lexical/Cosine)";
   let aiServiceConnected = false;
 
-  const testAi = await querySemanticService("Faculty salary unpaid", "Faculty remuneration pending");
+  const configuredMode = process.env.SIMILARITY_MODE || "auto";
+  const testAi = configuredMode === "auto" ? await querySemanticService("Synthetic faculty salary example", "Synthetic remuneration example") : null;
   if (testAi) {
     aiServiceStatus = `Connected (${testAi.engine})`;
     aiServiceConnected = true;
@@ -116,8 +117,10 @@ adminRouter.get("/system-status", requireAuth, async (_req: AuthenticatedRequest
     aiService: {
       status: aiServiceStatus,
       connected: aiServiceConnected,
-      model: "sentence-transformers/all-MiniLM-L6-v2",
-      fallbackActive: !aiServiceConnected
+      mode: configuredMode === "unavailable" ? "unavailable" : testAi?.mode || "lexical_fallback",
+      model: testAi?.model || (configuredMode === "unavailable" ? "none" : "token-frequency-cosine"),
+      revision: testAi?.revision || "1",
+      fallbackActive: configuredMode !== "unavailable" && testAi?.mode !== "multilingual_embeddings"
     },
     prioritySlaDays: SLA_DAYS,
     timestamp: new Date().toISOString()
@@ -143,7 +146,7 @@ adminRouter.put(
       return config;
     });
     return res.json({
-      message: "Statutory SLA & Escalation configuration updated.",
+      message: "Operational SLA & Escalation configuration updated.",
       config: updated
     });
   }
@@ -159,7 +162,7 @@ adminRouter.post(
     const result = requestScope.exit(()=>runSlaEvaluationCycle());
     store.addAuditLog({userId:(_req as AuthenticatedRequest).user!.id,userName:(_req as AuthenticatedRequest).user!.fullName,action:"SLA_MONITOR_TRIGGERED",entityType:"SystemOperation",entityId:"sla-monitor",details:{timestamp:result.timestamp}});
     return res.json({
-      message: "Statutory SLA evaluation cycle executed successfully.",
+      message: "Operational SLA evaluation cycle executed successfully.",
       result
     });
   }

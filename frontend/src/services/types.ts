@@ -53,6 +53,8 @@ export interface Institution {
 }
 
 export interface Complaint {
+  sla?:{policy:{timezone:string};pauses:{from:string;to?:string}[]};
+  metadata?: import("./intake.js").CaseMetadata;
   id: string;
   complaintId: string;
   institutionId: string;
@@ -112,6 +114,7 @@ export interface CaseTransfer {
 }
 
 export interface OverlapAlert {
+  assessment?: OverlapAssessment;
   canDecide?: boolean;
   canCoordinate?: boolean;
   id: string;
@@ -142,7 +145,7 @@ export interface OverlapAlert {
   reviewedBy?: string;
   reviewedByName?: string;
   reviewedAt?: string;
-  confidenceCategory?: "High-Confidence Duplicate" | "Related Grievance" | "Low-Confidence Match";
+  confidenceCategory?: string;
   detectionMethod?: string;
   reviewRemarks?: string;
   createdAt: string;
@@ -150,6 +153,7 @@ export interface OverlapAlert {
 }
 
 export interface OverlapExplanation {
+  assessment?: OverlapAssessment;
   institutionMatch: {
     matched: boolean;
     score: number;
@@ -173,12 +177,23 @@ export interface OverlapExplanation {
     details: string;
   };
   semanticMatch: {
-    score: number;
+    mode?: "multilingual_embeddings" | "lexical_fallback" | "unavailable";
+    model?: string;
+    revision?: string;
+    preprocessingVersion?: string;
+    score?: number;
     engine: string;
     details: string;
   };
   summary: string;
   recommendation: string;
+}
+
+export interface OverlapAssessment {
+  algorithmVersion: string; configurationVersion: number; mandatoryReview: boolean; reviewRequired: boolean;
+  relationshipCandidate: "possible_duplicate" | "possible_related" | "undetermined";
+  signals: { key: string; available: boolean; value: number; weight: number; contribution: number; reason: string }[];
+  date: { sourceA: string; sourceB: string; distanceDays?: number; withinWindow?: boolean; missingBehavior: string };
 }
 
 export interface Notification {

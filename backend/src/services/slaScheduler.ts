@@ -1,8 +1,11 @@
+import {runReportScheduleCycle} from "./reporting.js";
 import { store } from "../db/store.js";
 import { DEFAULT_ESCALATION_CONFIG, EscalationConfig } from "../config/constants.js";
 import { Complaint, Notification } from "../models/types.js";
 import { v4 as uuidv4 } from "uuid";
 import {coordination} from "./coordination.js";
+import { runOperationalWork } from "../db/operationalPostgres.js";
+import{evaluatePolicySlaCycle}from"./slaAlerts.js";
 
 let schedulerTimer: NodeJS.Timeout | null = null;
 let isCycleRunning = false;
@@ -45,7 +48,7 @@ export function calculateCalendarDiffDays(dueDateStr: string, referenceDateStr?:
 }
 
 /**
- * Runs one idempotent evaluation cycle of the AICTE Statutory SLA Monitor.
+ * Runs one idempotent evaluation cycle of the AICTE Operational SLA Monitor.
  * Uses bounded pagination across all database records and calendar-day boundary math.
  */
 export function runSlaEvaluationCycle(configOverride?: Partial<EscalationConfig>): SlaCycleResult {
@@ -95,7 +98,7 @@ export function runSlaEvaluationCycle(configOverride?: Partial<EscalationConfig>
     do {
       const res = store.getComplaints({ page, limit: pageSize });
       const activeInPage = res.data.filter(
-        c => c.status === "Pending" || c.status === "Under Process" || c.status === "Escalated"
+        c => !c.sla&&(c.status === "Pending" || c.status === "Under Process" || c.status === "Escalated")
       );
       activeComplaints.push(...activeInPage);
       totalPages = res.pagination.totalPages;
@@ -113,7 +116,7 @@ export function runSlaEvaluationCycle(configOverride?: Partial<EscalationConfig>
       const diffCalendarDays = Math.round((todayUtc - dueUtc) / (1000 * 60 * 60 * 24));
 
       if (diffCalendarDays > 0) {
-        // OVERDUE CASE (Statutory deadline has elapsed)
+        // OVERDUE CASE (Operational deadline has elapsed)
         overdueCount++;
 
         const dedupeKey = `Overdue:${c.id}`;
@@ -122,7 +125,7 @@ export function runSlaEvaluationCycle(configOverride?: Partial<EscalationConfig>
             id: uuidv4(),
             recipientRole: c.currentBureauId === "RB" ? "Regulation Bureau Officer" : "PGRC Officer",
             title: `STATUTORY OVERDUE: Case ${c.complaintId}`,
-            message: `${c.institutionName} grievance (${c.category}) is overdue by ${diffCalendarDays} day(s). Expected statutory disposal was ${c.expectedDisposalDate}.`,
+            message: `${c.institutionName} grievance (${c.category}) is overdue by ${diffCalendarDays} day(s). Expected operational disposal was ${c.expectedDisposalDate}.`,
             notificationType: "Overdue",
             referenceId: c.id,
             referenceType: "complaint",
@@ -140,11 +143,11 @@ export function runSlaEvaluationCycle(configOverride?: Partial<EscalationConfig>
               c.id,
               {
                 status: "Escalated",
-                remarks: `AUTOMATED SYSTEM ESCALATION: Case is ${diffCalendarDays} days past statutory SLA deadline (${c.expectedDisposalDate}). Escalated to Senior Management.`
+                remarks: `AUTOMATED SYSTEM ESCALATION: Case is ${diffCalendarDays} days past operational SLA deadline (${c.expectedDisposalDate}). Escalated to Senior Management.`
               },
               {
                 id: "system-sla-scheduler",
-                fullName: "AICTE Statutory SLA Monitor (System)",
+                fullName: "AICTE Operational SLA Monitor (System)",
                 role: "Administrator",
                 email: "sla-monitor@aicte.gov.in",
                 passwordHash: "",
@@ -162,7 +165,7 @@ export function runSlaEvaluationCycle(configOverride?: Partial<EscalationConfig>
                 id: uuidv4(),
                 recipientRole: "Senior Management",
                 title: `CRITICAL ESCALATION: Case ${c.complaintId}`,
-                message: `Case ${c.complaintId} (${c.institutionName}) auto-escalated after exceeding statutory deadline by ${diffCalendarDays} days.`,
+                message: `Case ${c.complaintId} (${c.institutionName}) auto-escalated after exceeding operational deadline by ${diffCalendarDays} days.`,
                 notificationType: "Overdue",
                 referenceId: c.id,
                 referenceType: "complaint",
@@ -173,7 +176,7 @@ export function runSlaEvaluationCycle(configOverride?: Partial<EscalationConfig>
               notificationsCreated++;
             }
           } catch (e) {
-            console.error(`Failed to auto-escalate complaint ${c.complaintId}:`, e);
+            console.error("[SLA Engine] An automatic escalation could not be completed.");
           }
         }
       } else {
@@ -189,7 +192,7 @@ export function runSlaEvaluationCycle(configOverride?: Partial<EscalationConfig>
               id: uuidv4(),
               recipientRole: c.currentBureauId === "RB" ? "Regulation Bureau Officer" : "PGRC Officer",
               title: daysRemaining === 0 ? `SLA DEADLINE TODAY: ${c.complaintId}` : `SLA Deadline Approaching: ${c.complaintId}`,
-              message: `Case ${c.complaintId} ${urgencyText} until statutory SLA deadline (${c.expectedDisposalDate}).`,
+              message: `Case ${c.complaintId} ${urgencyText} until operational SLA deadline (${c.expectedDisposalDate}).`,
               notificationType: "Deadline",
               referenceId: c.id,
               referenceType: "complaint",
@@ -203,13 +206,14 @@ export function runSlaEvaluationCycle(configOverride?: Partial<EscalationConfig>
       }
     }
 
+    const policyResult=evaluatePolicySlaCycle(config,now);
     return {
       timestamp: now.toISOString(),
-      scannedComplaints: activeComplaints.length,
-      overdueCount,
-      approachingCount,
-      autoEscalatedCount,
-      notificationsCreated
+      scannedComplaints: activeComplaints.length+policyResult.scannedComplaints,
+      overdueCount:overdueCount+policyResult.overdueCount,
+      approachingCount:approachingCount+policyResult.approachingCount,
+      autoEscalatedCount:autoEscalatedCount+policyResult.autoEscalatedCount,
+      notificationsCreated:notificationsCreated+policyResult.notificationsCreated
     };
   } finally {
     isCycleRunning = false;
@@ -225,28 +229,11 @@ export function startSlaScheduler(intervalMinutes = 15): NodeJS.Timeout {
     clearInterval(schedulerTimer);
   }
 
-  console.log(`[SLA Engine] Starting AICTE Statutory SLA & Auto-Escalation Engine (interval: ${intervalMinutes}m)...`);
+  console.log(`[SLA Engine] Starting AICTE Operational SLA & Auto-Escalation Engine (interval: ${intervalMinutes}m)...`);
 
-  setTimeout(() => {
-    try {
-      const res = runSlaEvaluationCycle();
-      console.log(
-        `[SLA Engine] Initial cycle complete: ${res.scannedComplaints} active cases scanned, ` +
-        `${res.overdueCount} overdue, ${res.approachingCount} approaching, ${res.autoEscalatedCount} auto-escalated, ${res.notificationsCreated} notifications created.`
-      );
-    } catch (err) {
-      console.error("[SLA Engine] Error in initial evaluation cycle:", err);
-    }
-  }, 2000);
-
-  schedulerTimer = setInterval(() => {
-    try {
-      coordination.reminders();
-      runSlaEvaluationCycle();
-    } catch (err) {
-      console.error("[SLA Engine] Error during scheduled evaluation cycle:", err);
-    }
-  }, intervalMinutes * 60 * 1000);
+  const cycle = () => { void runOperationalWork(()=>{coordination.reminders();runReportScheduleCycle();return runSlaEvaluationCycle();}).then(()=>console.log("[SLA Engine] Operational cycle committed.")).catch(()=>console.error("[SLA Engine] Operational cycle failed; transaction rolled back.")); };
+  const initial = setTimeout(cycle, 2000); initial.unref();
+  schedulerTimer = setInterval(cycle, intervalMinutes * 60 * 1000);
 
   return schedulerTimer;
 }
