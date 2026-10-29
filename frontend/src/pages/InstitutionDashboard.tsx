@@ -108,6 +108,12 @@ export const InstitutionDashboard: React.FC = () => {
   const [sortBy, setSortBy] = useState<string>("receivedDate");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
+  // Autocomplete institution search for officers (across 10,295 directory records)
+  const [instSearchQuery, setInstSearchQuery] = useState<string>("");
+  const [instSearchResults, setInstSearchResults] = useState<Institution[]>([]);
+  const [isSearchingInst, setIsSearchingInst] = useState<boolean>(false);
+  const [showInstDropdown, setShowInstDropdown] = useState<boolean>(false);
+
   // Single-Window Modal Views
   const [selectedCaseId, setSelectedCaseId] = useState<string | null>(null);
   const [caseDetailLoading, setCaseDetailLoading] = useState<boolean>(false);
@@ -136,6 +142,35 @@ export const InstitutionDashboard: React.FC = () => {
   const [overrideReason, setOverrideReason] = useState<string>("");
   const [overrideSubmitting, setOverrideSubmitting] = useState<boolean>(false);
 
+  // Autocomplete search across all 10,295 institutions
+  useEffect(() => {
+    if (!instSearchQuery.trim()) {
+      setInstSearchResults([]);
+      setIsSearchingInst(false);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      setIsSearchingInst(true);
+      try {
+        const results = await api.searchInstitutions(instSearchQuery.trim(), 12);
+        setInstSearchResults(results || []);
+      } catch (err) {
+        console.error("Institution search failed:", err);
+      } finally {
+        setIsSearchingInst(false);
+      }
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [instSearchQuery]);
+
+  const handleSelectInstitution = (target: Institution) => {
+    setSelectedInstId(target.id);
+    setInstSearchQuery("");
+    setShowInstDropdown(false);
+    setPage(1);
+    setSearchParams({ institutionId: target.id });
+  };
+
   // Load available institutions based on user authorization
   useEffect(() => {
     async function loadInstitutions() {
@@ -145,7 +180,8 @@ export const InstitutionDashboard: React.FC = () => {
         if (user?.role === "Institutional User" && user.institutionId) {
           setSelectedInstId(user.institutionId);
         } else if (!selectedInstId && res.data.length > 0) {
-          setSelectedInstId(res.data[0].id);
+          const withComplaints = res.data.find(i => (i.totalComplaintsCount || 0) > 0);
+          setSelectedInstId(withComplaints ? withComplaints.id : res.data[0].id);
         }
       } catch (err) {
         console.error("Failed to load institutions selector:", err);
@@ -373,6 +409,15 @@ export const InstitutionDashboard: React.FC = () => {
   const kpis = metrics?.kpis;
   const inst = metrics?.institution;
 
+  // Ensure current selected institution is always present in dropdown options
+  const dropdownOptions = (() => {
+    const list = [...institutionsList];
+    if (inst && !list.some(i => i.id === inst.id)) {
+      list.unshift(inst);
+    }
+    return list;
+  })();
+
   const categories = [
     "Faculty Shortage / Irregularities",
     "Capitation Fee / Overcharging",
@@ -388,7 +433,21 @@ export const InstitutionDashboard: React.FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader title={tr("navigation:ui.institutionTitle")} subtitle={tr("complaints:institutionOverview.scope")}/>
-      {user?.role!=="Institutional User"&&<InstitutionSearch onSelect={id=>{setSelectedInstId(id);setPage(1);setSearchParams({institutionId:id});}}/>}
+      {user?.role !== "Institutional User" && (
+        <InstitutionSearch
+          onSelect={(id) => {
+            setSelectedInstId(id);
+            setPage(1);
+            setSearchParams({ institutionId: id });
+            setTimeout(() => {
+              const el = document.getElementById("institution-command-center");
+              if (el) {
+                el.scrollIntoView({ behavior: "smooth", block: "start" });
+              }
+            }, 80);
+          }}
+        />
+      )}
       {dashboardError&&<p role="alert">{dashboardError}</p>}
       {/* ========================================================================= */}
       {/* Role-Context Banner                                                        */}
@@ -411,79 +470,43 @@ export const InstitutionDashboard: React.FC = () => {
       ))}
 
       {/* ========================================================================= */}
-      {/* Global Search Bar                                                          */}
+      {/* Search Bar (Institutions for Officers, Grievances for Institutional Users) */}
       {/* ========================================================================= */}
-      {user?.role==="Institutional User"&&<>
-      <div className="bg-white border border-[#e5eaf0] rounded-lg p-3">
-        <div className="flex items-center gap-2 bg-[#f8fafc] border border-[#e5eaf0] rounded-lg px-3 py-1.5 focus-within:border-[#003366] focus-within:bg-white transition">
-          <Search className="w-4 h-4 text-slate-500 shrink-0" />
-          <input
-            id="swp-global-search"
-            type="text"
-            value={globalSearch}
-            onChange={(e) => {
-              const val = e.target.value;
-              setGlobalSearch(val);
-              if(user?.role==="Institutional User")setFilterSearch(val);
-              setPage(1);
-            }}
-            placeholder={user?.role === "Institutional User" ? tr("complaints:searchGrievancesByReferenceIdCategoryTitleStatus") : tr("complaints:searchInstitutionsByNameAictePermanentIdCityState")}
-            className="flex-1 bg-transparent text-xs text-slate-900 placeholder-slate-400 focus:outline-none min-w-0"
-            autoComplete="off"
-          />
-
-          {/* Active search chips */}
-          {globalSearch && (
-            <div className="flex items-center gap-2 shrink-0">
-              {user?.role !== "Institutional User" && filteredInstitutionsList.length > 0 && (
-                <span className="hidden sm:inline-flex items-center gap-1 text-xs font-semibold bg-[#e8eef5] text-aicte-navy-700 border border-[#e5eaf0] px-2 py-0.5 rounded-lg">
-                  <Building2 className="w-3 h-3" />
-                  {filteredInstitutionsList.length}{tr("complaints:institution_567af")}{filteredInstitutionsList.length !== 1 ? "s" : ""}
-                </span>
-              )}
+      {/* ========================================================================= */}
+      {/* Search Bar (Grievance search for Institutional User)                      */}
+      {/* ========================================================================= */}
+      {user?.role === "Institutional User" && (
+        <div className="bg-white border border-[#e5eaf0] rounded-lg p-3">
+          <div className="flex items-center gap-2 bg-[#f8fafc] border border-[#e5eaf0] rounded-lg px-3 py-1.5 focus-within:border-[#003366] focus-within:bg-white transition">
+            <Search className="w-4 h-4 text-slate-500 shrink-0" />
+            <input
+              id="swp-global-search"
+              type="text"
+              value={filterSearch}
+              onChange={(e) => {
+                setFilterSearch(e.target.value);
+                setPage(1);
+              }}
+              placeholder={tr("complaints:searchGrievancesByReferenceIdCategoryTitleStatus")}
+              className="flex-1 bg-transparent text-xs text-slate-900 placeholder-slate-400 focus:outline-none min-w-0"
+              autoComplete="off"
+            />
+            {filterSearch && (
               <button
-                onClick={() => {
-                  setGlobalSearch("");
-                  setFilterSearch("");
-                  setPage(1);
-                  document.getElementById("swp-global-search")?.focus();
-                }}
+                onClick={() => { setFilterSearch(""); setPage(1); }}
                 className="p-0.5 text-slate-500 hover:text-slate-800"
                 title={tr("complaints:clearSearch")} aria-label={tr("common:cancel")}
               >
                 <X className="w-3.5 h-3.5" />
               </button>
-            </div>
-          )}
-
-          {/* Keyboard shortcut hint */}
-          {!globalSearch && (
-            <div className="hidden sm:flex items-center gap-1 shrink-0">
-              <kbd className="text-xs text-slate-500 bg-white border border-slate-200 rounded-lg px-1.5 py-0.5 font-mono">{tr("complaints:ctrl")}</kbd>
-              <kbd className="text-xs text-slate-500 bg-white border border-slate-200 rounded-lg px-1.5 py-0.5 font-mono">K</kbd>
-            </div>
-          )}
-        </div>
-
-        {/* Live result count bar when searching */}
-        {globalSearch && (
-          <div className="mt-1.5 px-1 flex items-center justify-between text-xs text-slate-600">
-            <span className="flex items-center gap-1">
-              <FolderKanban className="w-3.5 h-3.5 text-aicte-navy-700" />{tr("complaints:showingRecordsMatching")}<strong className="text-slate-900 font-semibold">"{globalSearch}"</strong>
-            </span>
-            <button
-              onClick={() => { setGlobalSearch(""); setFilterSearch(""); setPage(1); }}
-              className="text-aicte-navy-700 hover:underline font-semibold"
-            >{tr("complaints:clearSearch_87e32")}</button>
+            )}
           </div>
-        )}
-      </div>
-
-      </>}
+        </div>
+      )}
       {/* ========================================================================= */}
       {/* 1. Header & Institution Selector                                         */}
       {/* ========================================================================= */}
-      <div className="page-header">
+      <div id="institution-command-center" className="page-header scroll-mt-6">
         <div className="flex items-start space-x-3">
           <div className="p-2.5 bg-[#f1f5f9] text-aicte-navy-700 border border-[#e5eaf0] rounded-lg mt-0.5 shrink-0">
             <Building2 className="w-5 h-5" />
@@ -500,7 +523,11 @@ export const InstitutionDashboard: React.FC = () => {
               {inst?.name || tr("complaints:institutionCommandCenter")}
             </h2>
             <p className="text-xs text-slate-600 mt-0.5">
-              {inst ? tr("complaints:regionAccreditation", {value1: inst.city, value2: inst.state, value3: inst.region, value4: inst.accreditationStatus}) : tr("complaints:consolidatedGrievanceAndStatutoryComplianceMonitoringWindow")}
+              {inst ? (
+                <span>
+                  {inst.city}{inst.district ? `, ${inst.district}` : ""} · <strong className="font-semibold text-slate-800">State & Region: {inst.state} ({inst.region})</strong> · Accreditation: {inst.accreditationStatus || "AICTE Approved"}
+                </span>
+              ) : tr("complaints:consolidatedGrievanceAndStatutoryComplianceMonitoringWindow")}
             </p>
           </div>
         </div>
@@ -517,14 +544,14 @@ export const InstitutionDashboard: React.FC = () => {
                   setPage(1);
                   setSearchParams({ institutionId: e.target.value });
                 }}
-                className="bg-transparent font-semibold text-slate-900 focus:outline-none cursor-pointer max-w-[240px] truncate" aria-label={tr("complaints:institution")}
+                className="bg-transparent font-semibold text-slate-900 focus:outline-none cursor-pointer max-w-[280px] truncate" aria-label={tr("complaints:institution")}
               >
-                {filteredInstitutionsList.length === 0 ? (
+                {dropdownOptions.length === 0 ? (
                   <option value="">{tr("complaints:noInstitutionsMatchSearch")}</option>
                 ) : (
-                  filteredInstitutionsList.map((i) => (
+                  dropdownOptions.map((i) => (
                     <option key={i.id} value={i.id}>
-                      {i.name} ({i.aictePermanentId})
+                      {i.name} — {i.state} ({i.region}) [{i.aictePermanentId}]
                     </option>
                   ))
                 )}
@@ -834,10 +861,26 @@ export const InstitutionDashboard: React.FC = () => {
               <input
                 type="text"
                 value={filterSearch}
-                onChange={(e) => setFilterSearch(e.target.value)}
+                onChange={(e) => {
+                  setFilterSearch(e.target.value);
+                  setPage(1);
+                }}
                 placeholder={tr("complaints:filterReferenceTitle")}
-                className="w-full ps-8 pe-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-[#003366]" aria-label={tr("complaints:filterReferenceTitle")}
+                className="w-full ps-8 pe-7 py-1.5 bg-white border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-[#003366]" aria-label={tr("complaints:filterReferenceTitle")}
               />
+              {filterSearch && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFilterSearch("");
+                    setPage(1);
+                  }}
+                  className="absolute end-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-bold focus:outline-none"
+                  aria-label="Clear complaint search"
+                >
+                  ×
+                </button>
+              )}
             </div>
 
             <select

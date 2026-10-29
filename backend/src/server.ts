@@ -6,6 +6,7 @@ import fs from "fs";
 import { fileURLToPath } from "url";
 
 dotenv.config();
+// AICTE Complaint Tracker API Server
 
 import { authRouter } from "./routes/auth.js";
 import { institutionsRouter } from "./routes/institutions.js";

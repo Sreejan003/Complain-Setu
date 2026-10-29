@@ -44,10 +44,12 @@ export interface WorkflowRequest {
 export interface Institution {
   id: string;
   aictePermanentId: string;
+  permanentId?: string;
   name: string;
   institutionType: "Engineering" | "Management" | "Pharmacy" | "Polytechnic" | "Architecture";
   address: string;
   city: string;
+  district?: string;
   state: string;
   region: string;
   pincode: string;
@@ -59,6 +61,16 @@ export interface Institution {
   activeComplaintsCount: number;
   overlapCount: number;
   latestComplaintDate?: string;
+  sourceType?: string;
+  sourceFile?: string;
+  sourcePage?: number;
+  sourceDocumentDate?: string;
+  verificationStatus?: string;
+  hasSourceConflict?: boolean;
+  conflictDetails?: any;
+  sourcePages?: number[];
+  pendingComplaintsCount?: number;
+  handlingBureaus?: string[];
   createdAt: string;
   updatedAt: string;
 }

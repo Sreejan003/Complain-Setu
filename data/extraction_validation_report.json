@@ -1,0 +1,61 @@
+{
+  "executionTimestamp": "2026-10-29T11:25:07.797580Z",
+  "sourceFile": "Institute_List.pdf",
+  "pdfMetadata": {
+    "author": "Surabhi Patil",
+    "creationDate": "2013-09-18",
+    "producer": "Microsoft Excel 2010"
+  },
+  "totalPagesProcessed": 794,
+  "totalRowsExtracted": 10297,
+  "headerRowsSkipped": 1,
+  "rejectedRowsCount": 0,
+  "rejectedRows": [],
+  "totalUniquePermanentIds": 10295,
+  "exactDuplicatesCount": 1,
+  "exactDuplicates": [
+    {
+      "permanentId": "1-9766101",
+      "name": "BLDEA'S COLLEGE OF PHARMACY, BIJAPUR",
+      "state": "Karnataka",
+      "district": "BIJAPUR",
+      "city": "BIJAPUR",
+      "occurrences": 2,
+      "pages": [
+        370,
+        706
+      ]
+    }
+  ],
+  "conflictingDuplicatesCount": 1,
+  "conflictingDuplicates": [
+    {
+      "permanentId": "1-4010725",
+      "occurrences": [
+        {
+          "permanentId": "1-4010725",
+          "name": "SREE NARAYANA INSTITUTE OF TECHNOLOGY",
+          "state": "Kerala",
+          "district": "PATHANAMTHIT TA",
+          "city": "ADOOR",
+          "sourcePage": 24,
+          "sourceRow": 10
+        },
+        {
+          "permanentId": "1-4010725",
+          "name": "SREE NARAYANA INSTITUTE OF TECHNOLOGY",
+          "state": "Kerala",
+          "district": "KOLLAM",
+          "city": "KOLLAM",
+          "sourcePage": 94,
+          "sourceRow": 4
+        }
+      ],
+      "reviewStatus": "FLAGGED_FOR_ADMIN_REVIEW",
+      "reason": "Conflicting geographic or institutional attributes across source pages"
+    }
+  ],
+  "canonicalInstitutionsCount": 10295,
+  "unrecognizedStates": [],
+  "executionTimeSeconds": 60.56
+}

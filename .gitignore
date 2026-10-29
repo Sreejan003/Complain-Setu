@@ -21,6 +21,8 @@ uploads/
 backend/uploads/*
 !backend/uploads/.gitkeep
 backend/data/*.log
+*.backup.*
+
 
 # Logs and Debug
 *.log

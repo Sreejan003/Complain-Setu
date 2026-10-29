@@ -14,6 +14,7 @@ import { detectOverlapsForComplaint } from "../services/overlapEngine.js";
 const validDate = (value: unknown) => typeof value==="string" && /^\d{4}-\d{2}-\d{2}$/.test(value) && Number.isFinite(Date.parse(value)) && new Date(value).toISOString().slice(0,10)===value;
 export const complaintsRouter = Router();
 complaintsRouter.use(requireAuth, (req: AuthenticatedRequest, res, next) => {
+  if (req.path.startsWith("/stream")) return next();
   const role = roleOf(req.user!.role);
   if (role === "SYSTEM_ADMIN") return res.status(403).json({error:"System administration does not grant complaint access."});
   const id = req.path.split("/")[1];

@@ -47,7 +47,18 @@ export interface Institution {
   totalComplaintsCount: number;
   activeComplaintsCount: number;
   overlapCount: number;
-  latestComplaintDate?: string;
+  district?: string;
+  permanentId?: string;
+  sourceType?: string;
+  sourceFile?: string;
+  sourcePage?: number;
+  sourceDocumentDate?: string;
+  verificationStatus?: string;
+  hasSourceConflict?: boolean;
+  conflictDetails?: any;
+  sourcePages?: number[];
+  pendingComplaintsCount?: number;
+  handlingBureaus?: string[];
   createdAt: string;
   updatedAt: string;
 }

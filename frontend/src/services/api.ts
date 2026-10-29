@@ -24,22 +24,22 @@ function getAuthHeader(): Record<string, string> {
 async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
     const errorBody = await res.json().catch(() => ({ error: res.statusText }));
-    if (res.status===401 || errorBody.code==="SESSION_REVOKED") window.dispatchEvent(new Event("aicte-session-expired"));
-    throw Object.assign(new Error(errorBody.error || `HTTP ${res.status}: ${res.statusText}`),{code:errorBody.code,status:res.status});
+    if (res.status === 401 || errorBody.code === "SESSION_REVOKED") window.dispatchEvent(new Event("aicte-session-expired"));
+    throw Object.assign(new Error(errorBody.error || `HTTP ${res.status}: ${res.statusText}`), { code: errorBody.code, status: res.status });
   }
   return res.json();
 }
 
 export const api = {
   async request<T = any>(path: string, method = "GET", body?: unknown): Promise<T> {
-    const res=await fetch(API_BASE+"/"+path,{method,headers:{...getAuthHeader(),"Content-Type":"application/json"},...(body!==undefined?{body:JSON.stringify(body)}:{})});
+    const res = await fetch(API_BASE + "/" + path, { method, headers: { ...getAuthHeader(), "Content-Type": "application/json" }, ...(body !== undefined ? { body: JSON.stringify(body) } : {}) });
     return handleResponse<T>(res);
   },
-  async downloadCsv(filters: Record<string,string> = {}) {
-    const res=await fetch(API_BASE+"/analytics/export-csv?"+new URLSearchParams(filters),{headers:getAuthHeader()});
-    if(!res.ok) {await handleResponse(res);return;}
-    const url=URL.createObjectURL(await res.blob());
-    const link=document.createElement("a");link.href=url;link.download="aicte-complaints.csv";link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  async downloadCsv(filters: Record<string, string> = {}) {
+    const res = await fetch(API_BASE + "/analytics/export-csv?" + new URLSearchParams(filters), { headers: getAuthHeader() });
+    if (!res.ok) { await handleResponse(res); return; }
+    const url = URL.createObjectURL(await res.blob());
+    const link = document.createElement("a"); link.href = url; link.download = "aicte-complaints.csv"; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
   },
   // Auth
   async login(email: string, password?: string): Promise<{ token: string; user: UserProfile }> {
@@ -65,7 +65,15 @@ export const api = {
 
   // Institutions
   async getInstitutions(params?: Record<string, any>): Promise<{ data: Institution[]; pagination: any }> {
-    const query = new URLSearchParams(params).toString();
+    const cleanParams: Record<string, string> = {};
+    if (params) {
+      for (const [k, v] of Object.entries(params)) {
+        if (v !== undefined && v !== null && String(v).trim() !== "") {
+          cleanParams[k] = String(v).trim();
+        }
+      }
+    }
+    const query = new URLSearchParams(cleanParams).toString();
     const res = await fetch(`${API_BASE}/institutions?${query}`, {
       headers: { ...getAuthHeader() }
     });
@@ -96,6 +104,44 @@ export const api = {
       method: "POST",
       headers: { "Content-Type": "application/json", ...getAuthHeader() },
       body: JSON.stringify(data)
+    });
+    return handleResponse(res);
+  },
+
+  async searchInstitutions(query: string, limit = 20): Promise<Institution[]> {
+    const res = await fetch(`${API_BASE}/institutions/search?q=${encodeURIComponent(query)}&limit=${limit}`, {
+      headers: { ...getAuthHeader() }
+    });
+    return handleResponse(res);
+  },
+
+  async getInstitutionFilters(params?: { state?: string; district?: string }): Promise<{
+    totalInstitutions: number;
+    states: string[];
+    districts: string[];
+    cities: string[];
+    institutionTypes: string[];
+    regions: string[];
+    stateRegionPairs?: { state: string; region: string }[];
+  }> {
+    const q = new URLSearchParams(params as any).toString();
+    const res = await fetch(`${API_BASE}/institutions/filters?${q}`, {
+      headers: { ...getAuthHeader() }
+    });
+    return handleResponse(res);
+  },
+
+  async getInstitutionComplaints(id: string, params?: { page?: number; limit?: number }): Promise<{ data: Complaint[]; pagination: any }> {
+    const q = new URLSearchParams(params as any).toString();
+    const res = await fetch(`${API_BASE}/institutions/${id}/complaints?${q}`, {
+      headers: { ...getAuthHeader() }
+    });
+    return handleResponse(res);
+  },
+
+  async getInstitutionStatistics(id: string): Promise<any> {
+    const res = await fetch(`${API_BASE}/institutions/${id}/statistics`, {
+      headers: { ...getAuthHeader() }
     });
     return handleResponse(res);
   },
@@ -434,7 +480,7 @@ export const api = {
   // Real-Time Events Subscription
   subscribeLiveEvents(onEvent: (event: any) => void): () => void {
     const token = localStorage.getItem("aicte_token");
-    if (!token) return () => {};
+    if (!token) return () => { };
 
     const url = `${API_BASE}/complaints/stream/live?token=${encodeURIComponent(token)}`;
     const eventSource = new EventSource(url);

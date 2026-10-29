@@ -214,7 +214,30 @@ async function runTests() {
     // Test 7: A rejected overlap remains recorded with review reason
     // -------------------------------------------------------------------
     console.log("Test 7: Rejected overlap remains recorded with review reason...");
-    const sampleAlert = store.getOverlapAlerts({ limit: 1 }).data[0];
+    let sampleAlert = store.getOverlapAlerts({ limit: 1 }).data[0];
+    if (!sampleAlert) {
+      const targetInst = store.getInstitutions({ limit: 1 }).data[0] || mockInstA;
+      await store.createComplaint({
+        institutionId: targetInst.id,
+        category: "Capitation Fee / Overcharging",
+        title: "Test Complaint Overlap Source",
+        description: "Capitation fee demanded without receipt for engineering seat admission.",
+        receivingBureauId: "RB",
+        priority: "High"
+      }, adminUser);
+
+      await store.createComplaint({
+        institutionId: targetInst.id,
+        category: "Capitation Fee / Overcharging",
+        title: "Test Complaint Overlap Target",
+        description: "Excess capitation fee charged without receipt for engineering course seat.",
+        receivingBureauId: "PGRC",
+        priority: "High"
+      }, adminUser);
+
+      sampleAlert = store.getOverlapAlerts({ limit: 1 }).data[0];
+    }
+
     const reviewReasonText = "Verified with Regional Office: separate complaints regarding different campus branches.";
     const reviewedAlert = store.reviewOverlapAlert(
       sampleAlert.id,
@@ -268,7 +291,25 @@ async function runTests() {
     // Test 9: Upcoming deadlines and overdue cases generate appropriate notifications
     // -------------------------------------------------------------------
     console.log("Test 9: Deadline and overdue monitoring notification generation...");
-    const overdueNotifications = store.getNotifications("Senior Management").filter(n => n.notificationType === "Overdue");
+    let overdueNotifications = store.getNotifications("Senior Management").filter(n => n.notificationType === "Overdue");
+    if (overdueNotifications.length === 0) {
+      const targetInst = store.getInstitutions({ limit: 1 }).data[0] || mockInstA;
+      const overdueComp = await store.createComplaint({
+        institutionId: targetInst.id,
+        category: "Faculty Shortage / Irregularities",
+        title: "Overdue Test Case",
+        description: "Overdue test complaint for SLA monitoring verification.",
+        receivingBureauId: "RB",
+        priority: "Critical",
+        expectedDisposalDate: "2026-01-01"
+      }, adminUser);
+      const foundInStore = store.getComplaintById(overdueComp.complaint.id);
+      if (foundInStore) {
+        foundInStore.expectedDisposalDate = "2026-01-01";
+      }
+      runSlaEvaluationCycle();
+      overdueNotifications = store.getNotifications("Senior Management").filter(n => n.notificationType === "Overdue");
+    }
     assert(overdueNotifications.length > 0, "Overdue cases must produce notification for management");
     console.log(`  ✓ Passed: Found ${overdueNotifications.length} overdue notifications.`);
     passed++;
@@ -290,11 +331,27 @@ async function runTests() {
     // -------------------------------------------------------------------
     console.log("Test 11: Date-range filter on receivedDate returns correct subset...");
     const allComplaints = store.getComplaints({ limit: 100 });
-    const rangeResult = store.getComplaints({ receivedFrom: "2026-10-01", receivedTo: "2026-10-15", limit: 100 });
+    let rangeResult = store.getComplaints({ receivedFrom: "2026-10-01", receivedTo: "2026-10-15", limit: 100 });
+    if (rangeResult.data.length === 0) {
+      const targetInst = store.getInstitutions({ limit: 1 }).data[0] || mockInstA;
+      const testCompInRange = await store.createComplaint({
+        institutionId: targetInst.id,
+        category: "Admission Guideline Violations",
+        title: "Date Range Filter Test Case",
+        description: "Date range test description.",
+        receivingBureauId: "RB",
+        priority: "Medium"
+      }, adminUser);
+      const foundComp = store.getComplaintById(testCompInRange.complaint.id);
+      if (foundComp) {
+        foundComp.receivedDate = "2026-10-05";
+      }
+      rangeResult = store.getComplaints({ receivedFrom: "2026-10-01", receivedTo: "2026-10-15", limit: 100 });
+    }
     // All results must fall within the range
     const allInRange = rangeResult.data.every(c => c.receivedDate >= "2026-10-01" && c.receivedDate <= "2026-10-15");
     assert(allInRange, "All filtered complaints must have receivedDate within specified range");
-    assert(rangeResult.data.length > 0, "Date range must return at least one complaint from seed data");
+    assert(rangeResult.data.length > 0, "Date range must return at least one complaint from test data");
     assert(rangeResult.data.length <= allComplaints.data.length, "Date-range filtered set must be subset of all");
     console.log(`  ✓ Passed: Date-range filter returned ${rangeResult.data.length} of ${allComplaints.pagination.total} complaints, all within range.`);
     passed++;
@@ -303,7 +360,14 @@ async function runTests() {
     // Test 12: Supporting documents addition and retrieval
     // -------------------------------------------------------------------
     console.log("Test 12: Supporting document addition and retrieval by complaint...");
-    const sampleComplaint = allComplaints.data[0];
+    const sampleComplaint = allComplaints.data[0] || (await store.createComplaint({
+      institutionId: (store.getInstitutions({ limit: 1 }).data[0] || mockInstA).id,
+      category: "Infrastructure & Lab Deficiencies",
+      title: "Document Test Case",
+      description: "Testing document upload",
+      receivingBureauId: "RB",
+      priority: "Medium"
+    }, adminUser)).complaint;
     const testDoc = store.addDocument({
       id: "doc-test-12",
       complaintId: sampleComplaint.id,
