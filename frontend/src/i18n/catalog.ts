@@ -1,6 +1,9 @@
 // Static interface phrases only. Original case content must not pass through this lookup.
 export const englishLookup: Record<string,string> = {
-  "Institution Dashboard":"complaints:institutionOverview.directory",
+  "Institution Dashboard": "complaints:institutionOverview.directory",
+  "Bureau Coordination": "workflow:crossBureau.title",
+  "Select & View": "complaints:institutionOverview.selectView",
+  "Search institution among these": "complaints:institutionOverview.searchAmongThese",
   "Institutional User": "common:institutionalUser",
   "SYSTEM_ADMIN": "administration:roles.systemAdmin",
   "COMPETENT_AUTHORITY": "administration:roles.competentAuthority",

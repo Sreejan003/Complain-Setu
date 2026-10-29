@@ -525,7 +525,7 @@ export const InstitutionDashboard: React.FC = () => {
             <p className="text-xs text-slate-600 mt-0.5">
               {inst ? (
                 <span>
-                  {inst.city}{inst.district ? `, ${inst.district}` : ""} · <strong className="font-semibold text-slate-800">State & Region: {inst.state} ({inst.region})</strong> · Accreditation: {inst.accreditationStatus || "AICTE Approved"}
+                  {inst.city}{inst.district ? `, ${inst.district}` : ""} · <strong className="font-semibold text-slate-800">{tr("complaints:institutionOverview.location")}: {inst.state} ({inst.region})</strong> · {tr("complaints:institutionOverview.accreditationStatus")}: {inst.accreditationStatus || tr("complaints:aicteApproved")}
                 </span>
               ) : tr("complaints:consolidatedGrievanceAndStatutoryComplianceMonitoringWindow")}
             </p>
@@ -876,7 +876,7 @@ export const InstitutionDashboard: React.FC = () => {
                     setPage(1);
                   }}
                   className="absolute end-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-bold focus:outline-none"
-                  aria-label="Clear complaint search"
+                  aria-label={tr("complaints:clearSearch")}
                 >
                   ×
                 </button>
@@ -1035,7 +1035,7 @@ export const InstitutionDashboard: React.FC = () => {
 
         {/* Pagination */}
         <div className="p-2.5 border-t border-[#e5eaf0] bg-[#f8fafc] flex items-center justify-between text-xs text-slate-600">
-          <span>{tr("dashboard:page")}<strong>{formatNumber(page)}</strong> of <strong>{formatNumber(totalPages) || 1}</strong> ({formatNumber(totalCount)}{tr("complaints:totalCases_1e7cb")}</span>
+          <span>{tr("dashboard:page")} <strong>{formatNumber(page)}</strong> / <strong>{formatNumber(totalPages) || 1}</strong> ({formatNumber(totalCount)}{tr("complaints:totalCases_1e7cb")}</span>
           <div className="flex items-center space-x-1">
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}

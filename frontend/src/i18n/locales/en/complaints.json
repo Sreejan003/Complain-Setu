@@ -464,6 +464,16 @@
     "contactPhone": "Official Phone",
     "accreditationStatus": "Institution Status",
     "coordination": "Cross-Bureau Coordination",
-    "emptyCoordination": "No coordination indicators recorded."
+    "emptyCoordination": "No coordination indicators recorded.",
+    "selectView": "Select & View",
+    "searchAmongThese": "Search institution among these",
+    "searchPlaceholder": "Type Name, Permanent ID (e.g. 1-6648541), or City...",
+    "directorySubtitle": "10,295 AICTE Directory Records · Merged State & Region Exploration ({{count}} available)",
+    "territoryScope": "Territory Scope: {{scope}}",
+    "allStatesRegions": "All States & Regions (8 Regions · 34 States)",
+    "matchingInScope": "Matching \"{{search}}\" in {{scope}}",
+    "showingInScope": "Showing approved AICTE institutions in {{scope}}",
+    "noFoundInScope": "No institutions found for \"{{search}}\" in {{scope}}.",
+    "noRecordsInScope": "No institution records found for {{scope}}."
   }
 }

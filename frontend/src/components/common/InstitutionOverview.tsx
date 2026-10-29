@@ -7,7 +7,7 @@ import { field, button, panel } from "../dashboard/DashboardUI.js";
 import type { Institution, InstitutionDashboardMetrics } from "../../services/types.js";
 
 type Row = Institution & { pendingComplaintsCount?: number; handlingBureaus?: string[] };
-const t = (key: string) => tr("complaints:institutionOverview." + key);
+const t = (key: string, values?: Record<string, unknown>) => tr("complaints:institutionOverview." + key, values);
 
 const DEFAULT_REGION_STATE_MAP: Record<string, string[]> = {
   "Central Region (Bhopal)": ["Chhattisgarh", "Gujarat", "Madhya Pradesh"],
@@ -106,7 +106,7 @@ export function InstitutionSearch({ onSelect }: { onSelect: (id: string) => void
 
   const activeScopeName = filters.stateOrRegion
     ? filters.stateOrRegion.replace(/^(region|state):/, "")
-    : "All AICTE Regions & States";
+    : t("allStatesRegions");
 
   return (
     <section className={panel} id="institution-directory">
@@ -114,12 +114,12 @@ export function InstitutionSearch({ onSelect }: { onSelect: (id: string) => void
         <div>
           <h2 className="font-bold text-base text-aicte-navy-900">{tr("navigation:ui.directoryTitle")}</h2>
           <p className="text-xs text-slate-500">
-            10,295 AICTE Directory Records · Merged State & Region Exploration ({formatNumber(totalCount)} available)
+            {t("directorySubtitle", { count: formatNumber(totalCount) })}
           </p>
         </div>
         {filters.stateOrRegion && (
           <span className="text-xs font-semibold text-aicte-navy-800 bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-md">
-            Territory Scope: {activeScopeName}
+            {t("territoryScope", { scope: activeScopeName })}
           </span>
         )}
       </div>
@@ -127,7 +127,7 @@ export function InstitutionSearch({ onSelect }: { onSelect: (id: string) => void
       <div className="filter-bar mb-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {/* Merged State & Region Filter Dropdown */}
         <label className="text-xs font-semibold text-slate-700">
-          {localizeLabel("State & Region")}
+          {t("location")}
           <select
             className={`${field} block w-full mt-1 font-medium`}
             value={filters.stateOrRegion}
@@ -136,12 +136,12 @@ export function InstitutionSearch({ onSelect }: { onSelect: (id: string) => void
               setPage(1);
             }}
           >
-            <option value="">All States & Regions (8 Regions · 34 States)</option>
+            <option value="">{t("allStatesRegions")}</option>
             {regionsList.map(r => {
               const states = regionStateMap[r] || [];
               return (
                 <optgroup key={r} label={r}>
-                  <option value={`region:${r}`}>All {r}</option>
+                  <option value={`region:${r}`}>{t("all")} {r}</option>
                   {states.map(st => (
                     <option key={st} value={`state:${st}`}>
                       {st} ({r.split(" ")[0]})
@@ -155,11 +155,11 @@ export function InstitutionSearch({ onSelect }: { onSelect: (id: string) => void
 
         {/* Search Institution Among These */}
         <label className="text-xs font-semibold text-slate-700 sm:col-span-1 lg:col-span-2">
-          <span>Search institution among these</span>
+          <span>{t("searchAmongThese")}</span>
           <div className="relative mt-1">
             <input
               id="swp-global-search"
-              placeholder={filters.stateOrRegion ? `Search institution in ${activeScopeName} by Name, PID, City...` : "Search institution among these by Name, PID, or City..."}
+              placeholder={t("searchPlaceholder")}
               className={`${field} block w-full pe-8`}
               value={filters.search}
               onChange={e => {
@@ -175,7 +175,7 @@ export function InstitutionSearch({ onSelect }: { onSelect: (id: string) => void
                   setPage(1);
                 }}
                 className="absolute right-2 top-2 text-slate-400 hover:text-slate-700 text-xs"
-                title="Clear query"
+                title={tr("complaints:clearSearch")}
               >
                 ✕
               </button>
@@ -207,8 +207,8 @@ export function InstitutionSearch({ onSelect }: { onSelect: (id: string) => void
       <div className="flex items-center justify-between mb-3 text-xs">
         <span className="text-slate-500 font-medium">
           {filters.search
-            ? `Matching "${filters.search}" in ${activeScopeName}`
-            : `Showing approved AICTE institutions in ${activeScopeName}`}
+            ? t("matchingInScope", { search: filters.search, scope: activeScopeName })
+            : t("showingInScope", { scope: activeScopeName })}
         </span>
         {(filters.search || filters.stateOrRegion || filters.institutionType || filters.complaintStatus) && (
           <button
@@ -218,7 +218,7 @@ export function InstitutionSearch({ onSelect }: { onSelect: (id: string) => void
               setPage(1);
             }}
           >
-            {t("clear")} (Reset All)
+            {t("clear")} ({tr("complaints:resetAllFilters")})
           </button>
         )}
       </div>
@@ -228,11 +228,11 @@ export function InstitutionSearch({ onSelect }: { onSelect: (id: string) => void
         <LoadingSkeleton label={t("loading")} />
       ) : rows.length === 0 ? (
         <div className="py-8 text-center bg-slate-50 border border-slate-200 rounded-lg p-4 mt-2">
-          <p className="font-semibold text-slate-800 text-sm">No institutions match these filters.</p>
+          <p className="font-semibold text-slate-800 text-sm">{t("empty")}</p>
           <p className="text-xs text-slate-500 mt-1">
             {filters.search
-              ? `No institutions found for "${filters.search}" in ${activeScopeName}.`
-              : `No institution records found for ${activeScopeName}.`}
+              ? t("noFoundInScope", { search: filters.search, scope: activeScopeName })
+              : t("noRecordsInScope", { scope: activeScopeName })}
           </p>
           <button
             className="mt-3 text-xs font-semibold text-white bg-aicte-navy-700 hover:bg-aicte-navy-800 px-3.5 py-1.5 rounded cursor-pointer transition shadow-xs"
@@ -241,7 +241,7 @@ export function InstitutionSearch({ onSelect }: { onSelect: (id: string) => void
               setPage(1);
             }}
           >
-            Clear Filters & View All
+            {tr("complaints:resetAllFilters")}
           </button>
         </div>
       ) : (
@@ -251,7 +251,7 @@ export function InstitutionSearch({ onSelect }: { onSelect: (id: string) => void
               <tr className="bg-slate-50 border-b border-slate-200">
                 <th scope="col" className="p-2.5 text-start">{t("name")}</th>
                 <th scope="col" className="p-2.5 text-start">{t("permanentId")}</th>
-                <th scope="col" className="p-2.5 text-start">{localizeLabel("State & Region")}</th>
+                <th scope="col" className="p-2.5 text-start">{t("location")}</th>
                 <th scope="col" className="p-2.5 text-center">{t("total")}</th>
                 <th scope="col" className="p-2.5 text-center">{t("pending")}</th>
                 <th scope="col" className="p-2.5 text-start">{t("bureaus")}</th>
@@ -297,9 +297,9 @@ export function InstitutionSearch({ onSelect }: { onSelect: (id: string) => void
                           }
                         }, 80);
                       }}
-                      title={`Select ${i.name} for Command Center`}
+                      title={t("selectViewTitle", { name: i.name })}
                     >
-                      Select & View
+                      {t("selectView")}
                     </button>
                   </td>
                 </tr>
@@ -311,13 +311,13 @@ export function InstitutionSearch({ onSelect }: { onSelect: (id: string) => void
 
       <nav className="flex gap-3 items-center justify-between mt-4 pt-3 border-t border-slate-100" aria-label={t("directory")}>
         <button className={field} disabled={page <= 1} onClick={() => setPage(p => p - 1)}>
-          {localizeLabel("Previous")}
+          {tr("dashboard:previous")}
         </button>
         <span className="text-xs text-slate-600 font-medium">
-          {formatNumber(page)} / {formatNumber(Math.max(1, pages))} ({formatNumber(totalCount)} records)
+          {formatNumber(page)} / {formatNumber(Math.max(1, pages))} ({formatNumber(totalCount)} {tr("complaints:records_c7b99")})
         </span>
         <button className={field} disabled={page >= pages} onClick={() => setPage(p => p + 1)}>
-          {localizeLabel("Next")}
+          {tr("dashboard:next")}
         </button>
       </nav>
     </section>
