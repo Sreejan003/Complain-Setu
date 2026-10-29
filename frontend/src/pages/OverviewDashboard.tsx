@@ -297,83 +297,94 @@ export const OverviewDashboard: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#E2E8F0] bg-white">
-              {recentComplaints.slice(0, 6).map((c: Complaint) => {
-                const daysDiff = getDaysDiff(c.expectedDisposalDate);
-                const isOverdue = ["Pending", "Under Process", "Escalated"].includes(c.status) && daysDiff > 0;
+              {recentComplaints.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="py-12 text-center text-slate-500">
+                    <div className="space-y-1">
+                      <div className="font-semibold text-slate-700 text-xs">No complaints recorded yet.</div>
+                      <div className="text-xs text-slate-400">Grievance intake records will be displayed here in real time as complaints are filed.</div>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                recentComplaints.slice(0, 6).map((c: Complaint) => {
+                  const daysDiff = getDaysDiff(c.expectedDisposalDate);
+                  const isOverdue = ["Pending", "Under Process", "Escalated"].includes(c.status) && daysDiff > 0;
 
-                return (
-                  <tr
-                    key={c.id}
-                    onClick={() => navigate(`/cases/${c.id}`)}
-                    className="hover:bg-slate-50 transition cursor-pointer"
-                  >
-                    <td className="py-2.5 px-3 font-mono font-bold text-[#17365D] whitespace-nowrap">
-                      <bdi dir="ltr" className="canonical-value">{c.complaintId}</bdi>
-                    </td>
-                    <td className="py-2.5 px-3 max-w-[220px] truncate font-medium text-slate-900">
-                      <bdi dir="auto" className="original-content">{c.institutionName}</bdi>
-                    </td>
-                    <td className="py-2.5 px-2 text-center whitespace-nowrap">
-                      <span className="font-mono text-xs font-bold px-1.5 py-0.5 rounded-lg bg-slate-100 text-slate-800 border border-slate-200">
-                        <bdi dir="ltr" className="canonical-value">{c.currentBureauId}</bdi>
-                      </span>
-                    </td>
-                    <td className="py-2.5 px-3 max-w-[160px] truncate text-slate-600 text-xs">
-                      {c.assignedOfficerName || tr("dashboard:unassigned")}
-                    </td>
-                    <td className="py-2.5 px-2 text-center whitespace-nowrap">
-                      <span
-                        className={`px-2 py-0.5 rounded-lg text-xs font-semibold border ${
-                          c.status === "Pending"
-                            ? "bg-amber-50 text-amber-800 border-amber-300"
-                            : c.status === "Under Process"
-                            ? "bg-blue-50 text-blue-800 border-blue-300"
-                            : c.status === "Disposed"
-                            ? "bg-emerald-50 text-emerald-800 border-emerald-300"
-                            : c.status === "Escalated"
-                            ? "bg-rose-50 text-rose-800 border-rose-300"
-                            : "bg-purple-50 text-purple-800 border-purple-300"
-                        }`}
-                      >
-                        {localizeLabel(c.status)}
-                      </span>
-                    </td>
-                    <td className="py-2.5 px-2 text-center whitespace-nowrap">
-                      <span
-                        className={`text-xs font-semibold px-1.5 py-0.5 rounded-lg ${
-                          c.priority === "Critical"
-                            ? "text-rose-800 bg-rose-50 border border-rose-200 font-bold"
-                            : c.priority === "High"
-                            ? "text-amber-800 bg-amber-50 border border-amber-200 font-semibold"
-                            : "text-slate-600 bg-slate-100"
-                        }`}
-                      >
-                        {localizeLabel(c.priority)}
-                      </span>
-                    </td>
-                    <td className="py-2.5 px-3 font-mono text-xs whitespace-nowrap">
-                      {isOverdue ? (
-                        <span className="text-rose-700 font-bold">
-                          {formatDate(c.expectedDisposalDate)}{tr("dashboard:overdue")}</span>
-                      ) : (
-                        <span className="text-slate-600">{formatDate(c.expectedDisposalDate)}</span>
-                      )}
-                    </td>
-                    <td className="py-2.5 px-3 text-end whitespace-nowrap" onClick={e => e.stopPropagation()}>
-                      <Link
-                        to={`/cases/${c.id}`}
-                        className="px-2.5 py-1 bg-white hover:bg-[#17365D] hover:text-white text-slate-700 rounded-lg text-xs font-semibold border border-slate-200 transition"
-                      >{tr("complaints:inspect")}</Link>
-                    </td>
-                  </tr>
-                );
-              })}
+                  return (
+                    <tr
+                      key={c.id}
+                      onClick={() => navigate(`/cases/${c.id}`)}
+                      className="hover:bg-slate-50 transition cursor-pointer"
+                    >
+                      <td className="py-2.5 px-3 font-mono font-bold text-[#17365D] whitespace-nowrap">
+                        <bdi dir="ltr" className="canonical-value">{c.complaintId}</bdi>
+                      </td>
+                      <td className="py-2.5 px-3 max-w-[220px] truncate font-medium text-slate-900">
+                        <bdi dir="auto" className="original-content">{c.institutionName}</bdi>
+                      </td>
+                      <td className="py-2.5 px-2 text-center whitespace-nowrap">
+                        <span className="font-mono text-xs font-bold px-1.5 py-0.5 rounded-lg bg-slate-100 text-slate-800 border border-slate-200">
+                          <bdi dir="ltr" className="canonical-value">{c.currentBureauId}</bdi>
+                        </span>
+                      </td>
+                      <td className="py-2.5 px-3 max-w-[160px] truncate text-slate-600 text-xs">
+                        {c.assignedOfficerName || tr("dashboard:unassigned")}
+                      </td>
+                      <td className="py-2.5 px-2 text-center whitespace-nowrap">
+                        <span
+                          className={`px-2 py-0.5 rounded-lg text-xs font-semibold border ${
+                            c.status === "Pending"
+                              ? "bg-amber-50 text-amber-800 border-amber-300"
+                              : c.status === "Under Process"
+                              ? "bg-blue-50 text-blue-800 border-blue-300"
+                              : c.status === "Disposed"
+                              ? "bg-emerald-50 text-emerald-800 border-emerald-300"
+                              : c.status === "Escalated"
+                              ? "bg-rose-50 text-rose-800 border-rose-300"
+                              : "bg-purple-50 text-purple-800 border-purple-300"
+                          }`}
+                        >
+                          {localizeLabel(c.status)}
+                        </span>
+                      </td>
+                      <td className="py-2.5 px-2 text-center whitespace-nowrap">
+                        <span
+                          className={`text-xs font-semibold px-1.5 py-0.5 rounded-lg ${
+                            c.priority === "Critical"
+                              ? "text-rose-800 bg-rose-50 border border-rose-200 font-bold"
+                              : c.priority === "High"
+                              ? "text-amber-800 bg-amber-50 border border-amber-200 font-semibold"
+                              : "text-slate-600 bg-slate-100"
+                          }`}
+                        >
+                          {localizeLabel(c.priority)}
+                        </span>
+                      </td>
+                      <td className="py-2.5 px-3 font-mono text-xs whitespace-nowrap">
+                        {isOverdue ? (
+                          <span className="text-rose-700 font-bold">
+                            {formatDate(c.expectedDisposalDate)}{tr("dashboard:overdue")}</span>
+                        ) : (
+                          <span className="text-slate-600">{formatDate(c.expectedDisposalDate)}</span>
+                        )}
+                      </td>
+                      <td className="py-2.5 px-3 text-end whitespace-nowrap" onClick={e => e.stopPropagation()}>
+                        <Link
+                          to={`/cases/${c.id}`}
+                          className="px-2.5 py-1 bg-white hover:bg-[#17365D] hover:text-white text-slate-700 rounded-lg text-xs font-semibold border border-slate-200 transition"
+                        >{tr("complaints:inspect")}</Link>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* SECTION E — BUREAU WORKLOAD & STATUS ANALYTICS (All Charts Preserved) */}
+      {/* SECTION E — BUREAU WORKLOAD & STATUS ANALYTICS (All Charts Preserved with Empty States) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3.5">
         {/* Chart 1: Bureau Workload Distribution */}
         <div className="lg:col-span-2 bg-white border border-[#E2E8F0] rounded-lg p-4 shadow-xs">
@@ -385,21 +396,27 @@ export const OverviewDashboard: React.FC = () => {
             <span className="text-xs font-mono bg-slate-100 text-slate-700 px-2 py-0.5 rounded-lg border border-slate-200">
               {data?.bureauWorkload?.length || 5}{tr("dashboard:bureaus")}</span>
           </div>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={data?.bureauWorkload || []} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="2 2" vertical={false} stroke="#E2E8F0" />
-                <XAxis dataKey="bureau" tick={{ fontSize: 11, fill: "#475569" }} />
-                <YAxis tickFormatter={(value:any)=>formatNumber(value)} tick={{ fontSize: 11, fill: "#475569" }} />
-                <Tooltip formatter={(value:any,name:any)=>[typeof value==="number"?formatNumber(value):value,localizeLabel(name)]} labelFormatter={(label:any)=>localizeLabel(label)}
-                  contentStyle={{ backgroundColor: "#ffffff", borderColor: "#CBD5E1", borderRadius: "2px", fontSize: "11px" }}
-                />
-                <Legend formatter={(value:any)=>localizeLabel(value)} wrapperStyle={{ fontSize: "11px", paddingTop: "6px" }} />
-                <Bar dataKey="active" name={tr("dashboard:activeCases")} fill="#17365D" radius={[2, 2, 0, 0]} />
-                <Bar dataKey="disposed" name={tr("dashboard:disposedCases")} fill="#16A34A" radius={[2, 2, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+          {(!data?.kpi?.totalComplaints) ? (
+            <div className="h-64 flex items-center justify-center text-xs text-slate-500 bg-slate-50/50 rounded border border-dashed border-slate-200">
+              No complaints recorded yet. Workload distribution will populate as cases are logged across bureaus.
+            </div>
+          ) : (
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={data?.bureauWorkload || []} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="2 2" vertical={false} stroke="#E2E8F0" />
+                  <XAxis dataKey="bureau" tick={{ fontSize: 11, fill: "#475569" }} />
+                  <YAxis tickFormatter={(value:any)=>formatNumber(value)} tick={{ fontSize: 11, fill: "#475569" }} />
+                  <Tooltip formatter={(value:any,name:any)=>[typeof value==="number"?formatNumber(value):value,localizeLabel(name)]} labelFormatter={(label:any)=>localizeLabel(label)}
+                    contentStyle={{ backgroundColor: "#ffffff", borderColor: "#CBD5E1", borderRadius: "2px", fontSize: "11px" }}
+                  />
+                  <Legend formatter={(value:any)=>localizeLabel(value)} wrapperStyle={{ fontSize: "11px", paddingTop: "6px" }} />
+                  <Bar dataKey="active" name={tr("dashboard:activeCases")} fill="#17365D" radius={[2, 2, 0, 0]} />
+                  <Bar dataKey="disposed" name={tr("dashboard:disposedCases")} fill="#16A34A" radius={[2, 2, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
         </div>
 
         {/* Chart 2: Status Distribution Ratio */}
@@ -408,35 +425,43 @@ export const OverviewDashboard: React.FC = () => {
             <h2 className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">{tr("dashboard:complaintStatusRatio")}</h2>
             <p className="text-xs text-[#64748B]">{tr("dashboard:breakdownByResolutionLifecycleStage")}</p>
           </div>
-          <div className="h-44">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={data?.statusDistribution || []}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={40}
-                  outerRadius={68}
-                  paddingAngle={2}
-                  dataKey="count"
-                >
-                  {(data?.statusDistribution || []).map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value:any,name:any)=>[typeof value==="number"?formatNumber(value):value,localizeLabel(name)]} labelFormatter={(label:any)=>localizeLabel(label)} contentStyle={{ borderRadius: "2px", fontSize: "11px" }} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="grid grid-cols-2 gap-1.5 pt-2 border-t border-slate-100 text-xs">
-            {data?.statusDistribution.map((s, i) => (
-              <div key={i} className="flex items-center space-x-1.5">
-                <span className="w-2.5 h-2.5 rounded-lg shrink-0" style={{ backgroundColor: s.color }} />
-                <span className="text-slate-600 truncate">{localizeLabel(s.name)}:</span>
-                <span className="font-semibold text-slate-800 font-mono">{formatNumber(s.count)}</span>
+          {(!data?.kpi?.totalComplaints) ? (
+            <div className="h-44 flex items-center justify-center text-xs text-slate-500 bg-slate-50/50 rounded border border-dashed border-slate-200">
+              No complaints recorded yet.
+            </div>
+          ) : (
+            <>
+              <div className="h-44">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={data?.statusDistribution || []}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={40}
+                      outerRadius={68}
+                      paddingAngle={2}
+                      dataKey="count"
+                    >
+                      {(data?.statusDistribution || []).map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value:any,name:any)=>[typeof value==="number"?formatNumber(value):value,localizeLabel(name)]} labelFormatter={(label:any)=>localizeLabel(label)} contentStyle={{ borderRadius: "2px", fontSize: "11px" }} />
+                  </PieChart>
+                </ResponsiveContainer>
               </div>
-            ))}
-          </div>
+              <div className="grid grid-cols-2 gap-1.5 pt-2 border-t border-slate-100 text-xs">
+                {data?.statusDistribution.map((s, i) => (
+                  <div key={i} className="flex items-center space-x-1.5">
+                    <span className="w-2.5 h-2.5 rounded-lg shrink-0" style={{ backgroundColor: s.color }} />
+                    <span className="text-slate-600 truncate">{localizeLabel(s.name)}:</span>
+                    <span className="font-semibold text-slate-800 font-mono">{formatNumber(s.count)}</span>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -450,19 +475,25 @@ export const OverviewDashboard: React.FC = () => {
               <p className="text-xs text-[#64748B]">{tr("dashboard:6MonthHistoricalIntakeVelocityComparedToResolutionTurnaround")}</p>
             </div>
           </div>
-          <div className="h-52">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={data?.monthlyTrends || []} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="2 2" vertical={false} stroke="#E2E8F0" />
-                <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#475569" }} />
-                <YAxis tickFormatter={(value:any)=>formatNumber(value)} tick={{ fontSize: 11, fill: "#475569" }} />
-                <Tooltip formatter={(value:any,name:any)=>[typeof value==="number"?formatNumber(value):value,localizeLabel(name)]} labelFormatter={(label:any)=>localizeLabel(label)} contentStyle={{ borderRadius: "2px", fontSize: "11px" }} />
-                <Legend formatter={(value:any)=>localizeLabel(value)} wrapperStyle={{ fontSize: "11px", paddingTop: "4px" }} />
-                <Line type="monotone" dataKey="filed" name={tr("dashboard:complaintsFiled")} stroke="#17365D" strokeWidth={2} dot={{ r: 2 }} />
-                <Line type="monotone" dataKey="disposed" name={tr("dashboard:complaintsDisposed")} stroke="#16A34A" strokeWidth={2} dot={{ r: 2 }} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
+          {(!data?.kpi?.totalComplaints) ? (
+            <div className="h-52 flex items-center justify-center text-xs text-slate-500 bg-slate-50/50 rounded border border-dashed border-slate-200">
+              No complaint intake records yet for historical trend analysis.
+            </div>
+          ) : (
+            <div className="h-52">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={data?.monthlyTrends || []} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="2 2" vertical={false} stroke="#E2E8F0" />
+                  <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#475569" }} />
+                  <YAxis tickFormatter={(value:any)=>formatNumber(value)} tick={{ fontSize: 11, fill: "#475569" }} />
+                  <Tooltip formatter={(value:any,name:any)=>[typeof value==="number"?formatNumber(value):value,localizeLabel(name)]} labelFormatter={(label:any)=>localizeLabel(label)} contentStyle={{ borderRadius: "2px", fontSize: "11px" }} />
+                  <Legend formatter={(value:any)=>localizeLabel(value)} wrapperStyle={{ fontSize: "11px", paddingTop: "4px" }} />
+                  <Line type="monotone" dataKey="filed" name={tr("dashboard:complaintsFiled")} stroke="#17365D" strokeWidth={2} dot={{ r: 2 }} />
+                  <Line type="monotone" dataKey="disposed" name={tr("dashboard:complaintsDisposed")} stroke="#16A34A" strokeWidth={2} dot={{ r: 2 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          )}
         </div>
 
         {/* Case Ageing */}
@@ -471,21 +502,27 @@ export const OverviewDashboard: React.FC = () => {
             <h2 className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">{tr("dashboard:pendingCaseAgeing")}</h2>
             <p className="text-xs text-[#64748B]">{tr("dashboard:daysActiveComplaintsHaveBeenPending")}</p>
           </div>
-          <div className="h-52">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={data?.caseAgeing || []} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="2 2" vertical={false} stroke="#E2E8F0" />
-                <XAxis dataKey="range" tick={{ fontSize: 10, fill: "#475569" }} />
-                <YAxis tickFormatter={(value:any)=>formatNumber(value)} tick={{ fontSize: 10, fill: "#475569" }} />
-                <Tooltip formatter={(value:any,name:any)=>[typeof value==="number"?formatNumber(value):value,localizeLabel(name)]} labelFormatter={(label:any)=>localizeLabel(label)} contentStyle={{ borderRadius: "2px", fontSize: "11px" }} />
-                <Bar dataKey="count" name={tr("dashboard:cases")} fill="#b45309" radius={[2, 2, 0, 0]}>
-                  {(data?.caseAgeing || []).map((entry, index) => (
-                    <Cell key={`age-${index}`} fill={entry.color} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+          {(!data?.kpi?.totalComplaints) ? (
+            <div className="h-52 flex items-center justify-center text-xs text-slate-500 bg-slate-50/50 rounded border border-dashed border-slate-200">
+              No active cases awaiting disposal.
+            </div>
+          ) : (
+            <div className="h-52">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={data?.caseAgeing || []} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="2 2" vertical={false} stroke="#E2E8F0" />
+                  <XAxis dataKey="range" tick={{ fontSize: 10, fill: "#475569" }} />
+                  <YAxis tickFormatter={(value:any)=>formatNumber(value)} tick={{ fontSize: 10, fill: "#475569" }} />
+                  <Tooltip formatter={(value:any,name:any)=>[typeof value==="number"?formatNumber(value):value,localizeLabel(name)]} labelFormatter={(label:any)=>localizeLabel(label)} contentStyle={{ borderRadius: "2px", fontSize: "11px" }} />
+                  <Bar dataKey="count" name={tr("dashboard:cases")} fill="#b45309" radius={[2, 2, 0, 0]}>
+                    {(data?.caseAgeing || []).map((entry, index) => (
+                      <Cell key={`age-${index}`} fill={entry.color} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
         </div>
       </div>
     </div>

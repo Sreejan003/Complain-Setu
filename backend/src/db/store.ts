@@ -42,8 +42,6 @@ import {initializeAuditIntegrity,appendPendingAuditEvents,verifyAuditIntegrity,e
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const DATA_DIR = process.env.DATA_DIR || path.resolve(__dirname, "../../data");
-const DB_FILE = path.join(DATA_DIR, "db.json");
 
 export interface DatabaseSchema {
   reportSchedules?:ReportSchedule[];reportPacks?:ReportPack[];reportDownloads?:ReportDownload[];
@@ -78,6 +76,9 @@ export interface DatabaseSchema {
   meta: {
     lastReset: string;
     version: string;
+    dataSource?: string;
+    totalInstitutions?: number;
+    conflictsRecorded?: number;
   };
 }
 
@@ -213,6 +214,19 @@ export class Store implements IRepository {
     if (!institution) throw new Error("Institution not found.");
     institution.matching = structuredClone(matching); institution.updatedAt = new Date().toISOString(); this.persist();
   }
+
+  public getDataDir(): string {
+    return process.env.DATA_DIR || path.resolve(__dirname, "../../data");
+  }
+
+  public getDbFile(): string {
+    return path.join(this.getDataDir(), "db.json");
+  }
+
+  public reloadData(): void {
+    this.data = this.loadData();
+  }
+
   /** Internal coordination repository access; API access must use CoordinationService. */
   public getCoordinationSessions() {return structuredClone(this.data.coordinationSessions||[]);}
   public saveCoordinationSession(session:import("../models/coordination.js").CoordinationSession) {
@@ -226,13 +240,14 @@ export class Store implements IRepository {
   public async healthCheck(): Promise<DatabaseHealthResult> {
     if (this.mode === "PostgreSQL") return { connected: true, mode: "PostgreSQL", details: { authority: "PostgreSQL operational unit of work", totalComplaints: this.data.complaints.length, totalInstitutions: this.data.institutions.length } };
     try {
-      const exists = fs.existsSync(DB_FILE);
-      const stats = exists ? fs.statSync(DB_FILE) : null;
+      const dbFile = this.getDbFile();
+      const exists = fs.existsSync(dbFile);
+      const stats = exists ? fs.statSync(dbFile) : null;
       return {
         connected: exists,
         mode: "Local Persistent JSON Store (ACID)",
         details: {
-          file: DB_FILE,
+          file: dbFile,
           sizeBytes: stats?.size || 0,
           totalComplaints: this.data.complaints.length,
           totalInstitutions: this.data.institutions.length,
@@ -249,18 +264,20 @@ export class Store implements IRepository {
   }
 
   private loadData(): DatabaseSchema {
-    if (!fs.existsSync(DATA_DIR)) {
-      fs.mkdirSync(DATA_DIR, { recursive: true });
+    const dataDir = this.getDataDir();
+    const dbFile = this.getDbFile();
+
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
     }
 
-    if (fs.existsSync(DB_FILE)) {
+    if (fs.existsSync(dbFile)) {
       try {
-        const raw = fs.readFileSync(DB_FILE, "utf-8");
+        const raw = fs.readFileSync(dbFile, "utf-8");
         const parsed: DatabaseSchema = JSON.parse(raw);
         if (!parsed.documents) {
           parsed.documents = [];
         }
-
         return parsed;
       } catch (err) {
         throw new Error("Existing database could not be read; refusing to replace historical records.");
@@ -271,51 +288,109 @@ export class Store implements IRepository {
   }
 
   private initializeWithSeedData(): DatabaseSchema {
-    console.log("Initializing database with fresh AICTE synthetic seed dataset...");
-    const seed = generateSeedData();
-    const initialData: DatabaseSchema = {
-      profiles: seed.profiles,
-      institutions: seed.institutions,
-      complaints: seed.complaints,
-      overlapAlerts: seed.overlapAlerts,
-      caseHistory: seed.caseHistory,
-      caseTransfers: seed.caseTransfers,
-      relatedCases: [],
-      notifications: seed.notifications,
-      auditLogs: [],
-      documents: [
-        {
-          id: "doc-seed-001",
-          complaintId: seed.complaints[0]?.id || "c-001",
-          institutionId: seed.complaints[0]?.institutionId,
-          fileName: "Inspection_Report_Preliminary.pdf",
-          originalName: "Inspection_Report_Preliminary.pdf",
-          fileSize: 245800,
-          mimeType: "application/pdf",
-          fileUrl: "/uploads/Inspection_Report_Preliminary.pdf",
-          documentType: "Investigation Report",
-          uploadedBy: seed.profiles[0]?.id || "admin",
-          uploadedByName: seed.profiles[0]?.fullName || "AICTE Official",
-          uploadedAt: new Date(Date.now() - 5 * 86400000).toISOString()
-        },
-        {
-          id: "doc-seed-002",
-          complaintId: seed.complaints[0]?.id || "c-001",
-          institutionId: seed.complaints[0]?.institutionId,
-          fileName: "Petitioner_Grievance_Annexure.pdf",
-          originalName: "Petitioner_Grievance_Annexure.pdf",
-          fileSize: 154200,
-          mimeType: "application/pdf",
-          fileUrl: "/uploads/Petitioner_Grievance_Annexure.pdf",
-          documentType: "Complaint Evidence",
-          uploadedBy: seed.profiles[1]?.id || "officer",
-          uploadedByName: seed.profiles[1]?.fullName || "Desk Officer",
-          uploadedAt: new Date(Date.now() - 7 * 86400000).toISOString()
+    if (process.env.USE_TEST_FIXTURES === "true") {
+      console.log("[Store] Initializing test database with test fixtures...");
+      const seed = generateSeedData();
+      const testData: DatabaseSchema = {
+        profiles: seed.profiles,
+        institutions: seed.institutions,
+        complaints: seed.complaints,
+        overlapAlerts: seed.overlapAlerts,
+        caseHistory: seed.caseHistory,
+        caseTransfers: seed.caseTransfers,
+        relatedCases: [],
+        notifications: seed.notifications,
+        auditLogs: [],
+        documents: [],
+        meta: {
+          lastReset: new Date().toISOString(),
+          version: "1.0.0-test"
         }
-      ],
+      };
+      this.persist(testData);
+      return testData;
+    }
+
+    console.log("[Store] Initializing operational database with canonical AICTE institutions...");
+    let canonicalInstitutions: Institution[] = [];
+    const possiblePaths = [
+      path.join(this.getDataDir(), "institutions_canonical.json"),
+      path.resolve(__dirname, "../../data/institutions_canonical.json"),
+      path.resolve(__dirname, "../../../data/institutions_canonical.json")
+    ];
+
+    for (const p of possiblePaths) {
+      if (fs.existsSync(p)) {
+        try {
+          const raw = JSON.parse(fs.readFileSync(p, "utf-8"));
+          const nowIso = new Date().toISOString();
+          canonicalInstitutions = raw.map((item: any) => ({
+            id: item.id,
+            aictePermanentId: item.permanentId,
+            permanentId: item.permanentId,
+            name: item.name,
+            institutionType: item.institutionType || "Engineering",
+            address: `${item.city}, ${item.district}, ${item.state}`,
+            city: item.city,
+            district: item.district,
+            state: item.state,
+            region: item.region,
+            pincode: "Not Available",
+            contactEmail: "Not Available",
+            contactPhone: "Not Available",
+            accreditationStatus: "Not Verified",
+            yearEstablished: 0,
+            totalComplaintsCount: 0,
+            activeComplaintsCount: 0,
+            overlapCount: 0,
+            sourceType: "PDF_IMPORT",
+            sourceFile: "Institute_List.pdf",
+            sourcePage: item.sourcePage,
+            sourceDocumentDate: "2013-09-18",
+            verificationStatus: "UNVERIFIED",
+            hasSourceConflict: !!item.hasSourceConflict,
+            conflictDetails: item.conflictDetails || null,
+            sourcePages: item.sourcePages || [item.sourcePage],
+            createdAt: "2013-09-18T00:00:00Z",
+            updatedAt: nowIso
+          }));
+          console.log(`[Store] Loaded ${canonicalInstitutions.length} canonical institutions from ${p}`);
+          break;
+        } catch (e) {
+          console.error(`[Store] Failed to parse canonical file at ${p}:`, e);
+        }
+      }
+    }
+
+    const profiles = SEED_PROFILES.map(p => {
+      if (p.role === "Institutional User" && canonicalInstitutions[0]) {
+        return {
+          ...p,
+          institutionId: canonicalInstitutions[0].id,
+          institutionName: canonicalInstitutions[0].name
+        };
+      }
+      return { ...p };
+    });
+
+    const initialData: DatabaseSchema = {
+      profiles,
+      institutions: canonicalInstitutions,
+      complaints: [],
+      overlapAlerts: [],
+      caseHistory: [],
+      caseTransfers: [],
+      relatedCases: [],
+      notifications: [],
+      auditLogs: [],
+      documents: [],
+      bureaus: BUREAUS.map(b => ({ ...b })),
+      slaConfig: { ...DEFAULT_ESCALATION_CONFIG },
       meta: {
         lastReset: new Date().toISOString(),
-        version: "1.0.0"
+        version: "2.0.0",
+        dataSource: "Institute_List.pdf",
+        totalInstitutions: canonicalInstitutions.length
       }
     };
     this.persist(initialData);
@@ -477,10 +552,16 @@ export class Store implements IRepository {
   // ====================================================================
   // INSTITUTIONS
   // ====================================================================
+  // ====================================================================
+  // INSTITUTIONS
+  // ====================================================================
   public getInstitutions(params: {
     search?: string;
     region?: string;
     state?: string;
+    stateOrRegion?: string;
+    district?: string;
+    city?: string;
     institutionType?: string;
     complaintStatus?: string;
     bureau?: string;
@@ -495,12 +576,55 @@ export class Store implements IRepository {
     if(params.complaintStatus || params.bureau)result=result.filter(i=>this.aggregateCases().some(c=>c.institutionId===i.id && (!params.complaintStatus || c.status===params.complaintStatus) && (!params.bureau || c.currentBureauId===params.bureau)));
 
     if (params.search) {
-      const q = params.search.toLowerCase().trim();
-      result = result.filter(
-        i =>
-          i.name.toLowerCase().includes(q) ||
-          i.aictePermanentId.toLowerCase().includes(q) ||
-          (i.city || "").toLowerCase().includes(q)
+      const terms = params.search.toLowerCase().replace(/[,()\/]/g, " ").split(/\s+/).filter(Boolean);
+      result = result.filter(i => {
+        const fullText = `${i.name} ${i.aictePermanentId} ${i.permanentId || ""} ${i.city || ""} ${i.district || ""} ${i.state || ""} ${i.region || ""}`.toLowerCase();
+        const normalized = `${fullText} ${fullText.replace(/[-\/]/g, " ")}`;
+        return terms.every(t => normalized.includes(t));
+      });
+    }
+
+    // Build O(1) lookup maps for complaints and overlaps
+    const complaintsCountMap = new Map<string, number>();
+    const activeComplaintsMap = new Map<string, number>();
+    const pendingComplaintsMap = new Map<string, number>();
+    const bureausMap = new Map<string, Set<string>>();
+    const overlapsCountMap = new Map<string, number>();
+
+    if (this.data.complaints.length > 0) {
+      for (const c of this.data.complaints) {
+        complaintsCountMap.set(c.institutionId, (complaintsCountMap.get(c.institutionId) || 0) + 1);
+        if (["Pending", "Under Process", "Escalated"].includes(c.status)) {
+          activeComplaintsMap.set(c.institutionId, (activeComplaintsMap.get(c.institutionId) || 0) + 1);
+        }
+        if (c.status === "Pending") {
+          pendingComplaintsMap.set(c.institutionId, (pendingComplaintsMap.get(c.institutionId) || 0) + 1);
+        }
+        if (c.currentBureauId) {
+          let bset = bureausMap.get(c.institutionId);
+          if (!bset) {
+            bset = new Set();
+            bureausMap.set(c.institutionId, bset);
+          }
+          bset.add(c.currentBureauId);
+        }
+      }
+    }
+
+    if (this.data.overlapAlerts.length > 0) {
+      for (const o of this.data.overlapAlerts) {
+        overlapsCountMap.set(o.institutionId, (overlapsCountMap.get(o.institutionId) || 0) + 1);
+      }
+    }
+
+    if (params.complaintStatus || params.bureau) {
+      result = result.filter(i =>
+        this.data.complaints.some(
+          c =>
+            c.institutionId === i.id &&
+            (!params.complaintStatus || c.status === params.complaintStatus) &&
+            (!params.bureau || c.currentBureauId === params.bureau)
+        )
       );
     }
 
@@ -527,15 +651,29 @@ export class Store implements IRepository {
     const sortOrder = params.sortOrder === "desc" ? -1 : 1;
 
     result.sort((a: any, b: any) => {
-      if (a[sortBy] < b[sortBy]) return -1 * sortOrder;
-      if (a[sortBy] > b[sortBy]) return 1 * sortOrder;
-      return 0;
+      let valA = a[sortBy] ?? "";
+      let valB = b[sortBy] ?? "";
+      if (sortBy === "totalComplaintsCount") {
+        valA = complaintsCountMap.get(a.id) || 0;
+        valB = complaintsCountMap.get(b.id) || 0;
+      }
+      if (valA < valB) return -1 * sortOrder;
+      if (valA > valB) return 1 * sortOrder;
+      return (a.aictePermanentId || "").localeCompare(b.aictePermanentId || "");
     });
 
     const page = Math.max(1, Number(params.page) || 1);
     const limit = Math.max(1, Math.min(100, Number(params.limit) || 10));
     const total = result.length;
-    const paginated = result.slice((page - 1) * limit, page * limit);
+    const paginated = result.slice((page - 1) * limit, page * limit).map(inst => {
+      const copy = { ...inst };
+      copy.totalComplaintsCount = complaintsCountMap.get(inst.id) || 0;
+      copy.activeComplaintsCount = activeComplaintsMap.get(inst.id) || 0;
+      copy.overlapCount = overlapsCountMap.get(inst.id) || 0;
+      copy.pendingComplaintsCount = pendingComplaintsMap.get(inst.id) || 0;
+      copy.handlingBureaus = Array.from(bureausMap.get(inst.id) || []);
+      return copy;
+    });
 
     return {
       data: paginated,
@@ -556,27 +694,123 @@ export class Store implements IRepository {
     const overlaps=this.visibleOverlaps().filter(o=>o.institutionId===institution.id);
     const count=(status:string)=>cases.filter(c=>c.status===status).length;
     return {
-      institution:{...institution,totalComplaintsCount:cases.length,activeComplaintsCount:cases.filter(c=>c.status!=="Disposed").length,overlapCount:overlaps.length},
-      kpis:{totalComplaints:cases.length,pendingCount:count("Pending"),underProcessCount:count("Under Process"),resolvedCount:count("Disposed"),escalatedCount:count("Escalated"),transferredCount:count("Transferred"),activeOverlapCount:overlaps.filter(o=>["Pending Review","Confirmed Related","Confirmed Duplicate"].includes(o.alertStatus)).length},
-      bureauInvolvement:[...new Set(cases.map(c=>c.currentBureauId))].map(bureau=>({bureau,total:cases.filter(c=>c.currentBureauId===bureau).length,pending:cases.filter(c=>c.currentBureauId===bureau&&c.status==="Pending").length})),
-      coordination:overlaps.map(o=>({bureauA:o.bureauA,bureauB:o.bureauB,status:o.alertStatus})),
-      visibility:{aggregateScope:"institution within authorized region",caseScope:"existing case-specific RBAC",canReadCases:viewer?roleOf(viewer.role)!=="SYSTEM_ADMIN":true}
+      totalInstitutions: this.data.institutions.length,
+      states,
+      districts,
+      cities,
+      institutionTypes: types,
+      regions,
+      stateRegionPairs
+    };
+  }
+
+  public searchInstitutions(query: string, limit = 20, stateOrRegion?: string): Institution[] {
+    let pool = this.data.institutions;
+    if (stateOrRegion && stateOrRegion.trim()) {
+      let sor = stateOrRegion.toLowerCase().trim();
+      if (sor.startsWith("region:")) sor = sor.replace("region:", "").trim();
+      if (sor.startsWith("state:")) sor = sor.replace("state:", "").trim();
+      pool = pool.filter(i =>
+        (i.state || "").toLowerCase().includes(sor) ||
+        (i.region || "").toLowerCase().includes(sor)
+      );
+    }
+
+    if (!query || !query.trim()) {
+      return pool.slice(0, limit).map(inst => ({
+        ...inst,
+        totalComplaintsCount: this.data.complaints.filter(c => c.institutionId === inst.id).length
+      }));
+    }
+    const q = query.toLowerCase().trim();
+    const matches: Institution[] = [];
+
+    // Exact Permanent ID match first
+    for (const inst of pool) {
+      if (
+        (inst.aictePermanentId && inst.aictePermanentId.toLowerCase() === q) ||
+        (inst.permanentId && inst.permanentId.toLowerCase() === q)
+      ) {
+        const complaintsCount = this.data.complaints.filter(c => c.institutionId === inst.id).length;
+        matches.push({ ...inst, totalComplaintsCount: complaintsCount });
+        break;
+      }
+    }
+
+    const terms = query.toLowerCase().replace(/[,()\/]/g, " ").split(/\s+/).filter(Boolean);
+
+    // Name / State / Region / City / District / Permanent ID match
+    for (const inst of pool) {
+      if (matches.length >= limit) break;
+      if (matches.some(m => m.id === inst.id)) continue;
+      const fullText = `${inst.name} ${inst.aictePermanentId} ${inst.permanentId || ""} ${inst.city || ""} ${inst.district || ""} ${inst.state || ""} ${inst.region || ""}`.toLowerCase();
+      const normalized = `${fullText} ${fullText.replace(/[-\/]/g, " ")}`;
+      if (terms.every(t => normalized.includes(t))) {
+        const complaintsCount = this.data.complaints.filter(c => c.institutionId === inst.id).length;
+        matches.push({ ...inst, totalComplaintsCount: complaintsCount });
+      }
+    }
+    return matches;
+  }
+
+  public getInstitutionOverview(id: string) {
+    const institution = this.data.institutions.find(
+      i => i.id === id || i.aictePermanentId === id || i.permanentId === id
+    );
+    const viewer = requestScope.getStore();
+    if (!institution || (viewer && !mayViewInstitution(viewer, institution))) return undefined;
+    const cases = this.data.complaints.filter(c => c.institutionId === institution.id);
+    const overlaps = this.data.overlapAlerts.filter(o => o.institutionId === institution.id);
+    const count = (status: string) => cases.filter(c => c.status === status).length;
+    return {
+      institution: {
+        ...institution,
+        totalComplaintsCount: cases.length,
+        activeComplaintsCount: cases.filter(c => c.status !== "Disposed").length,
+        overlapCount: overlaps.length
+      },
+      kpis: {
+        totalComplaints: cases.length,
+        pendingCount: count("Pending"),
+        underProcessCount: count("Under Process"),
+        resolvedCount: count("Disposed"),
+        escalatedCount: count("Escalated"),
+        transferredCount: count("Transferred"),
+        activeOverlapCount: overlaps.filter(o =>
+          ["Pending Review", "Confirmed Related", "Confirmed Duplicate"].includes(o.alertStatus)
+        ).length
+      },
+      bureauInvolvement: [...new Set(cases.map(c => c.currentBureauId))].map(bureau => ({
+        bureau,
+        total: cases.filter(c => c.currentBureauId === bureau).length,
+        pending: cases.filter(c => c.currentBureauId === bureau && c.status === "Pending").length
+      })),
+      coordination: overlaps.map(o => ({ bureauA: o.bureauA, bureauB: o.bureauB, status: o.alertStatus })),
+      visibility: {
+        aggregateScope: "institution within authorized region",
+        caseScope: "existing case-specific RBAC",
+        canReadCases: viewer ? roleOf(viewer.role) !== "SYSTEM_ADMIN" : true
+      }
     };
   }
 
   public getInstitutionById(id: string): Institution | undefined {
-    const inst = this.data.institutions.find(i => i.id === id || i.aictePermanentId === id);
-    const viewer=requestScope.getStore();
-    if(inst && viewer && !mayViewInstitution(viewer,inst))return undefined;
+    const inst = this.data.institutions.find(
+      i => i.id === id || i.aictePermanentId === id || i.permanentId === id
+    );
+    const viewer = requestScope.getStore();
+    if (inst && viewer && !mayViewInstitution(viewer, inst)) return undefined;
     if (inst) {
+      const copy = { ...inst };
       const instComplaints = this.visibleComplaints().filter(c => c.institutionId === inst.id);
-      inst.totalComplaintsCount = instComplaints.length;
-      inst.activeComplaintsCount = instComplaints.filter(c =>
+      copy.totalComplaintsCount = instComplaints.length;
+      copy.activeComplaintsCount = instComplaints.filter(c =>
         ["Pending", "Under Process", "Escalated"].includes(c.status)
       ).length;
-      inst.overlapCount = this.visibleOverlaps().filter(o => o.institutionId === inst.id).length;
+      copy.overlapCount = this.visibleOverlaps().filter(o => o.institutionId === inst.id).length;
+      return copy;
     }
-    return inst;
+    return undefined;
   }
 
   public findInstitutionsByFuzzyName(query: string): { institution: Institution; score: number }[] {
@@ -595,7 +829,7 @@ export class Store implements IRepository {
       }
     }
 
-    return results.sort((a, b) => b.score - a.score);
+    return results.sort((a, b) => b.score - a.score).slice(0, 25);
   }
 
   public createInstitution(data: Omit<Institution, "id" | "totalComplaintsCount" | "activeComplaintsCount" | "overlapCount" | "createdAt" | "updatedAt">): Institution {
@@ -1573,11 +1807,14 @@ export class Store implements IRepository {
 
     // Region-wise complaint distribution
     const regionCounts: Record<string, number> = {};
-    this.data.institutions.forEach(inst => {
-      const count = complaints.filter(c => c.institutionId === inst.id).length;
-      const reg = inst.region.split("(")[0].trim();
-      regionCounts[reg] = (regionCounts[reg] || 0) + count;
-    });
+    const instRegionMap = new Map<string, string>();
+    for (const inst of this.data.institutions) {
+      instRegionMap.set(inst.id, inst.region ? inst.region.split("(")[0].trim() : "Unspecified");
+    }
+    for (const c of complaints) {
+      const reg = instRegionMap.get(c.institutionId) || "Unspecified";
+      regionCounts[reg] = (regionCounts[reg] || 0) + 1;
+    }
 
     const regionDistribution = Object.keys(regionCounts).map(k => ({
       region: k,

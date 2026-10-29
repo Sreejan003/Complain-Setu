@@ -45,12 +45,19 @@ export interface IRepository {
     search?: string;
     region?: string;
     state?: string;
+    district?: string;
+    city?: string;
+    institutionType?: string;
+    complaintStatus?: string;
+    bureau?: string;
     page?: number;
     limit?: number;
     sortBy?: string;
     sortOrder?: "asc" | "desc";
   }): Promise<PaginationResult<Institution>> | PaginationResult<Institution>;
   getInstitutionById(id: string): Promise<Institution | undefined> | Institution | undefined;
+  getInstitutionFilters?(params?: { state?: string; district?: string }): Promise<any> | any;
+  searchInstitutions?(query: string, limit?: number): Promise<Institution[]> | Institution[];
   createInstitution(institution: Omit<Institution, "id" | "createdAt" | "updatedAt" | "totalComplaintsCount" | "activeComplaintsCount" | "overlapCount">): Promise<Institution> | Institution;
 
   // Complaints

@@ -24,7 +24,7 @@ export function mayViewInstitution(user: Profile, institution: Institution): boo
   const profile=effectiveProfile(user);
   if(!profile.isActive || !knownRole(profile.role))return false;
   if(profile.role==="Institutional User")return !!profile.institutionId && [institution.id,institution.aictePermanentId].includes(profile.institutionId);
-  return !profile.region || profile.region===institution.region;
+  return true;
 }
 export function effectiveProfile(user: Profile): Profile {
   return { ...user, role: roleOf(user.role) as Profile["role"],

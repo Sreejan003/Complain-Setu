@@ -4,14 +4,14 @@ import { requireAuth, requireRole, AuthenticatedRequest } from "../middleware/au
 import{deadlineDaysRemaining}from"../services/slaCalendar.js";
 
 export const institutionsRouter = Router();
-institutionsRouter.use(requireAuth, (req: AuthenticatedRequest,res,next)=>{
-  if(req.method!=="GET" && !["BUREAU_HEAD","COMPETENT_AUTHORITY"].includes(req.user!.role)) return res.status(403).json({error:"Supervisory authorization required."});
+institutionsRouter.use(requireAuth, (req: AuthenticatedRequest, res, next) => {
+  if (req.method !== "GET" && !["BUREAU_HEAD", "COMPETENT_AUTHORITY"].includes(req.user!.role)) return res.status(403).json({ error: "Supervisory authorization required." });
   next();
 });
 
 // Search and list institutions (Authenticated & Role-scoped)
 institutionsRouter.get("/", requireAuth, (req: AuthenticatedRequest, res: Response) => {
-  const { search, region, state, page, limit, sortBy, sortOrder, institutionType, complaintStatus, bureau } = req.query;
+  const { search, region, state, stateOrRegion, district, city, page, limit, sortBy, sortOrder, institutionType, complaintStatus, bureau } = req.query;
 
   // Institutional User scope: strictly lock to their own institution
   if (req.user && req.user.role === "Institutional User" && req.user.institutionId) {
@@ -22,18 +22,25 @@ institutionsRouter.get("/", requireAuth, (req: AuthenticatedRequest, res: Respon
     });
   }
 
+  // If no geographic filter or search query is specified, default Regional Officers to their region.
+  // If an explicit region, state, stateOrRegion, or search is provided, allow directory exploration across records.
   let effectiveRegion = region as string;
-  if (req.user && req.user.role === "Regional Officer" && req.user.region) {
+  let effectiveState = state as string;
+  let effectiveStateOrRegion = stateOrRegion as string;
+  if (!effectiveRegion && !effectiveState && !effectiveStateOrRegion && !search && req.user && req.user.role === "Regional Officer" && req.user.region) {
     effectiveRegion = req.user.region;
   }
 
   const results = store.getInstitutions({
-    search: search as string,
-    region: effectiveRegion,
-    state: state as string,
-    institutionType: institutionType as string,
-    complaintStatus: complaintStatus as string,
-    bureau: bureau as string,
+    search: search ? (search as string).trim() : undefined,
+    region: effectiveRegion ? (effectiveRegion as string).trim() : undefined,
+    state: effectiveState ? (effectiveState as string).trim() : undefined,
+    stateOrRegion: effectiveStateOrRegion ? (effectiveStateOrRegion as string).trim() : undefined,
+    district: district ? (district as string).trim() : undefined,
+    city: city ? (city as string).trim() : undefined,
+    institutionType: institutionType ? (institutionType as string).trim() : undefined,
+    complaintStatus: complaintStatus ? (complaintStatus as string).trim() : undefined,
+    bureau: bureau ? (bureau as string).trim() : undefined,
     page: page ? Number(page) : undefined,
     limit: limit ? Number(limit) : undefined,
     sortBy: sortBy as string,
@@ -41,6 +48,24 @@ institutionsRouter.get("/", requireAuth, (req: AuthenticatedRequest, res: Respon
   });
 
   return res.json(results);
+});
+
+// Distinct filter metadata (states, districts, cities, types, regions, stateRegionPairs)
+institutionsRouter.get("/filters", requireAuth, (req: AuthenticatedRequest, res: Response) => {
+  const { state, district } = req.query;
+  const filters = store.getInstitutionFilters({
+    state: state as string,
+    district: district as string
+  });
+  return res.json(filters);
+});
+
+// Autocomplete and quick search (Name / Permanent ID / State / Region)
+institutionsRouter.get("/search", requireAuth, (req: AuthenticatedRequest, res: Response) => {
+  const { q, limit, state, region, stateOrRegion } = req.query;
+  const filterScope = (stateOrRegion || state || region) as string | undefined;
+  const matches = store.searchInstitutions((q as string) || "", limit ? Number(limit) : 20, filterScope);
+  return res.json(matches);
 });
 
 // Single-window institution dashboard metrics endpoint (Feature 1)
@@ -64,9 +89,9 @@ institutionsRouter.get("/:id/dashboard-metrics", requireAuth, (req: Authenticate
   }
 
   // Fetch all complaints for this institution
-  const first=store.getComplaints({institutionId:institution.id,limit:100});
-  const allCases=[...first.data];
-  for(let page=2;page<=first.pagination.totalPages;page++)allCases.push(...store.getComplaints({institutionId:institution.id,limit:100,page}).data);
+  const first = store.getComplaints({ institutionId: institution.id, limit: 100 });
+  const allCases = [...first.data];
+  for (let page = 2; page <= first.pagination.totalPages; page++)allCases.push(...store.getComplaints({ institutionId: institution.id, limit: 100, page }).data);
   const today = new Date().toISOString().split("T")[0];
 
   // KPIs
@@ -107,12 +132,12 @@ institutionsRouter.get("/:id/dashboard-metrics", requireAuth, (req: Authenticate
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
     .slice(0, 5);
 
-  const overview=store.getInstitutionOverview(institution.id)!;
+  const overview = store.getInstitutionOverview(institution.id)!;
   return res.json({
-    institution:overview.institution,
-    bureauInvolvement:overview.bureauInvolvement,
-    coordination:overview.coordination,
-    visibility:overview.visibility,
+    institution: overview.institution,
+    bureauInvolvement: overview.bureauInvolvement,
+    coordination: overview.coordination,
+    visibility: overview.visibility,
     kpis: {
       ...overview.kpis,
       overdueCount: overdueCases.length,
@@ -162,6 +187,73 @@ institutionsRouter.get("/:id", requireAuth, (req: AuthenticatedRequest, res: Res
     complaints,
     overlapAlerts,
     documents
+  });
+});
+
+// Dedicated complaints endpoint for an institution
+institutionsRouter.get("/:id/complaints", requireAuth, (req: AuthenticatedRequest, res: Response) => {
+  const institution = store.getInstitutionById(req.params.id);
+  if (!institution) {
+    return res.status(404).json({ error: "Institution not found." });
+  }
+
+  if (req.user && req.user.role === "Institutional User" && req.user.institutionId) {
+    if (institution.id !== req.user.institutionId && institution.aictePermanentId !== req.user.institutionId) {
+      return res.status(403).json({ error: "Access Denied: You do not have permission to access another institution's complaints." });
+    }
+  }
+
+  if (req.user && req.user.role === "Regional Officer" && req.user.region) {
+    if (!institution.region.toLowerCase().includes(req.user.region.toLowerCase())) {
+      return res.status(403).json({ error: "Access Denied: You do not have jurisdiction over institutions in this region." });
+    }
+  }
+
+  const page = req.query.page ? Number(req.query.page) : 1;
+  const limit = req.query.limit ? Number(req.query.limit) : 20;
+  const complaints = store.getComplaints({ institutionId: institution.id, page, limit });
+  return res.json(complaints);
+});
+
+// Dedicated summary statistics endpoint for an institution
+institutionsRouter.get("/:id/statistics", requireAuth, (req: AuthenticatedRequest, res: Response) => {
+  const institution = store.getInstitutionById(req.params.id);
+  if (!institution) {
+    return res.status(404).json({ error: "Institution not found." });
+  }
+
+  if (req.user && req.user.role === "Institutional User" && req.user.institutionId) {
+    if (institution.id !== req.user.institutionId && institution.aictePermanentId !== req.user.institutionId) {
+      return res.status(403).json({ error: "Access Denied: You do not have permission to access another institution's statistics." });
+    }
+  }
+
+  if (req.user && req.user.role === "Regional Officer" && req.user.region) {
+    if (!institution.region.toLowerCase().includes(req.user.region.toLowerCase())) {
+      return res.status(403).json({ error: "Access Denied: You do not have jurisdiction over institutions in this region." });
+    }
+  }
+
+  const complaintsRes = store.getComplaints({ institutionId: institution.id, limit: 1000 });
+  const allComplaints = complaintsRes.data || [];
+  const statusCounts: Record<string, number> = {};
+  const priorityCounts: Record<string, number> = {};
+  for (const c of allComplaints) {
+    statusCounts[c.status] = (statusCounts[c.status] || 0) + 1;
+    priorityCounts[c.priority] = (priorityCounts[c.priority] || 0) + 1;
+  }
+  const overlapsRes = store.getOverlapAlerts({ institutionId: institution.id, limit: 100 });
+
+  return res.json({
+    institutionId: institution.id,
+    permanentId: institution.aictePermanentId,
+    name: institution.name,
+    totalComplaints: allComplaints.length,
+    activeComplaints: allComplaints.filter(c => ["Pending", "Under Process", "Escalated"].includes(c.status)).length,
+    disposedComplaints: allComplaints.filter(c => c.status === "Disposed").length,
+    overlapAlertsCount: overlapsRes.pagination.total || 0,
+    statusCounts,
+    priorityCounts
   });
 });
 

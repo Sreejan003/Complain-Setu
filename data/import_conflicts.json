@@ -1,0 +1,27 @@
+[
+  {
+    "permanentId": "1-4010725",
+    "occurrences": [
+      {
+        "permanentId": "1-4010725",
+        "name": "SREE NARAYANA INSTITUTE OF TECHNOLOGY",
+        "state": "Kerala",
+        "district": "PATHANAMTHIT TA",
+        "city": "ADOOR",
+        "sourcePage": 24,
+        "sourceRow": 10
+      },
+      {
+        "permanentId": "1-4010725",
+        "name": "SREE NARAYANA INSTITUTE OF TECHNOLOGY",
+        "state": "Kerala",
+        "district": "KOLLAM",
+        "city": "KOLLAM",
+        "sourcePage": 94,
+        "sourceRow": 4
+      }
+    ],
+    "reviewStatus": "FLAGGED_FOR_ADMIN_REVIEW",
+    "reason": "Conflicting geographic or institutional attributes across source pages"
+  }
+]

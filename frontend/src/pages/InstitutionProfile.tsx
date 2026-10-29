@@ -134,12 +134,22 @@ export const InstitutionProfile: React.FC = () => {
               <Building2 className="w-5 h-5 text-white" />
             </div>
             <div>
-              <div className="flex items-center space-x-2">
-                <span className="text-xs font-mono font-bold bg-[#f1f5f9] text-aicte-navy-700 px-2 py-0.5 rounded-lg border border-[#e5eaf0]">{tr("complaints:aictePermanentId_4787d")}{institution.aictePermanentId}
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs font-mono font-bold bg-[#f1f5f9] text-aicte-navy-700 px-2 py-0.5 rounded-lg border border-[#e5eaf0]">
+                  {tr("complaints:aictePermanentId_4787d")}{institution.aictePermanentId}
                 </span>
-                <span className="text-xs bg-[#f0fdf4] text-[#166534] border border-[#bbf7d0] font-semibold px-2 py-0.5 rounded-lg">
-                  {institution.accreditationStatus}
+                <span className={`text-xs font-semibold px-2 py-0.5 rounded-lg border ${
+                  institution.verificationStatus === "UNVERIFIED"
+                    ? "bg-slate-100 text-slate-700 border-slate-300"
+                    : "bg-[#f0fdf4] text-[#166534] border-[#bbf7d0]"
+                }`}>
+                  {institution.verificationStatus === "UNVERIFIED" ? "Historical Record (Unverified)" : institution.accreditationStatus}
                 </span>
+                {institution.hasSourceConflict && (
+                  <span className="text-xs font-bold bg-amber-50 text-amber-800 border border-amber-300 px-2 py-0.5 rounded-lg">
+                    Conflicting Source Record
+                  </span>
+                )}
               </div>
               <h1 className="text-base sm:text-lg font-bold text-aicte-navy-900 mt-1 tracking-tight">
                 {institution.name}
@@ -147,17 +157,42 @@ export const InstitutionProfile: React.FC = () => {
               <div className="flex flex-wrap items-center gap-y-1 gap-x-4 text-xs text-slate-600 mt-1">
                 <span className="flex items-center space-x-1">
                   <MapPin className="w-3.5 h-3.5 text-slate-500" />
-                  <span>{institution.city}, {institution.state} ({institution.region.split("(")[0]})</span>
+                  <span>
+                    {institution.city}, {institution.district ? `${institution.district}, ` : ""}{institution.state} ({institution.region?.split("(")[0]})
+                  </span>
                 </span>
-                <span className="flex items-center space-x-1">
-                  <Mail className="w-3.5 h-3.5 text-slate-500" />
-                  <span>{institution.contactEmail}</span>
-                </span>
-                <span className="flex items-center space-x-1">
-                  <Calendar className="w-3.5 h-3.5 text-slate-500" />
-                  <span>{tr("complaints:established")}{institution.yearEstablished}</span>
-                </span>
+                {institution.contactEmail && institution.contactEmail !== "Not Available" && (
+                  <span className="flex items-center space-x-1">
+                    <Mail className="w-3.5 h-3.5 text-slate-500" />
+                    <span>{institution.contactEmail}</span>
+                  </span>
+                )}
+                {institution.yearEstablished > 0 && (
+                  <span className="flex items-center space-x-1">
+                    <Calendar className="w-3.5 h-3.5 text-slate-500" />
+                    <span>{tr("complaints:established")}{institution.yearEstablished}</span>
+                  </span>
+                )}
               </div>
+
+              {/* Source Provenance Banner */}
+              <div className="mt-2 text-xs text-slate-500 bg-slate-50 px-2.5 py-1 rounded border border-slate-200/80 inline-block">
+                Source: {institution.sourceFile || "Institute_List.pdf"} | Document created: September 2013 | Current institutional approval status not independently verified.
+              </div>
+
+              {/* Conflict Explanation if flagged */}
+              {institution.hasSourceConflict && institution.conflictDetails && (
+                <div className="mt-2 text-xs text-amber-800 bg-amber-50/80 p-2 rounded border border-amber-200">
+                  <span className="font-semibold">Import Conflict Log: </span>
+                  This Permanent ID appears on multiple source pages with differing locations:
+                  {institution.conflictDetails.map((c: any, idx: number) => (
+                    <span key={idx} className="ms-1.5 font-mono">
+                      [Page {c.sourcePage}: {c.city}, {c.district}, {c.state}]
+                    </span>
+                  ))}
+                  . Retained for administrative review.
+                </div>
+              )}
             </div>
           </div>
 
@@ -474,20 +509,12 @@ export const InstitutionProfile: React.FC = () => {
 
           <div className="pt-3 border-t border-[#e2e8f0]">
             <h3 className="text-xs font-bold uppercase tracking-wider text-aicte-navy-700 mb-2.5 flex items-center space-x-1.5">
-              <FileCheck className="w-3.5 h-3.5 text-[#15803d]" />
+              <FileCheck className="w-3.5 h-3.5 text-aicte-navy-700" />
               <span>{tr("complaints:statutoryAicteApprovalsAccreditationRegistry")}</span>
             </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-              <div className="p-3.5 border border-[#e5eaf0] rounded-lg bg-[#f8fafc]">
-                <span className="font-semibold text-slate-800 block">{tr("complaints:aicteExtensionOfApprovalEoa202526")}</span>
-                <span className="text-xs text-slate-500 mt-0.5 block">{tr("complaints:sanctionedIntake480Seats")}</span>
-                <span className="text-xs text-[#166534] font-bold mt-1.5 inline-block">{tr("complaints:activeValid")}</span>
-              </div>
-              <div className="p-3.5 border border-[#e5eaf0] rounded-lg bg-[#f8fafc]">
-                <span className="font-semibold text-slate-800 block">{tr("complaints:nbaAccreditationCertificate")}</span>
-                <span className="text-xs text-slate-500 mt-0.5 block">{tr("complaints:cseEceAccreditedTierIi")}</span>
-                <span className="text-xs text-[#166534] font-bold mt-1.5 inline-block">{tr("complaints:validTillJune2027")}</span>
-              </div>
+            <div className="p-4 border border-dashed border-[#e5eaf0] rounded-lg bg-[#f8fafc] text-xs text-slate-500 text-center">
+              No verified digital approval certificates currently attached to this historical directory record.
+              Institutional approval extensions and affiliation norms are governed directly by the AICTE Approval Bureau.
             </div>
           </div>
         </div>
@@ -497,16 +524,22 @@ export const InstitutionProfile: React.FC = () => {
       {activeTab === "analytics" && (
         <div className="bg-white border border-[#e5eaf0] rounded-lg p-4 shadow-none">
           <h3 className="text-xs font-bold uppercase tracking-wider text-aicte-navy-700 mb-3 pb-2 border-b border-[#e2e8f0]">{tr("complaints:grievanceNatureCategoryDistribution")}</h3>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={categoryChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <XAxis dataKey="name" tick={{ fontSize: 10 }} />
-                <YAxis tickFormatter={(value:any)=>formatNumber(value)} tick={{ fontSize: 11 }} />
-                <Tooltip formatter={(value:any,name:any)=>[typeof value==="number"?formatNumber(value):value,localizeLabel(name)]} labelFormatter={(label:any)=>localizeLabel(label)} />
-                <Bar dataKey="count" name={tr("complaints:complaints")} fill="#003366" radius={[2, 2, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+          {complaints.length === 0 ? (
+            <div className="py-12 text-center text-xs text-slate-500">
+              No complaints recorded yet for this institution. Grievance nature and category analytics will appear once cases are logged.
+            </div>
+          ) : (
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={categoryChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <XAxis dataKey="name" tick={{ fontSize: 10 }} />
+                  <YAxis tickFormatter={(value:any)=>formatNumber(value)} tick={{ fontSize: 11 }} />
+                  <Tooltip formatter={(value:any,name:any)=>[typeof value==="number"?formatNumber(value):value,localizeLabel(name)]} labelFormatter={(label:any)=>localizeLabel(label)} />
+                  <Bar dataKey="count" name={tr("complaints:complaints")} fill="#003366" radius={[2, 2, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
         </div>
       )}
     </div>

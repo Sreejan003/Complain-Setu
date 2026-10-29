@@ -6,6 +6,7 @@ import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import {
   FilePlus2,
   Building2,
+  Search,
   AlertTriangle,
   GitMerge,
   CheckCircle2,
@@ -33,6 +34,12 @@ export const ComplaintRegister: React.FC = () => {
   const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [selectedInstId, setSelectedInstId] = useState<string>("");
   const [selectedInst, setSelectedInst] = useState<Institution | null>(null);
+
+  // Searchable Institution Selector state
+  const [instSearchQuery, setInstSearchQuery] = useState<string>("");
+  const [instSearchResults, setInstSearchResults] = useState<Institution[]>([]);
+  const [isSearchingInst, setIsSearchingInst] = useState<boolean>(false);
+  const [showDropdown, setShowDropdown] = useState<boolean>(false);
 
   const [category, setCategory] = useState<string>("Faculty Shortage / Irregularities");
   const [title, setTitle] = useState<string>("");
@@ -71,27 +78,48 @@ export const ComplaintRegister: React.FC = () => {
     { id: "PB", name: "Policy & Academic Bureau (PB)" }
   ];
 
+  // Pre-selection if given in URL query params
   useEffect(() => {
-    async function fetchInstitutionsList() {
-      try {
-        const res = await api.getInstitutions({ limit: 100 });
-        setInstitutions(res.data);
-
-        // Pre-select if given in URL query params
-        const paramInstId = searchParams.get("instId");
-        if (paramInstId) {
-          const match = res.data.find(i => i.id === paramInstId);
-          if (match) {
-            setSelectedInstId(match.id);
-            setSelectedInst(match);
+    async function loadInitialInstitution() {
+      const paramInstId = searchParams.get("instId");
+      if (paramInstId) {
+        try {
+          const profile = await api.getInstitutionProfile(paramInstId);
+          if (profile && profile.institution) {
+            setSelectedInst(profile.institution);
+            setSelectedInstId(profile.institution.id);
+            setInstSearchQuery(profile.institution.name);
           }
+        } catch (e) {
+          console.warn("Could not pre-select institution from query param:", e);
         }
-      } catch (err) {
-        console.error("Failed to load institutions list:", err);
       }
     }
-    fetchInstitutionsList();
+    loadInitialInstitution();
   }, [searchParams]);
+
+  // Debounced search across all 10,000+ persistent database records
+  useEffect(() => {
+    if (!instSearchQuery.trim() || selectedInst?.name === instSearchQuery) {
+      setInstSearchResults([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setIsSearchingInst(true);
+      try {
+        const matches = await api.searchInstitutions(instSearchQuery, 15);
+        setInstSearchResults(matches);
+        setShowDropdown(true);
+      } catch (err) {
+        console.error("Institution search failed:", err);
+      } finally {
+        setIsSearchingInst(false);
+      }
+    }, 250);
+
+    return () => clearTimeout(timer);
+  }, [instSearchQuery, selectedInst]);
 
   // Recalculate SLA expected disposal date when priority changes
   useEffect(() => {
@@ -100,10 +128,18 @@ export const ComplaintRegister: React.FC = () => {
     setExpectedDisposalDate(target.toISOString().split("T")[0]);
   }, [priority]);
 
-  const handleInstitutionChange = (id: string) => {
-    setSelectedInstId(id);
-    const found = institutions.find(i => i.id === id) || null;
-    setSelectedInst(found);
+  const handleSelectInstitution = (inst: Institution) => {
+    setSelectedInst(inst);
+    setSelectedInstId(inst.id);
+    setInstSearchQuery(inst.name);
+    setShowDropdown(false);
+  };
+
+  const handleClearInstitution = () => {
+    setSelectedInst(null);
+    setSelectedInstId("");
+    setInstSearchQuery("");
+    setShowDropdown(false);
   };
 
   // Pre-submission Overlap Check trigger
@@ -226,38 +262,111 @@ export const ComplaintRegister: React.FC = () => {
                 <span>{tr("complaints:1TargetAicteApprovedInstitution")}</span>
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">{tr("complaints:selectApprovedInstitution")}<span className="text-red-600">*</span>
-                </label>
-                <select aria-label={tr("complaints:selectApprovedInstitution")}
-                  required
-                  value={selectedInstId}
-                  onChange={e => handleInstitutionChange(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#003366] focus:border-[#003366]"
-                >
-                  <option value="">{tr("complaints:selectTechnicalInstitutionFromAicteDirectory")}</option>
-                  {institutions.map(inst => (
-                    <option key={inst.id} value={inst.id}>
-                      {inst.name} ({inst.city}, {inst.state}) - [{inst.aictePermanentId}]
-                    </option>
-                  ))}
-                </select>
-              </div>
+              {!selectedInst ? (
+                <div className="relative">
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    {tr("complaints:selectApprovedInstitution")}<span className="text-red-600">*</span>
+                    <span className="text-slate-500 font-normal ms-2">(Search by Institution Name or AICTE Permanent ID)</span>
+                  </label>
+                  <div className="relative">
+                    <Search className="w-3.5 h-3.5 text-slate-400 absolute start-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    <input
+                      type="text"
+                      required={!selectedInstId}
+                      value={instSearchQuery}
+                      onChange={e => {
+                        setInstSearchQuery(e.target.value);
+                        setShowDropdown(true);
+                      }}
+                      onFocus={() => {
+                        if (instSearchResults.length > 0) setShowDropdown(true);
+                      }}
+                      placeholder="Type institution name (e.g. Siddaganga) or Permanent ID (e.g. 1-6648541)..."
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg ps-8 pe-3 py-2 text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#003366] focus:border-[#003366]"
+                    />
+                    {isSearchingInst && (
+                      <span className="absolute end-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">Searching...</span>
+                    )}
+                  </div>
 
-              {selectedInst && (
-                <div className="p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-slate-800">{selectedInst.name}</span>
-                    <span className="font-mono text-xs font-bold text-aicte-navy-700 bg-slate-200/80 px-1.5 py-0.2 rounded-lg border border-slate-200">
-                      ID: {selectedInst.aictePermanentId}
-                    </span>
+                  {showDropdown && instSearchResults.length > 0 && (
+                    <div className="absolute z-20 mt-1 w-full bg-white border border-slate-300 rounded-lg shadow-lg max-h-60 overflow-y-auto divide-y divide-slate-100 text-xs">
+                      {instSearchResults.map(inst => (
+                        <div
+                          key={inst.id}
+                          onClick={() => handleSelectInstitution(inst)}
+                          className="p-2.5 hover:bg-slate-50 cursor-pointer transition flex items-start justify-between gap-2"
+                        >
+                          <div>
+                            <div className="font-semibold text-slate-900">{inst.name}</div>
+                            <div className="text-slate-500 text-xs mt-0.5">
+                              {inst.city}, {inst.district ? `${inst.district}, ` : ""}{inst.state}
+                            </div>
+                          </div>
+                          <span className="font-mono text-xs font-bold bg-slate-100 text-aicte-navy-700 px-2 py-0.5 rounded border border-slate-200 shrink-0">
+                            {inst.aictePermanentId}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {showDropdown && !isSearchingInst && instSearchQuery.trim() && instSearchResults.length === 0 && (
+                    <div className="absolute z-20 mt-1 w-full bg-white border border-slate-300 rounded-lg shadow-lg p-3 text-center text-xs text-slate-500">
+                      No institutions match "{instSearchQuery}". Search across 10,295 AICTE directory records.
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs space-y-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="font-bold text-slate-900 text-sm">{selectedInst.name}</div>
+                      <div className="text-xs text-slate-600 mt-0.5">
+                        {selectedInst.address || `${selectedInst.city}, ${selectedInst.district}, ${selectedInst.state}`}
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2 shrink-0">
+                      <span className="font-mono text-xs font-bold text-aicte-navy-700 bg-white px-2 py-1 rounded border border-slate-200">
+                        Permanent ID: {selectedInst.aictePermanentId}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={handleClearInstitution}
+                        className="px-2 py-1 bg-white hover:bg-slate-100 text-slate-600 hover:text-red-700 border border-slate-200 rounded text-xs transition cursor-pointer"
+                      >
+                        Change
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-slate-600 pt-0.5">
-                    <span><strong>{tr("complaints:location")}</strong> {selectedInst.city}, {selectedInst.state}</span>
-                    <span><strong>{tr("complaints:type")}</strong> {localizeLabel(selectedInst.institutionType)}</span>
-                    <span><strong>{tr("complaints:region")}</strong> {selectedInst.region.split("(")[0]}</span>
-                    <span><strong>{tr("complaints:accreditation")}</strong> {selectedInst.accreditationStatus}</span>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-slate-200 text-xs">
+                    <div>
+                      <span className="text-slate-400 block">State</span>
+                      <span className="font-medium text-slate-700">{selectedInst.state}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block">District</span>
+                      <span className="font-medium text-slate-700">{selectedInst.district || "N/A"}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block">City</span>
+                      <span className="font-medium text-slate-700">{selectedInst.city}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block">AICTE Region</span>
+                      <span className="font-medium text-slate-700">{selectedInst.region?.split("(")[0]}</span>
+                    </div>
                   </div>
+
+                  {selectedInst.sourceType === "PDF_IMPORT" && (
+                    <div className="text-xs text-slate-500 pt-1 border-t border-slate-200/60 flex items-center justify-between">
+                      <span>Source: Institute_List.pdf (Historical Directory Snapshot)</span>
+                      <span className="bg-slate-200/60 px-1.5 py-0.2 rounded font-mono text-slate-600 text-xs">
+                        Page {selectedInst.sourcePage || "N/A"}
+                      </span>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

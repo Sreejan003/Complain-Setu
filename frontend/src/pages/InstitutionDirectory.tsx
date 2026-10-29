@@ -12,24 +12,89 @@ import {
   ChevronLeft,
   ChevronRight,
   ShieldCheck,
+  ArrowUpDown,
+  RotateCcw,
   X
 } from "lucide-react";
 import { api } from "../services/api.js";
 import { Institution } from "../services/types.js";
 import { useAuth } from "../context/AuthContext.js";
 
+const REGIONS_LIST = [
+  "Northern Region (Kanpur)",
+  "North-Western Region (Chandigarh)",
+  "Eastern Region (Kolkata)",
+  "Western Region (Mumbai)",
+  "Central Region (Bhopal)",
+  "Southern Region (Chennai)",
+  "South-Western Region (Bangalore)",
+  "South-Central Region (Hyderabad)"
+];
+
+const DEFAULT_STATE_REGION_PAIRS = [
+  { state: "Karnataka", region: "South-Western Region (Bangalore)" },
+  { state: "Kerala", region: "South-Western Region (Bangalore)" },
+  { state: "Uttar Pradesh", region: "Northern Region (Kanpur)" },
+  { state: "Uttarakhand", region: "Northern Region (Kanpur)" },
+  { state: "Punjab", region: "North-Western Region (Chandigarh)" },
+  { state: "Haryana", region: "North-Western Region (Chandigarh)" },
+  { state: "Himachal Pradesh", region: "North-Western Region (Chandigarh)" },
+  { state: "Jammu and Kashmir", region: "North-Western Region (Chandigarh)" },
+  { state: "Rajasthan", region: "North-Western Region (Chandigarh)" },
+  { state: "Delhi", region: "North-Western Region (Chandigarh)" },
+  { state: "Chandigarh", region: "North-Western Region (Chandigarh)" },
+  { state: "Madhya Pradesh", region: "Central Region (Bhopal)" },
+  { state: "Chhattisgarh", region: "Central Region (Bhopal)" },
+  { state: "Gujarat", region: "Central Region (Bhopal)" },
+  { state: "Bihar", region: "Eastern Region (Kolkata)" },
+  { state: "Jharkhand", region: "Eastern Region (Kolkata)" },
+  { state: "West Bengal", region: "Eastern Region (Kolkata)" },
+  { state: "Orissa", region: "Eastern Region (Kolkata)" },
+  { state: "Assam", region: "Eastern Region (Kolkata)" },
+  { state: "Sikkim", region: "Eastern Region (Kolkata)" },
+  { state: "Tripura", region: "Eastern Region (Kolkata)" },
+  { state: "Manipur", region: "Eastern Region (Kolkata)" },
+  { state: "Meghalaya", region: "Eastern Region (Kolkata)" },
+  { state: "Mizoram", region: "Eastern Region (Kolkata)" },
+  { state: "Nagaland", region: "Eastern Region (Kolkata)" },
+  { state: "Arunachal Pradesh", region: "Eastern Region (Kolkata)" },
+  { state: "Andaman and Nicobar Islands", region: "Eastern Region (Kolkata)" },
+  { state: "Andhra Pradesh", region: "South-Central Region (Hyderabad)" },
+  { state: "Telangana", region: "South-Central Region (Hyderabad)" },
+  { state: "Tamil Nadu", region: "Southern Region (Chennai)" },
+  { state: "Puducherry", region: "Southern Region (Chennai)" },
+  { state: "Maharashtra", region: "Western Region (Mumbai)" },
+  { state: "Goa", region: "Western Region (Mumbai)" },
+  { state: "Dadra and Nagar Haveli", region: "Western Region (Mumbai)" },
+  { state: "Daman and Diu", region: "Western Region (Mumbai)" }
+];
+
 export const InstitutionDirectory: React.FC = () => {
   useLocaleRender();
   const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState("");
   const [search, setSearch] = useState("");
+  const [mergedStateRegion, setMergedStateRegion] = useState("");
   const [regionFilter, setRegionFilter] = useState("");
+  const [stateFilter, setStateFilter] = useState("");
+  const [districtFilter, setDistrictFilter] = useState("");
+  const [cityFilter, setCityFilter] = useState("");
+  const [sortBy, setSortBy] = useState("name");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  // Filter options loaded from database
+  const [statesList, setStatesList] = useState<string[]>([]);
+  const [districtsList, setDistrictsList] = useState<string[]>([]);
+  const [citiesList, setCitiesList] = useState<string[]>([]);
+  const [regionsList, setRegionsList] = useState<string[]>(REGIONS_LIST);
+  const [stateRegionPairs, setStateRegionPairs] = useState<{ state: string; region: string }[]>(DEFAULT_STATE_REGION_PAIRS);
 
   // Registration modal form state
   const [formName, setFormName] = useState("");
@@ -44,28 +109,86 @@ export const InstitutionDirectory: React.FC = () => {
   const [regError, setRegError] = useState("");
   const [regSubmitting, setRegSubmitting] = useState(false);
 
+  // Load filter lists from backend
+  useEffect(() => {
+    async function loadFilters() {
+      try {
+        const filters = await api.getInstitutionFilters({
+          state: stateFilter || undefined,
+          district: districtFilter || undefined
+        });
+        if (!stateFilter) {
+          setStatesList(filters.states || []);
+        }
+        if (filters.regions && filters.regions.length > 0) {
+          setRegionsList(filters.regions);
+        }
+        if (filters.stateRegionPairs && filters.stateRegionPairs.length > 0) {
+          setStateRegionPairs(filters.stateRegionPairs);
+        }
+        setDistrictsList(filters.districts || []);
+        setCitiesList(filters.cities || []);
+      } catch (err) {
+        console.error("Failed to load institution filter lists:", err);
+      }
+    }
+    loadFilters();
+  }, [stateFilter, districtFilter]);
+
   const fetchInstitutions = async () => {
     setLoading(true);
+    setFetchError("");
     try {
       const res = await api.getInstitutions({
-        search,
-        region: regionFilter,
+        search: search.trim() || undefined,
+        region: regionFilter || undefined,
+        state: stateFilter || undefined,
+        district: districtFilter || undefined,
+        city: cityFilter || undefined,
+        sortBy,
+        sortOrder,
         page,
-        limit: 10
+        limit: 15
       });
       setInstitutions(res.data);
       setTotalPages(res.pagination.totalPages);
       setTotalRecords(res.pagination.total);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error fetching institutions:", err);
+      setFetchError(err.message || "Failed to load institutions.");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchInstitutions();
-  }, [search, regionFilter, page]);
+    const timer = setTimeout(() => {
+      fetchInstitutions();
+    }, 200);
+    return () => clearTimeout(timer);
+  }, [search, regionFilter, stateFilter, districtFilter, cityFilter, sortBy, sortOrder, page]);
+
+  const handleSort = (field: string) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortBy(field);
+      setSortOrder("asc");
+    }
+    setPage(1);
+  };
+
+  const resetAllFilters = () => {
+    setSearch("");
+    setMergedStateRegion("");
+    setRegionFilter("");
+    setStateFilter("");
+    setDistrictFilter("");
+    setCityFilter("");
+    setSortBy("name");
+    setSortOrder("asc");
+    setPage(1);
+  };
 
   const handleRegisterInstitution = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,7 +211,6 @@ export const InstitutionDirectory: React.FC = () => {
       });
 
       setShowRegisterModal(false);
-      // Reset form
       setFormName("");
       setFormPermId("");
       setFormCity("");
@@ -101,114 +223,234 @@ export const InstitutionDirectory: React.FC = () => {
     }
   };
 
-  const regionsList = [
-    "Northern Region (Kanpur)",
-    "North-Western Region (Chandigarh)",
-    "Southern Region (Chennai)",
-    "South-Western Region (Bangalore)",
-    "Western Region (Mumbai)",
-    "Central Region (Bhopal)",
-    "Eastern Region (Kolkata)",
-    "South-Central Region (Hyderabad)"
-  ];
-
   return (
     <div className="space-y-4">
       {/* Official Header */}
       <div className="bg-white border border-[#e5eaf0] rounded-lg p-4 shadow-none flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <div className="text-xs font-bold uppercase tracking-wider text-aicte-navy-700">{tr("complaints:governmentOfIndiaAicteInstitutionalDirectory")}</div>
-          <h1 className="text-base sm:text-lg font-bold text-aicte-navy-900 tracking-tight">{tr("complaints:aicteApprovedInstitutionsMasterDirectory")}</h1>
-          <p className="text-xs text-slate-500 mt-0.5">{tr("complaints:centralRepositoryOfTechnicalInstitutionsAictePermanentIdsAnd")}</p>
-        </div>
-
-        {["BUREAU_HEAD", "COMPETENT_AUTHORITY"].includes(user?.role || "") && (
-          <button
-            onClick={() => setShowRegisterModal(true)}
-            className="flex items-center space-x-1.5 px-3 py-1.5 bg-aicte-navy-700 hover:bg-aicte-navy-900 text-white rounded-lg text-xs font-semibold shadow-none self-start sm:self-auto transition cursor-pointer"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>{tr("complaints:registerNewInstitution")}</span>
-          </button>
-        )}
-      </div>
-
-      {/* Filter and Search Bar */}
-      <div className="bg-white border border-[#e5eaf0] rounded-lg p-3 shadow-none flex flex-col md:flex-row gap-2.5 items-stretch md:items-center justify-between text-xs">
-        <div className="relative flex-1">
-          <Search className="w-3.5 h-3.5 text-slate-500 absolute start-2.5 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            value={search}
-            onChange={e => {
-              setSearch(e.target.value);
-              setPage(1);
-            }}
-            placeholder={tr("complaints:searchByInstitutionNamePermanentIdEG1")}
-            className="w-full bg-white border border-[#e5eaf0] rounded-lg ps-8 pe-3 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#003366]"
-          />
+          <div className="text-xs font-bold uppercase tracking-wider text-aicte-navy-700">
+            {tr("complaints:governmentOfIndiaAicteInstitutionalDirectory")}
+          </div>
+          <h1 className="text-base sm:text-lg font-bold text-aicte-navy-900 tracking-tight">
+            {tr("complaints:aicteApprovedInstitutionsMasterDirectory")}
+          </h1>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Canonical Directory of AICTE Institutions · {formatNumber(totalRecords)} records indexed from Institute_List.pdf
+          </p>
         </div>
 
         <div className="flex items-center space-x-2">
-          <Filter className="w-3.5 h-3.5 text-slate-500" />
-          <select
-            value={regionFilter}
-            onChange={e => {
-              setRegionFilter(e.target.value);
-              setPage(1);
-            }}
-            className="bg-white border border-[#e5eaf0] rounded-lg px-2.5 py-1.5 text-xs text-slate-700 focus:outline-none focus:border-[#003366]"
-          >
-            <option value="">{tr("complaints:allAicteRegionalJurisdictions")}</option>
-            {regionsList.map(r => (
-              <option key={r} value={r}>
-                {r}
-              </option>
-            ))}
-          </select>
-
-          {(search || regionFilter) && (
+          <span className="bg-slate-100 text-slate-700 font-mono text-xs font-bold px-2.5 py-1.5 rounded-lg border border-slate-200">
+            {formatNumber(totalRecords)} Total Records
+          </span>
+          {["BUREAU_HEAD", "COMPETENT_AUTHORITY"].includes(user?.role || "") && (
             <button
-              onClick={() => {
-                setSearch("");
-                setRegionFilter("");
-                setPage(1);
-              }}
-              className="text-xs text-aicte-navy-700 hover:underline px-2 cursor-pointer font-medium"
-            >{tr("complaints:resetFilters")}</button>
+              onClick={() => setShowRegisterModal(true)}
+              className="flex items-center space-x-1.5 px-3 py-1.5 bg-aicte-navy-700 hover:bg-aicte-navy-900 text-white rounded-lg text-xs font-semibold shadow-none transition cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>{tr("complaints:registerNewInstitution")}</span>
+            </button>
           )}
         </div>
       </div>
 
-      {/* Institutions Table */}
+      {/* Filter and Search Bar with State, District, and City Filters */}
+      <div className="bg-white border border-[#e5eaf0] rounded-lg p-3 shadow-none space-y-2.5 text-xs">
+        <div className="flex flex-col md:flex-row gap-2.5 items-stretch md:items-center justify-between">
+          <div className="relative flex-1">
+            <Search className="w-3.5 h-3.5 text-slate-500 absolute start-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <input
+              type="text"
+              value={search}
+              onChange={e => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+              placeholder="Search institution among these by Name, Permanent ID (e.g. 1-6648541), or City..."
+              className="w-full bg-white border border-[#e5eaf0] rounded-lg ps-8 pe-3 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#003366]"
+            />
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Merged State & Region Filter */}
+            <select
+              value={mergedStateRegion}
+              onChange={e => {
+                const val = e.target.value;
+                setMergedStateRegion(val);
+                if (val.startsWith("region:")) {
+                  setRegionFilter(val.replace("region:", ""));
+                  setStateFilter("");
+                } else if (val.startsWith("state:")) {
+                  setStateFilter(val.replace("state:", ""));
+                  setRegionFilter("");
+                } else {
+                  setRegionFilter("");
+                  setStateFilter("");
+                }
+                setDistrictFilter("");
+                setCityFilter("");
+                setPage(1);
+              }}
+              className="bg-white border border-[#e5eaf0] rounded-lg px-2.5 py-1.5 text-xs text-slate-700 focus:outline-none focus:border-[#003366] font-medium"
+            >
+              <option value="">All States & Regions (8 Regions · 34 States)</option>
+              {regionsList.map(r => {
+                const states = stateRegionPairs.filter(p => p.region === r).map(p => p.state);
+                return (
+                  <optgroup key={r} label={r}>
+                    <option value={`region:${r}`}>All {r}</option>
+                    {states.map(st => (
+                      <option key={st} value={`state:${st}`}>
+                        {st} ({r.split(" ")[0]})
+                      </option>
+                    ))}
+                  </optgroup>
+                );
+              })}
+            </select>
+
+            {/* District Filter */}
+            <select
+              value={districtFilter}
+              onChange={e => {
+                setDistrictFilter(e.target.value);
+                setCityFilter("");
+                setPage(1);
+              }}
+              disabled={!districtsList.length}
+              className="bg-white border border-[#e5eaf0] rounded-lg px-2.5 py-1.5 text-xs text-slate-700 focus:outline-none focus:border-[#003366] disabled:opacity-50"
+            >
+              <option value="">All Districts ({districtsList.length})</option>
+              {districtsList.map(d => (
+                <option key={d} value={d}>{d}</option>
+              ))}
+            </select>
+
+            {/* City Filter */}
+            <select
+              value={cityFilter}
+              onChange={e => {
+                setCityFilter(e.target.value);
+                setPage(1);
+              }}
+              disabled={!citiesList.length}
+              className="bg-white border border-[#e5eaf0] rounded-lg px-2.5 py-1.5 text-xs text-slate-700 focus:outline-none focus:border-[#003366] disabled:opacity-50"
+            >
+              <option value="">All Cities ({citiesList.length})</option>
+              {citiesList.map(c => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+
+            {(search || mergedStateRegion || regionFilter || stateFilter || districtFilter || cityFilter) && (
+              <button
+                onClick={resetAllFilters}
+                className="flex items-center space-x-1 text-xs text-aicte-navy-700 hover:underline px-2 cursor-pointer font-medium"
+              >
+                <RotateCcw className="w-3 h-3" />
+                <span>{tr("complaints:resetFilters")}</span>
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Error Banner */}
+      {fetchError && (
+        <div className="p-3 bg-red-50 border border-red-200 text-xs text-red-800 rounded-lg">
+          {fetchError}
+        </div>
+      )}
+
+      {/* Institutions Table (Permanent ID, Name, State, District, City, Cases, Actions) */}
       <div className="bg-white border border-[#e5eaf0] rounded-lg shadow-none overflow-hidden">
         <div className="overflow-x-auto">
           <table className="gov-table w-full text-start text-xs">
             <thead>
               <tr>
-                <th>{tr("complaints:aictePermanentId")}</th>
-                <th>{tr("complaints:institutionName")}</th>
-                <th>{tr("complaints:type_3deb7")}</th>
-                <th>{tr("complaints:stateRegion")}</th>
-                <th className="text-center">{tr("complaints:totalCases")}</th>
-                <th className="text-center">{tr("dashboard:activeCases")}</th>
-                <th className="text-center">{tr("complaints:overlaps")}</th>
-                <th>{tr("complaints:latestGrievance")}</th>
+                <th
+                  onClick={() => handleSort("aictePermanentId")}
+                  className="cursor-pointer hover:bg-slate-100 transition select-none"
+                >
+                  <div className="flex items-center space-x-1">
+                    <span>{tr("complaints:aictePermanentId")}</span>
+                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                  </div>
+                </th>
+                <th
+                  onClick={() => handleSort("name")}
+                  className="cursor-pointer hover:bg-slate-100 transition select-none"
+                >
+                  <div className="flex items-center space-x-1">
+                    <span>{tr("complaints:institutionName")}</span>
+                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                  </div>
+                </th>
+                <th
+                  onClick={() => handleSort("state")}
+                  className="cursor-pointer hover:bg-slate-100 transition select-none"
+                >
+                  <div className="flex items-center space-x-1">
+                    <span>State & Region</span>
+                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                  </div>
+                </th>
+                <th
+                  onClick={() => handleSort("district")}
+                  className="cursor-pointer hover:bg-slate-100 transition select-none"
+                >
+                  <div className="flex items-center space-x-1">
+                    <span>District</span>
+                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                  </div>
+                </th>
+                <th
+                  onClick={() => handleSort("city")}
+                  className="cursor-pointer hover:bg-slate-100 transition select-none"
+                >
+                  <div className="flex items-center space-x-1">
+                    <span>City</span>
+                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                  </div>
+                </th>
+                <th className="text-center">Grievances</th>
                 <th className="text-end">{tr("complaints:actions")}</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={9} className="py-8 text-center text-slate-500">{tr("complaints:loadingInstitutionsDirectory")}</td>
+                  <td colSpan={7} className="py-12 text-center text-slate-500">
+                    <div className="space-y-1">
+                      <div className="font-semibold text-slate-700">Loading Institutions Directory...</div>
+                      <div className="text-xs text-slate-400">Querying persistent AICTE database</div>
+                    </div>
+                  </td>
                 </tr>
               ) : institutions.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="py-8 text-center text-slate-500">{tr("complaints:noInstitutionsMatchedYourSearchFilter")}</td>
+                  <td colSpan={7} className="py-12 text-center text-slate-500">
+                    <div className="max-w-sm mx-auto space-y-1.5">
+                      <div className="font-bold text-slate-800 text-sm">{tr("complaints:noInstitutionsMatchedYourSearchFilter")}</div>
+                      <p className="text-xs text-slate-500">
+                        No institution records found for the applied search and geographic filters.
+                      </p>
+                      {(search || regionFilter || stateFilter || districtFilter || cityFilter) && (
+                        <button
+                          onClick={resetAllFilters}
+                          className="mt-2 px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold cursor-pointer border border-slate-200"
+                        >
+                          Clear All Filters
+                        </button>
+                      )}
+                    </div>
+                  </td>
                 </tr>
               ) : (
                 institutions.map(inst => (
-                  <tr key={inst.id}>
+                  <tr key={inst.id} className="hover:bg-slate-50/70 transition">
                     <td className="font-mono font-bold text-aicte-navy-900 whitespace-nowrap">
                       {inst.aictePermanentId}
                     </td>
@@ -219,50 +461,40 @@ export const InstitutionDirectory: React.FC = () => {
                       >
                         {inst.name}
                       </Link>
-                      <div className="text-xs text-slate-500">{inst.city}</div>
-                    </td>
-                    <td>
-                      <span className="bg-[#f1f5f9] text-slate-700 border border-[#e5eaf0] px-1.5 py-0.2 rounded-lg text-xs font-medium">
-                        {localizeLabel(inst.institutionType)}
-                      </span>
+                      <div className="text-xs text-slate-400 font-mono mt-0.5">
+                        {inst.sourceType === "PDF_IMPORT" ? `Source: PDF p.${inst.sourcePage}` : inst.institutionType}
+                        {inst.hasSourceConflict && (
+                          <span className="ms-2 text-amber-700 font-sans font-semibold bg-amber-50 px-1 py-0.2 rounded border border-amber-200">
+                            Conflict Flagged
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="whitespace-nowrap">
-                      <div className="font-medium text-slate-800">{inst.state}</div>
-                      <div className="text-xs text-slate-500">{inst.region.split("(")[0]}</div>
+                      <div className="font-medium text-slate-800">{inst.state || "—"}</div>
+                      <div className="text-[11px] text-slate-500">{inst.region || "—"}</div>
                     </td>
-                    <td className="text-center font-bold text-slate-800 font-mono">
-                      {inst.totalComplaintsCount}
+                    <td className="whitespace-nowrap text-slate-700">
+                      {inst.district || "—"}
                     </td>
-                    <td className="text-center font-mono">
-                      <span
-                        className={`font-semibold px-1.5 py-0.2 rounded-lg text-xs border ${
-                          inst.activeComplaintsCount > 0
-                            ? "bg-[#fffbeb] text-[#92400e] border-[#fde68a]"
-                            : "bg-[#f8fafc] text-slate-600 border-[#e5eaf0]"
-                        }`}
-                      >
-                        {inst.activeComplaintsCount}
-                      </span>
+                    <td className="whitespace-nowrap text-slate-700">
+                      {inst.city || "—"}
                     </td>
                     <td className="text-center font-mono">
-                      {inst.overlapCount > 0 ? (
-                        <span className="inline-flex items-center space-x-1 bg-[#fffbeb] text-[#92400e] border border-[#fde68a] font-bold px-1.5 py-0.2 rounded-lg text-xs">
-                          <GitMerge className="w-3 h-3 text-[#b45309]" />
-                          <span>{inst.overlapCount}</span>
+                      {inst.totalComplaintsCount > 0 ? (
+                        <span className="font-semibold px-2 py-0.5 rounded-lg text-xs bg-amber-50 text-amber-800 border border-amber-200">
+                          {inst.totalComplaintsCount} active
                         </span>
                       ) : (
-                        <span className="text-slate-500 text-xs">—</span>
+                        <span className="text-slate-400 text-xs">0 cases</span>
                       )}
                     </td>
-                    <td className="text-slate-500 text-xs font-mono whitespace-nowrap">
-                      {inst.latestComplaintDate || tr("administration:none")}
-                    </td>
-                    <td className="text-end whitespace-nowrap space-x-2">
+                    <td className="text-end whitespace-nowrap">
                       <Link
                         to={`/institutions/${inst.id}`}
-                        className="inline-flex items-center text-xs text-aicte-navy-700 font-semibold hover:underline"
+                        className="inline-flex items-center text-xs text-aicte-navy-700 font-semibold hover:underline px-2.5 py-1 bg-slate-50 hover:bg-slate-100 rounded border border-slate-200 transition"
                       >
-                        <span>{tr("complaints:singleWindow")}</span>
+                        <span>View Details</span>
                         <ChevronRight className="w-3 h-3 ms-0.5" />
                       </Link>
                     </td>
@@ -398,7 +630,7 @@ export const InstitutionDirectory: React.FC = () => {
                   onChange={e => setFormRegion(e.target.value)}
                   className="w-full bg-white border border-[#e5eaf0] rounded-lg px-3 py-1.5 text-xs focus:border-[#003366] focus:outline-none"
                 >
-                  {regionsList.map(r => (
+                  {REGIONS_LIST.map(r => (
                     <option key={r} value={r}>
                       {r}
                     </option>
