@@ -1,0 +1,20 @@
+{
+  "overdue": "ᱚᱵᱷᱟᱨᱰᱭᱩ",
+  "statusUpdate": "ᱥᱴᱮᱴᱟᱥ ᱟᱯᱰᱮᱴ",
+  "governmentOfIndiaAicteAdministrativeAlerts": "ᱵᱷᱟᱨᱚᱛ ᱥᱚᱨᱠᱟᱨ • AICTE ᱮᱰᱢᱤᱱᱤᱥᱴᱨᱮᱴᱤᱵᱷ ᱮᱞᱟᱨᱴᱥ",
+  "officialNotificationCenter": "ᱚᱯᱷᱤᱥᱤᱭᱟᱞ ᱱᱚᱴᱤᱯᱷᱤᱠᱮᱥᱚᱱ ᱛᱟᱞᱢᱟ",
+  "auditAlertsForNewlyDetectedOverlapsApproachingSlaDeadlines": "ᱱᱟᱶᱟ ᱵᱟᱰᱟᱭ ᱧᱟᱢ ᱟᱠᱟᱱ ᱚᱵᱷᱟᱨᱞᱮᱯ, SLA ᱢᱩᱪᱟᱹᱫ ᱢᱟᱦᱟᱸ ᱥᱮᱴᱮᱨᱚᱜ, ᱠᱮᱥ ᱩᱪᱟᱹᱲ ᱟᱨ ᱵᱟᱹᱲᱛᱤ ᱞᱟᱹᱜᱤᱫ ᱚᱰᱤᱴ ᱮᱞᱟᱨᱴ᱾",
+  "markAllRead": "ᱥᱟᱱᱟᱢ ᱯᱟᱲᱦᱟᱣ ᱪᱤᱱᱦᱟᱹᱭ ᱢᱮ",
+  "filterByType": "ᱞᱮᱠᱟ ᱛᱮ ᱯᱷᱤᱞᱴᱟᱨ:",
+  "allNotificationTypes": "ᱥᱟᱱᱟᱢ ᱱᱚᱴᱤᱯᱷᱤᱠᱮᱥᱚᱱ ᱞᱮᱠᱟᱱ",
+  "overdueDeadlines": "ᱢᱩᱪᱟᱹᱫ ᱢᱩᱪᱟᱹᱫ ᱢᱟᱦᱟᱸ",
+  "caseTransfers": "ᱠᱮᱥ ᱩᱪᱟᱹᱲ",
+  "statusUpdates": "ᱥᱴᱮᱴᱟᱥ ᱟᱯᱰᱮᱴᱥ",
+  "unreadOnly": "ᱵᱟᱝ ᱯᱟᱲᱦᱟᱣ ᱥᱩᱢᱩᱝ",
+  "loadingNotifications": "ᱱᱚᱴᱤᱯᱷᱤᱠᱮᱥᱚᱱ ᱞᱳᱰᱤᱝ ᱠᱟᱱᱟ...",
+  "noOfficialNotificationsRecorded": "ᱪᱮᱫ ᱚᱯᱷᱤᱥᱤᱭᱟᱞ ᱱᱚᱴᱤᱯᱷᱤᱠᱮᱥᱚᱱ ᱨᱮᱠᱚᱨᱰ ᱵᱟᱝ ᱦᱩᱭ ᱟᱠᱟᱱᱟ ᱾",
+  "reviewInOverlapCenter": "ᱚᱵᱷᱟᱨᱞᱮᱯ ᱛᱟᱞᱢᱟ ᱨᱮ ᱫᱚᱦᱲᱟ ᱧᱮᱞ ᱢᱮ →",
+  "inspectCaseFile": "ᱠᱮᱥ ᱨᱮᱫ ᱧᱮᱞ ᱛᱚᱞᱟᱥ ᱢᱮ →",
+  "markAsRead": "ᱯᱟᱲᱦᱟᱣ ᱞᱮᱠᱟ ᱪᱤᱱᱦᱟᱹᱭ ᱢᱮ",
+  "alerts": " ᱮᱞᱟᱨᱴᱥ"
+}

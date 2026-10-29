@@ -4,14 +4,13 @@ import { requireAuth, requireRole, AuthenticatedRequest } from "../middleware/au
 
 export const institutionsRouter = Router();
 institutionsRouter.use(requireAuth, (req: AuthenticatedRequest,res,next)=>{
-  if(req.user!.role === "SYSTEM_ADMIN") return res.status(403).json({error:"Institution complaint content is outside administration scope."});
   if(req.method!=="GET" && !["BUREAU_HEAD","COMPETENT_AUTHORITY"].includes(req.user!.role)) return res.status(403).json({error:"Supervisory authorization required."});
   next();
 });
 
 // Search and list institutions (Authenticated & Role-scoped)
 institutionsRouter.get("/", requireAuth, (req: AuthenticatedRequest, res: Response) => {
-  const { search, region, state, page, limit, sortBy, sortOrder } = req.query;
+  const { search, region, state, page, limit, sortBy, sortOrder, institutionType, complaintStatus, bureau } = req.query;
 
   // Institutional User scope: strictly lock to their own institution
   if (req.user && req.user.role === "Institutional User" && req.user.institutionId) {
@@ -31,6 +30,9 @@ institutionsRouter.get("/", requireAuth, (req: AuthenticatedRequest, res: Respon
     search: search as string,
     region: effectiveRegion,
     state: state as string,
+    institutionType: institutionType as string,
+    complaintStatus: complaintStatus as string,
+    bureau: bureau as string,
     page: page ? Number(page) : undefined,
     limit: limit ? Number(limit) : undefined,
     sortBy: sortBy as string,
@@ -61,7 +63,9 @@ institutionsRouter.get("/:id/dashboard-metrics", requireAuth, (req: Authenticate
   }
 
   // Fetch all complaints for this institution
-  const allCases = store.getComplaints({ institutionId: institution.id, limit: 1000 }).data;
+  const first=store.getComplaints({institutionId:institution.id,limit:100});
+  const allCases=[...first.data];
+  for(let page=2;page<=first.pagination.totalPages;page++)allCases.push(...store.getComplaints({institutionId:institution.id,limit:100,page}).data);
   const today = new Date().toISOString().split("T")[0];
 
   // KPIs
@@ -102,16 +106,16 @@ institutionsRouter.get("/:id/dashboard-metrics", requireAuth, (req: Authenticate
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
     .slice(0, 5);
 
+  const overview=store.getInstitutionOverview(institution.id)!;
   return res.json({
-    institution,
+    institution:overview.institution,
+    bureauInvolvement:overview.bureauInvolvement,
+    coordination:overview.coordination,
+    visibility:overview.visibility,
     kpis: {
-      totalComplaints: allCases.length,
-      pendingCount: pendingCases.length,
-      underProcessCount: underProcessCases.length,
-      resolvedCount: resolvedCases.length,
+      ...overview.kpis,
       overdueCount: overdueCases.length,
-      highPriorityCount: highPriorityCases.length,
-      activeOverlapCount: activeOverlaps.length
+      highPriorityCount: highPriorityCases.length
     },
     distribution: {
       byStatus: Object.entries(statusMap).map(([name, count]) => ({ name, count })),

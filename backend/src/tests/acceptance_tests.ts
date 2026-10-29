@@ -319,11 +319,14 @@ export async function runAcceptanceTests(): Promise<{ passed: number; total: num
       adminUser
     );
 
+    assert.strictEqual(store.getComplaintById(createdCompA.id)!.currentBureauId,origBureau,"Pending transfer retains source ownership");
+    store.respondToTransfer(transferRes.id,"Accepted","Receiving bureau accepts",{...adminUser,role:"COMPETENT_AUTHORITY",permissions:["APPROVE_TRANSFERS"],bureauId:destBureau});
+    assert.strictEqual(store.getComplaintById(createdCompA.id)!.currentBureauId,destBureau,"Accepted transfer changes ownership");
     assert.strictEqual(transferRes.toBureauId, destBureau, "Current bureau updated to destination");
     assert.strictEqual(transferRes.fromBureauId, origBureau, "Original bureau preserved in transfer");
 
     const history = store.getCaseHistory(createdCompA.id);
-    const transferEntry = history.find(h => h.actionType === "Case Transferred" || h.actionType === "Jurisdiction Transferred");
+    const transferEntry = history.find(h => h.actionType === "Transfer Requested" || h.actionType === "Jurisdiction Transferred");
     assert.strictEqual(Boolean(transferEntry), true, "Transfer recorded in case history");
 
     console.log("  [PASS] Test 8: Transfers preserve assignment history and update responsible bureau");

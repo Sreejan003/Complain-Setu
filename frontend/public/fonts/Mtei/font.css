@@ -1,0 +1,15 @@
+/* Noto Sans Meetei Mayek; source: https://fonts.googleapis.com/css2?family=Noto+Sans+Meetei+Mayek:wght@400;600&display=swap; license: ./OFL.txt */
+@font-face {
+  font-family: 'Noto Sans Meetei Mayek';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(./59b3595d8bd58823.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Noto Sans Meetei Mayek';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(./6205d19dbfd53b33.ttf) format('truetype');
+}

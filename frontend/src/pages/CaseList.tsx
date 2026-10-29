@@ -1,3 +1,7 @@
+import { canVisit } from "../services/access.js";
+import { StatusBadge } from "../components/ui/Interface.js";
+import { tr, localizeLabel, localizeError, useLocaleRender } from "../i18n/index.js";
+import { formatDate, formatNumber } from "../i18n/localeUtils.js";
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
@@ -30,6 +34,7 @@ import { Complaint } from "../services/types.js";
 import { useAuth } from "../context/AuthContext.js";
 
 export const CaseList: React.FC = () => {
+  useLocaleRender();
   const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
 
@@ -150,6 +155,7 @@ export const CaseList: React.FC = () => {
     fetchComplaints();
   }, [
     user?.id,
+    effectiveOfficerId,
     viewAllParam,
     searchParam,
     bureauParam,
@@ -208,77 +214,73 @@ export const CaseList: React.FC = () => {
   return (
     <div className="space-y-3.5">
       {/* 1. Official Breadcrumb */}
-      <div className="text-[11px] text-slate-500 flex items-center space-x-1.5 font-medium">
-        <Link to="/" className="hover:text-[#003366] hover:underline">Home</Link>
-        <span>&rsaquo;</span>
-        <span>Grievance Management</span>
-        <span>&rsaquo;</span>
-        <span className="text-slate-700 font-semibold">Complaint Register</span>
+      <div className="text-xs text-slate-500 flex items-center space-x-1.5 font-medium">
+        <Link to="/" className="hover:text-aicte-navy-700 hover:underline">{tr("complaints:home")}</Link>
+        <span>{tr("complaints:rsaquo")}</span>
+        <span>{tr("complaints:grievanceManagement")}</span>
+        <span>{tr("complaints:rsaquo")}</span>
+        <span className="text-slate-700 font-semibold">{tr("navigation:complaintRegister")}</span>
       </div>
 
       {/* 2. Compact Page Header & Actions */}
-      <div className="bg-white border border-slate-300 rounded-xs p-3.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div className="page-header">
         <div>
           <div className="flex items-center space-x-2">
-            <h1 className="text-base sm:text-lg font-bold text-[#003366] tracking-tight">
-              {isInstitutional ? "Institution Grievance Register" : isMyCasesMode ? "My Assigned Cases" : "Comprehensive Grievance Register"}
+            <h1 className="text-base sm:text-lg font-bold text-aicte-navy-700 tracking-tight">
+              {isInstitutional ? tr("complaints:institutionGrievanceRegister") : isMyCasesMode ? tr("navigation:myAssignedCases") : tr("navigation:complaintRegister")}
             </h1>
-            <span className="bg-slate-100 text-slate-700 border border-slate-300 text-[10px] font-bold px-1.5 py-0.2 rounded-xs">
-              {totalCount} {totalCount === 1 ? "RECORD" : "RECORDS"}
+            <span className="bg-slate-100 text-slate-700 border border-slate-200 text-xs font-bold px-1.5 py-0.2 rounded-lg">
+              {formatNumber(totalCount)} {totalCount === 1 ? tr("complaints:record") : tr("complaints:records")}
             </span>
           </div>
           <div className="text-xs text-slate-500 mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5">
-            <span>Officer Context: <strong className="text-slate-700">{user?.fullName || "Official"}</strong></span>
+            <span>{tr("complaints:officerContext")}<strong className="text-slate-700">{user?.fullName || tr("complaints:official")}</strong></span>
             <span>&bull;</span>
-            <span>Role: <strong className="text-slate-700">{user?.role}</strong></span>
+            <span>{tr("complaints:role")}<strong className="text-slate-700">{localizeLabel(user?.role)}</strong></span>
             {user?.bureauId && (
               <>
                 <span>&bull;</span>
-                <span>Bureau: <strong className="text-slate-700">{user.bureauId}</strong></span>
+                <span>{tr("complaints:bureau")}<strong className="text-slate-700"><bdi dir="ltr" className="canonical-value">{user.bureauId}</bdi></strong></span>
               </>
             )}
             <span>&bull;</span>
-            <span>Scope: <strong className="text-emerald-700 font-semibold">{isMyCasesMode ? "Desk-Assigned" : "All Bureaus"}</strong></span>
+            <span>{tr("administration:scope")}<strong className="text-emerald-700 font-semibold">{isMyCasesMode ? tr("complaints:deskAssigned") : tr("navigation:ui.authorizedScope")}</strong></span>
           </div>
         </div>
 
         <div className="flex items-center space-x-2 self-start sm:self-auto shrink-0">
           {/* Supervisor Scope Switch */}
           {isSupervisor && (
-            <div className="inline-flex rounded-xs border border-slate-300 bg-slate-100 p-0.5 text-xs">
+            <div className="inline-flex rounded-lg border border-slate-200 bg-slate-100 p-0.5 text-xs">
               <button
-                onClick={() => updateFilterParams({ viewAll: undefined, page: 1 })}
-                className={`px-2.5 py-1 text-xs font-semibold rounded-xs transition cursor-pointer ${
-                  isMyCasesMode ? "bg-white text-[#003366] shadow-xs" : "text-slate-600 hover:text-slate-900"
+                onClick={() => updateFilterParams({ scope: "my_cases", viewAll: undefined, page: 1 })}
+                className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition cursor-pointer ${
+                  isMyCasesMode ? "bg-white text-aicte-navy-700 shadow-xs" : "text-slate-600 hover:text-slate-900"
                 }`}
-              >
-                My Cases
-              </button>
+              >{tr("complaints:myCases")}</button>
               <button
-                onClick={() => updateFilterParams({ viewAll: "true", page: 1 })}
-                className={`px-2.5 py-1 text-xs font-semibold rounded-xs transition cursor-pointer ${
-                  !isMyCasesMode ? "bg-white text-[#003366] shadow-xs" : "text-slate-600 hover:text-slate-900"
+                onClick={() => updateFilterParams({ scope: undefined, viewAll: "true", page: 1 })}
+                className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition cursor-pointer ${
+                  !isMyCasesMode ? "bg-white text-aicte-navy-700 shadow-xs" : "text-slate-600 hover:text-slate-900"
                 }`}
-              >
-                All Bureaus
-              </button>
+              >{tr("navigation:ui.allAuthorizedCases")}</button>
             </div>
           )}
 
           {/* Primary Action Button */}
-          <Link
+          {canVisit(user?.role || "", "/complaints/register") && <Link
             to="/complaints/register"
-            className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-[#003366] hover:bg-[#002855] text-white text-xs font-semibold rounded-xs border border-[#002147] transition shadow-xs cursor-pointer"
+            className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-aicte-navy-700 hover:bg-[#002855] text-white text-xs font-semibold rounded-lg border border-[#002147] transition shadow-xs cursor-pointer"
           >
             <FilePlus className="w-3.5 h-3.5" />
-            <span>Register Complaint</span>
-          </Link>
+            <span>{tr("navigation:registerComplaint")}</span>
+          </Link>}
         </div>
       </div>
 
       {/* 3. Compact Status Tabs Bar */}
-      <div className="bg-white border border-slate-300 rounded-xs px-2 pt-2 flex items-center justify-between border-b-2 border-b-[#003366]">
-        <div className="flex items-center space-x-1 overflow-x-auto text-xs">
+      <div className="flex flex-wrap gap-3 items-center justify-between">
+        <div className="flex items-center space-x-1 overflow-x-auto text-xs max-w-full">
           {[
             { id: "", label: "All Statuses" },
             { id: "Pending", label: "Pending" },
@@ -292,13 +294,9 @@ export const CaseList: React.FC = () => {
               <button
                 key={tab.id}
                 onClick={() => updateFilterParams({ status: tab.id || undefined, page: 1 })}
-                className={`px-3 py-1.5 font-semibold text-xs border-b-2 -mb-0.5 transition cursor-pointer whitespace-nowrap ${
-                  isActive
-                    ? "border-b-2 border-[#003366] text-[#003366] bg-slate-50"
-                    : "border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-50"
-                }`}
+                className="tab-button" aria-pressed={isActive}
               >
-                {tab.label}
+                {localizeLabel(tab.label)}
               </button>
             );
           })}
@@ -306,23 +304,24 @@ export const CaseList: React.FC = () => {
       </div>
 
       {/* 4. Single-Field Search & Collapsible Advanced Filter Panel */}
-      <div className="bg-white border border-slate-300 rounded-xs p-2.5 space-y-2">
+      <div className="bg-white border border-slate-200 rounded-lg p-2.5 space-y-2">
         <div className="flex flex-col sm:flex-row items-center gap-2">
           {/* Primary Search Input */}
           <div className="relative flex-1 w-full">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+            <Search className="w-3.5 h-3.5 text-slate-500 absolute start-2.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
+              aria-label={tr("complaints:searchByComplaintIdAicteRbInstitutionNameCity")}
               value={searchInput}
               onChange={e => setSearchInput(e.target.value)}
-              placeholder="Search by Complaint ID (AICTE/RB/...), Institution Name, City, or Category..."
-              className="w-full bg-slate-50 hover:bg-white focus:bg-white border border-slate-300 rounded-xs pl-8 pr-7 py-1.5 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#003366] focus:border-[#003366]"
+              placeholder={tr("complaints:searchByComplaintIdAicteRbInstitutionNameCity")}
+              className="w-full bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 rounded-lg ps-8 pe-7 py-1.5 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#003366] focus:border-[#003366]"
             />
             {searchInput && (
               <button
                 onClick={() => { setSearchInput(""); updateFilterParams({ search: undefined, page: 1 }); }}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                title="Clear search"
+                className="absolute end-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-600"
+                title={tr("complaints:clearSearch")} aria-label={tr("complaints:clearSearch")}
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -333,16 +332,17 @@ export const CaseList: React.FC = () => {
             {/* Advanced Filters Toggle */}
             <button
               onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-              className={`inline-flex items-center space-x-1 px-2.5 py-1.5 text-xs font-semibold rounded-xs border transition cursor-pointer ${
+              aria-expanded={showAdvancedFilters}
+              className={`inline-flex items-center space-x-1 px-2.5 py-1.5 text-xs font-semibold rounded-lg border transition cursor-pointer ${
                 showAdvancedFilters || activeFiltersCount > 0
-                  ? "bg-slate-100 border-[#003366] text-[#003366]"
-                  : "bg-white border-slate-300 text-slate-700 hover:bg-slate-50"
+                  ? "bg-slate-100 border-[#003366] text-aicte-navy-700"
+                  : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
               }`}
             >
               <SlidersHorizontal className="w-3 h-3" />
-              <span>Advanced Filters</span>
+              <span>{tr("complaints:advancedFilters")}</span>
               {activeFiltersCount > 0 && (
-                <span className="w-4 h-4 bg-[#003366] text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                <span className="w-4 h-4 bg-aicte-navy-700 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
                   {activeFiltersCount}
                 </span>
               )}
@@ -353,11 +353,11 @@ export const CaseList: React.FC = () => {
             {(activeFiltersCount > 0 || searchParam || statusParam) && (
               <button
                 onClick={handleResetFilters}
-                className="inline-flex items-center space-x-1 px-2 py-1.5 text-xs text-slate-600 hover:text-red-700 border border-slate-300 rounded-xs hover:bg-slate-50 transition cursor-pointer"
-                title="Reset All Filters"
+                className="inline-flex items-center space-x-1 px-2 py-1.5 text-xs text-slate-600 hover:text-red-700 border border-slate-200 rounded-lg hover:bg-slate-50 transition cursor-pointer"
+                title={tr("complaints:resetAllFilters")}
               >
                 <RotateCcw className="w-3 h-3" />
-                <span>Reset</span>
+                <span>{tr("complaints:reset")}</span>
               </button>
             )}
           </div>
@@ -367,13 +367,13 @@ export const CaseList: React.FC = () => {
         {showAdvancedFilters && (
           <div className="pt-2.5 border-t border-slate-200 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 text-xs">
             <div>
-              <label className="block text-[11px] font-semibold text-slate-600 mb-0.5">Assigned Bureau</label>
-              <select
+              <label className="block text-xs font-semibold text-slate-600 mb-0.5">{tr("complaints:assignedBureau")}</label>
+              <select aria-label={tr("complaints:assignedBureau")}
                 value={bureauParam}
                 onChange={e => updateFilterParams({ bureau: e.target.value, page: 1 })}
-                className="w-full bg-slate-50 border border-slate-300 rounded-xs px-2 py-1 text-slate-700 text-xs focus:outline-none"
+                className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-slate-700 text-xs focus:outline-none"
               >
-                <option value="">All Bureaus</option>
+                <option value="">{tr("complaints:allBureaus")}</option>
                 {bureaus.map(b => (
                   <option key={b} value={b}>{b}</option>
                 ))}
@@ -381,68 +381,68 @@ export const CaseList: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-[11px] font-semibold text-slate-600 mb-0.5">Priority Level</label>
-              <select
+              <label className="block text-xs font-semibold text-slate-600 mb-0.5">{tr("complaints:priorityLevel")}</label>
+              <select aria-label={tr("complaints:priorityLevel")}
                 value={priorityParam}
                 onChange={e => updateFilterParams({ priority: e.target.value, page: 1 })}
-                className="w-full bg-slate-50 border border-slate-300 rounded-xs px-2 py-1 text-slate-700 text-xs focus:outline-none"
+                className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-slate-700 text-xs focus:outline-none"
               >
-                <option value="">All Priorities</option>
+                <option value="">{tr("complaints:allPriorities")}</option>
                 {priorities.map(p => (
-                  <option key={p} value={p}>{p}</option>
+                  <option key={p} value={p}>{localizeLabel(p)}</option>
                 ))}
               </select>
             </div>
 
             <div>
-              <label className="block text-[11px] font-semibold text-slate-600 mb-0.5">Violation Category</label>
-              <select
+              <label className="block text-xs font-semibold text-slate-600 mb-0.5">{tr("complaints:violationCategory")}</label>
+              <select aria-label={tr("complaints:violationCategory")}
                 value={categoryParam}
                 onChange={e => updateFilterParams({ category: e.target.value, page: 1 })}
-                className="w-full bg-slate-50 border border-slate-300 rounded-xs px-2 py-1 text-slate-700 text-xs focus:outline-none truncate"
+                className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-slate-700 text-xs focus:outline-none truncate"
               >
-                <option value="">All Categories</option>
+                <option value="">{tr("complaints:allCategories")}</option>
                 {categories.map(c => (
-                  <option key={c} value={c}>{c}</option>
+                  <option key={c} value={c}>{localizeLabel(c)}</option>
                 ))}
               </select>
             </div>
 
             <div>
-              <label className="block text-[11px] font-semibold text-slate-600 mb-0.5">Sort Criteria</label>
-              <select
+              <label className="block text-xs font-semibold text-slate-600 mb-0.5">{tr("complaints:sortCriteria")}</label>
+              <select aria-label={tr("complaints:sortCriteria")}
                 value={`${sortByParam}:${sortOrderParam}`}
                 onChange={e => {
                   const [sb, so] = e.target.value.split(":");
                   updateFilterParams({ sortBy: sb, sortOrder: so, page: 1 });
                 }}
-                className="w-full bg-slate-50 border border-slate-300 rounded-xs px-2 py-1 text-slate-700 text-xs focus:outline-none"
+                className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-slate-700 text-xs focus:outline-none"
               >
-                <option value="receivedDate:desc">Received Date (Newest first)</option>
-                <option value="receivedDate:asc">Received Date (Oldest first)</option>
-                <option value="expectedDisposalDate:asc">SLA Deadline (Urgent first)</option>
-                <option value="priority:desc">Priority (Critical first)</option>
-                <option value="updatedAt:desc">Last Action Date</option>
+                <option value="receivedDate:desc">{tr("complaints:receivedDateNewestFirst")}</option>
+                <option value="receivedDate:asc">{tr("complaints:receivedDateOldestFirst")}</option>
+                <option value="expectedDisposalDate:asc">{tr("complaints:slaDeadlineUrgentFirst")}</option>
+                <option value="priority:desc">{tr("complaints:priorityCriticalFirst")}</option>
+                <option value="updatedAt:desc">{tr("complaints:lastActionDate")}</option>
               </select>
             </div>
 
             {/* Date Range & Specific Toggles */}
             <div className="sm:col-span-2 md:col-span-4 flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100 text-xs">
               <div className="flex items-center space-x-2 text-slate-700">
-                <CalendarDays className="w-3.5 h-3.5 text-slate-400" />
-                <span className="text-[11px] font-medium">Received Between:</span>
+                <CalendarDays className="w-3.5 h-3.5 text-slate-500" />
+                <span className="text-xs font-medium">{tr("complaints:receivedBetween")}</span>
                 <input
                   type="date"
                   value={receivedFromParam}
                   onChange={e => updateFilterParams({ receivedFrom: e.target.value, page: 1 })}
-                  className="bg-slate-50 border border-slate-300 rounded-xs px-2 py-0.5 text-xs text-slate-700"
+                  className="bg-slate-50 border border-slate-200 rounded-lg px-2 py-0.5 text-xs text-slate-700"
                 />
-                <span className="text-slate-400">to</span>
+                <span className="text-slate-500">to</span>
                 <input
                   type="date"
                   value={receivedToParam}
                   onChange={e => updateFilterParams({ receivedTo: e.target.value, page: 1 })}
-                  className="bg-slate-50 border border-slate-300 rounded-xs px-2 py-0.5 text-xs text-slate-700"
+                  className="bg-slate-50 border border-slate-200 rounded-lg px-2 py-0.5 text-xs text-slate-700"
                 />
               </div>
 
@@ -452,18 +452,18 @@ export const CaseList: React.FC = () => {
                     type="checkbox"
                     checked={isOverdueParam}
                     onChange={e => updateFilterParams({ isOverdue: e.target.checked, page: 1 })}
-                    className="rounded-xs text-red-600 focus:ring-0"
+                    className="rounded-lg text-red-600 focus:ring-0"
                   />
-                  <span className="font-semibold text-red-700">Overdue SLA Cases Only</span>
+                  <span className="font-semibold text-red-700">{tr("complaints:overdueSlaCasesOnly")}</span>
                 </label>
                 <label className="flex items-center space-x-1.5 cursor-pointer text-xs select-none">
                   <input
                     type="checkbox"
                     checked={hasOverlapParam}
                     onChange={e => updateFilterParams({ hasOverlap: e.target.checked, page: 1 })}
-                    className="rounded-xs text-amber-600 focus:ring-0"
+                    className="rounded-lg text-amber-600 focus:ring-0"
                   />
-                  <span className="font-semibold text-amber-800">Overlap Alerts Only</span>
+                  <span className="font-semibold text-amber-800">{tr("complaints:overlapAlertsOnly")}</span>
                 </label>
               </div>
             </div>
@@ -472,33 +472,31 @@ export const CaseList: React.FC = () => {
       </div>
 
       {/* 5. Information-Dense Government Data Table (10 Standard Columns) */}
-      <div className="bg-white border border-slate-300 rounded-xs overflow-hidden">
+      <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
         {fetchError && (
           <div className="p-3 bg-red-50 border-b border-red-200 text-xs text-red-800 flex items-center justify-between">
-            <span>{fetchError}</span>
+            <span>{localizeError(fetchError)}</span>
             <button
               onClick={fetchComplaints}
-              className="px-2 py-0.5 bg-red-700 text-white text-[11px] font-semibold rounded-xs hover:bg-red-800"
-            >
-              Retry
-            </button>
+              className="px-2 py-0.5 bg-red-700 text-white text-xs font-semibold rounded-lg hover:bg-red-800"
+            >{tr("complaints:retry")}</button>
           </div>
         )}
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-slate-700 gov-table">
+          <table className="w-full text-start text-xs text-slate-700 gov-table">
             <thead>
               <tr>
-                <th className="py-2.5 px-3">Complaint / Ref ID</th>
-                <th className="py-2.5 px-3">Institution Name</th>
-                <th className="py-2.5 px-3">Category</th>
-                <th className="py-2.5 px-2 text-center">Bureau</th>
-                <th className="py-2.5 px-2.5 text-center">Current Status</th>
-                <th className="py-2.5 px-2.5 text-center">Priority</th>
-                <th className="py-2.5 px-2 text-center">Overlap</th>
-                <th className="py-2.5 px-3">Received Date</th>
-                <th className="py-2.5 px-3">Disposal SLA</th>
-                <th className="py-2.5 px-3 text-right">Actions</th>
+                <th className="py-2.5 px-3">{tr("complaints:complaintRefId")}</th>
+                <th className="py-2.5 px-3">{tr("complaints:institutionName")}</th>
+                <th className="py-2.5 px-3">{tr("complaints:category")}</th>
+                <th className="py-2.5 px-2 text-center">{tr("dashboard:bureau")}</th>
+                <th className="py-2.5 px-2.5 text-center">{tr("complaints:currentStatus")}</th>
+                <th className="py-2.5 px-2.5 text-center">{tr("complaints:priority")}</th>
+                <th className="py-2.5 px-2 text-center">{tr("complaints:overlap")}</th>
+                <th className="py-2.5 px-3">{tr("complaints:receivedDate")}</th>
+                <th className="py-2.5 px-3">{tr("complaints:disposalSla")}</th>
+                <th className="py-2.5 px-3 text-end">{tr("complaints:actions")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 bg-white">
@@ -507,7 +505,7 @@ export const CaseList: React.FC = () => {
                   <td colSpan={10} className="py-12 text-center text-slate-500">
                     <div className="inline-flex items-center space-x-2">
                       <div className="w-4 h-4 border-2 border-[#003366] border-t-transparent rounded-full animate-spin" />
-                      <span>Retrieving official complaint records...</span>
+                      <span>{tr("complaints:retrievingOfficialComplaintRecords")}</span>
                     </div>
                   </td>
                 </tr>
@@ -515,19 +513,15 @@ export const CaseList: React.FC = () => {
                 <tr>
                   <td colSpan={10} className="py-10 text-center text-slate-500">
                     <div className="max-w-sm mx-auto space-y-1.5">
-                      <div className="font-bold text-slate-800 text-sm">No Grievance Records Found</div>
+                      <div className="font-bold text-slate-800 text-sm">{tr("complaints:noGrievanceRecordsFound")}</div>
                       <p className="text-xs text-slate-500">
-                        {isMyCasesMode
-                          ? "No cases currently assigned to your desk match the specified filter criteria."
-                          : "No records match the specified search and filter parameters."}
+                        {isMyCasesMode ? tr("complaints:noCasesCurrentlyAssignedToYourDeskMatchThe") : tr("complaints:noRecordsMatchTheSpecifiedSearchAndFilterParameters")}
                       </p>
                       {(activeFiltersCount > 0 || searchParam || statusParam) && (
                         <button
                           onClick={handleResetFilters}
-                          className="mt-2 px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xs text-xs font-semibold cursor-pointer border border-slate-300"
-                        >
-                          Clear All Filters
-                        </button>
+                          className="mt-2 px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold cursor-pointer border border-slate-200"
+                        >{tr("complaints:clearAllFilters")}</button>
                       )}
                     </div>
                   </td>
@@ -539,9 +533,9 @@ export const CaseList: React.FC = () => {
                   return (
                     <tr key={c.id} className="hover:bg-slate-50 transition">
                       {/* 1. Complaint / Ref ID */}
-                      <td className="py-2.5 px-3 font-mono font-bold text-[#003366] whitespace-nowrap">
+                      <td className="py-2.5 px-3 font-mono font-bold text-aicte-navy-700 whitespace-nowrap">
                         <Link to={`/cases/${c.id}`} className="hover:underline">
-                          {c.complaintId}
+                          <bdi dir="ltr" className="canonical-value">{c.complaintId}</bdi>
                         </Link>
                       </td>
 
@@ -549,51 +543,37 @@ export const CaseList: React.FC = () => {
                       <td className="py-2.5 px-3 max-w-[220px]">
                         <Link
                           to={`/institutions/${c.institutionId}`}
-                          className="font-medium text-slate-800 hover:text-[#003366] hover:underline block truncate"
+                          className="font-medium text-slate-800 hover:text-aicte-navy-700 hover:underline block truncate"
                           title={c.institutionName}
                         >
-                          {c.institutionName}
+                          <bdi dir="auto" className="original-content">{c.institutionName}</bdi>
                         </Link>
-                        <div className="text-[10px] text-slate-400 font-mono">
+                        <div className="text-xs text-slate-500 font-mono">
                           ID: {c.aictePermanentId}
                         </div>
                       </td>
 
                       {/* 3. Category */}
-                      <td className="py-2.5 px-3 max-w-[180px] text-slate-600 truncate text-[11px]" title={c.category}>
+                      <td className="py-2.5 px-3 max-w-[180px] text-slate-600 truncate text-xs" title={c.category}>
                         {c.category}
                       </td>
 
                       {/* 4. Assigned Bureau */}
                       <td className="py-2.5 px-2 text-center whitespace-nowrap">
-                        <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded-xs bg-slate-100 text-slate-700 border border-slate-200">
-                          {c.currentBureauId}
-                        </span>
+                        <span className="font-mono text-xs font-bold px-1.5 py-0.5 rounded-lg bg-slate-100 text-slate-700 border border-slate-200">
+                          <bdi dir="ltr" className="canonical-value">{c.currentBureauId}</bdi>
+                        </span><div className="text-xs text-slate-500 mt-1">{c.assignedOfficerName || tr("dashboard:unassigned")}</div>
                       </td>
 
                       {/* 5. Current Status */}
                       <td className="py-2.5 px-2.5 text-center whitespace-nowrap">
-                        <span
-                          className={`px-2 py-0.5 rounded-xs text-[10px] font-semibold border ${
-                            c.status === "Pending"
-                              ? "bg-amber-50 text-amber-800 border-amber-300"
-                              : c.status === "Under Process"
-                              ? "bg-blue-50 text-blue-800 border-blue-300"
-                              : c.status === "Disposed"
-                              ? "bg-emerald-50 text-emerald-800 border-emerald-300"
-                              : c.status === "Transferred"
-                              ? "bg-purple-50 text-purple-800 border-purple-300"
-                              : "bg-red-50 text-red-800 border-red-300"
-                          }`}
-                        >
-                          {c.status}
-                        </span>
+                        <StatusBadge value={c.status}/>
                       </td>
 
                       {/* 6. Priority */}
                       <td className="py-2.5 px-2.5 text-center whitespace-nowrap">
                         <span
-                          className={`font-semibold text-[10px] px-1.5 py-0.2 rounded-xs ${
+                          className={`font-semibold text-xs px-1.5 py-0.2 rounded-lg ${
                             c.priority === "Critical"
                               ? "text-red-700 font-bold bg-red-50 border border-red-200"
                               : c.priority === "High"
@@ -601,7 +581,7 @@ export const CaseList: React.FC = () => {
                               : "text-slate-600 bg-slate-100"
                           }`}
                         >
-                          {c.priority}
+                          {localizeLabel(c.priority)}
                         </span>
                       </td>
 
@@ -610,42 +590,42 @@ export const CaseList: React.FC = () => {
                         {c.hasOverlapAlert ? (
                           <Link
                             to="/overlaps"
-                            title="Potential duplicate/overlap alert active"
-                            className="inline-flex items-center space-x-0.5 bg-amber-50 text-amber-800 border border-amber-300 text-[10px] font-semibold px-1 py-0.2 rounded-xs"
+                            title={tr("complaints:potentialDuplicateOverlapAlertActive")}
+                            className="inline-flex items-center space-x-0.5 bg-amber-50 text-amber-800 border border-amber-300 text-xs font-semibold px-1 py-0.2 rounded-lg"
                           >
                             <AlertTriangle className="w-3 h-3 text-amber-600" />
-                            <span>Alert</span>
+                            <span>{tr("complaints:alert")}</span>
                           </Link>
                         ) : (
-                          <span className="text-slate-300 text-[11px]">—</span>
+                          <span className="text-slate-300 text-xs">—</span>
                         )}
                       </td>
 
                       {/* 8. Received Date */}
-                      <td className="py-2.5 px-3 text-slate-500 text-[11px] whitespace-nowrap font-mono">
-                        {c.receivedDate}
+                      <td className="py-2.5 px-3 text-slate-500 text-xs whitespace-nowrap font-mono">
+                        {formatDate(c.receivedDate)}<span className="block mt-1 text-xs text-slate-500">{tr("navigation:ui.lastUpdated")}: {formatDate(c.updatedAt)}</span>
                       </td>
 
                       {/* 9. Expected Disposal Date / SLA */}
-                      <td className="py-2.5 px-3 text-[11px] whitespace-nowrap font-mono">
+                      <td className="py-2.5 px-3 text-xs whitespace-nowrap font-mono">
                         {isBreached ? (
-                          <span className="text-red-700 font-bold inline-flex items-center space-x-1" title="Statutory SLA Breached">
+                          <span className="text-red-700 font-bold inline-flex items-center space-x-1" title={tr("complaints:statutorySlaBreached")}>
                             <AlertCircle className="w-3.5 h-3.5 text-red-600 shrink-0" />
-                            <span>{c.expectedDisposalDate}</span>
+                            <span>{formatDate(c.expectedDisposalDate)}</span>
                           </span>
                         ) : (
-                          <span className="text-slate-600">{c.expectedDisposalDate}</span>
+                          <span className="text-slate-600">{formatDate(c.expectedDisposalDate)}</span>
                         )}
                       </td>
 
                       {/* 10. Actions */}
-                      <td className="py-2.5 px-3 text-right whitespace-nowrap">
+                      <td className="py-2.5 px-3 text-end whitespace-nowrap">
                         <Link
                           to={`/cases/${c.id}`}
-                          className="px-2 py-1 bg-slate-100 hover:bg-[#003366] hover:text-white text-slate-700 rounded-xs text-[11px] font-semibold border border-slate-300 hover:border-[#003366] transition inline-flex items-center space-x-1"
+                          className="px-2 py-1 bg-slate-100 hover:bg-aicte-navy-700 hover:text-white text-slate-700 rounded-lg text-xs font-semibold border border-slate-200 hover:border-[#003366] transition inline-flex items-center space-x-1"
                         >
                           <Eye className="w-3 h-3" />
-                          <span>Inspect</span>
+                          <span>{tr("complaints:inspect")}</span>
                         </Link>
                       </td>
                     </tr>
@@ -658,28 +638,21 @@ export const CaseList: React.FC = () => {
 
         {/* 6. Compact Pagination Bar */}
         <div className="px-3 py-2 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs text-slate-600">
-          <div>
-            Showing <strong className="text-slate-900">{complaints.length}</strong> of{" "}
-            <strong className="text-slate-900">{totalCount}</strong> records
-          </div>
+          <div>{tr("complaints:showing")}<strong className="text-slate-900">{complaints.length}</strong> of{" "}
+            <strong className="text-slate-900">{formatNumber(totalCount)}</strong>{tr("complaints:records_c7b99")}</div>
           <div className="flex items-center space-x-2">
             <button
               disabled={pageParam <= 1 || loading}
               onClick={() => updateFilterParams({ page: pageParam - 1 })}
-              className="px-2 py-0.5 bg-white border border-slate-300 rounded-xs text-xs hover:bg-slate-100 disabled:opacity-40 transition cursor-pointer"
-            >
-              &larr; Prev
-            </button>
-            <span className="font-medium text-slate-700">
-              Page {pageParam} of {totalPages || 1}
+              className="px-2 py-0.5 bg-white border border-slate-200 rounded-lg text-xs hover:bg-slate-100 disabled:opacity-40 transition cursor-pointer"
+            >{tr("complaints:prev")}</button>
+            <span className="font-medium text-slate-700">{tr("dashboard:page")}{formatNumber(pageParam)} of {formatNumber(Math.max(1,totalPages))}
             </span>
             <button
               disabled={pageParam >= totalPages || loading}
               onClick={() => updateFilterParams({ page: pageParam + 1 })}
-              className="px-2 py-0.5 bg-white border border-slate-300 rounded-xs text-xs hover:bg-slate-100 disabled:opacity-40 transition cursor-pointer"
-            >
-              Next &rarr;
-            </button>
+              className="px-2 py-0.5 bg-white border border-slate-200 rounded-lg text-xs hover:bg-slate-100 disabled:opacity-40 transition cursor-pointer"
+            >{tr("complaints:next")}</button>
           </div>
         </div>
       </div>

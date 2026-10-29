@@ -1,0 +1,20 @@
+{
+  "overdue": "অভাৰডু",
+  "statusUpdate": "অৱস্থা আপডেইট",
+  "governmentOfIndiaAicteAdministrativeAlerts": "ভাৰত চৰকাৰ • AICTE প্ৰশাসনিক সতৰ্কবাণী",
+  "officialNotificationCenter": "অফিচিয়েল অধিসূচনা কেন্দ্ৰ",
+  "auditAlertsForNewlyDetectedOverlapsApproachingSlaDeadlines": "নতুনকৈ ধৰা পৰা ওভাৰলেপসমূহৰ বাবে অডিট সতৰ্কবাণীসমূহ, SLA সময়সীমাৰ কাষ চাপি অহা, কেছ স্থানান্তৰ, আৰু বৃদ্ধি।",
+  "markAllRead": "মাৰ্ক অল ৰিড",
+  "filterByType": "ধৰণ অনুসৰি ফিল্টাৰ কৰক:",
+  "allNotificationTypes": "সকলো জাননীৰ ধৰণ",
+  "overdueDeadlines": "অতিৰিক্ত সময়সীমা",
+  "caseTransfers": "কেছ ট্ৰেন্সফাৰ",
+  "statusUpdates": "অৱস্থা আপডেইটসমূহ",
+  "unreadOnly": "কেৱল অপঠন",
+  "loadingNotifications": "বিজ্ঞপ্তি লোড কৰি আছে...",
+  "noOfficialNotificationsRecorded": "কোনো চৰকাৰী অধিসূচনা ৰেকৰ্ড কৰা হোৱা নাই।",
+  "reviewInOverlapCenter": "ওভাৰলেপ কেন্দ্ৰত পৰ্যালোচনা →",
+  "inspectCaseFile": "কেছ ফাইল পৰিদৰ্শন কৰক →",
+  "markAsRead": "পঢ়াৰ দৰে মাৰ্ক কৰক",
+  "alerts": " সতৰ্কবাণী দিয়ে"
+}

@@ -1,0 +1,17 @@
+/* Noto Sans Bengali; source: https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600&display=swap; license: ./OFL.txt */
+@font-face {
+  font-family: 'Noto Sans Bengali';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: normal;
+  font-display: swap;
+  src: url(./cbac3ec6c57038ae.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Noto Sans Bengali';
+  font-style: normal;
+  font-weight: 600;
+  font-stretch: normal;
+  font-display: swap;
+  src: url(./5fd6632644672e74.ttf) format('truetype');
+}

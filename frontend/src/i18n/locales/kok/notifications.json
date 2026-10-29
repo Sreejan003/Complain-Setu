@@ -1,0 +1,20 @@
+{
+  "overdue": "मुजतवाड जाल्या",
+  "statusUpdate": "स्थिती अद्ययावत",
+  "governmentOfIndiaAicteAdministrativeAlerts": "भारत सरकार • AICTE प्रशासकीय सावधानताय",
+  "officialNotificationCenter": "अधिकृत अधिसुचोवणी केंद्र",
+  "auditAlertsForNewlyDetectedOverlapsApproachingSlaDeadlines": "नव्यान सोदून काडिल्ल्या ओव्हरलॅपा खातीर, SLA मुजतवाड लागीं पावपी, केस हस्तांतरण, आनी वाडपा खातीर ऑडिट इशारो.",
+  "markAllRead": "मार्क ऑल रीड",
+  "filterByType": "प्रकारा प्रमाण फिल्टर करचें:",
+  "allNotificationTypes": "सगळे अधिसुचोवणी प्रकार",
+  "overdueDeadlines": "मुजतवाड सोंपली",
+  "caseTransfers": "केस ट्रान्सफर करप",
+  "statusUpdates": "स्थिती अद्ययावत करप",
+  "unreadOnly": "फकत वाचूंक नाशिल्लें",
+  "loadingNotifications": "अधिसुचोवण्यो लोड करतात...",
+  "noOfficialNotificationsRecorded": "अधिकृत अधिसुचोवण्यो नोंद जावंक नात.",
+  "reviewInOverlapCenter": "ओव्हरलॅप सेंटरांत पुनरावलोकन →",
+  "inspectCaseFile": "केस फायल तपासात →",
+  "markAsRead": "वाचले तशें चिन्न करात",
+  "alerts": " सावधानताय दितात"
+}

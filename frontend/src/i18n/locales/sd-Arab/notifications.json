@@ -1,0 +1,20 @@
+{
+  "overdue": "اوورڊيو",
+  "statusUpdate": "اسٽيٽس اپڊيٽ",
+  "governmentOfIndiaAicteAdministrativeAlerts": "هندستان جي حڪومت • AICTE انتظامي الارٽس",
+  "officialNotificationCenter": "سرڪاري نوٽيفڪيشن سينٽر",
+  "auditAlertsForNewlyDetectedOverlapsApproachingSlaDeadlines": "نئين دريافت ڪيل اوورليپز لاءِ آڊٽ الرٽ، SLA جي آخري تاريخن، ڪيس جي منتقلي، ۽ واڌاري لاءِ.",
+  "markAllRead": "نشان لڳايو سڀ پڙهڻ",
+  "filterByType": "قسم جي ذريعي فلٽر:",
+  "allNotificationTypes": "نوٽيفڪيشن جا سڀ قسم",
+  "overdueDeadlines": "اوورڊيو ڊيڊ لائنون",
+  "caseTransfers": "ڪيس جي منتقلي",
+  "statusUpdates": "اسٽيٽس اپڊيٽس",
+  "unreadOnly": "صرف اڻ پڙهيل",
+  "loadingNotifications": "نوٽيفڪيشن لوڊ ٿي رهيو آهي...",
+  "noOfficialNotificationsRecorded": "ڪوبه سرڪاري نوٽيفڪيشن رڪارڊ ٿيل نه آهي.",
+  "reviewInOverlapCenter": "اوورليپ سينٽر → ۾ نظرثاني ڪريو",
+  "inspectCaseFile": "چڪاس ڪريو ڪيس فائل →",
+  "markAsRead": "نشان لڳايو پڙهو",
+  "alerts": " خبرداري"
+}

@@ -1,6 +1,10 @@
-import { roleRequest } from "./RoleDashboard.js";
+import { ModalFrame, EmptyState, ErrorState, LoadingSkeleton } from "../components/ui/Interface.js";
+import { tr, localizeLabel, localizeError, useLocaleRender } from "../i18n/index.js";
+import { formatDate, formatNumber } from "../i18n/localeUtils.js";
+import { WorkflowRequests } from "../components/common/WorkflowRequests.js";
+import {CoordinationCaseLink} from "../components/common/CrossBureauCoordinationWorkspace.js";
 import React, { useState, useEffect } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import {
   FileText,
   Building2,
@@ -29,10 +33,16 @@ import { Complaint, CaseHistory, RelatedCase, OverlapAlert, ComplaintDocument } 
 import { useAuth } from "../context/AuthContext.js";
 
 export const ComplaintDetails: React.FC = () => {
+  useLocaleRender();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [detailTab, setDetailTab] = useState(() => ["#requests", "#coordination"].includes(window.location.hash) ? "coordination" : "overview");
+  useEffect(() => { if (["#requests", "#coordination"].includes(location.hash)) setDetailTab("coordination"); }, [location.hash]);
   const { user } = useAuth();
 
+  const [allowedActions,setAllowedActions]=useState<any>({});
+  const [officerSearch,setOfficerSearch]=useState("");
   const [permittedStatuses,setPermittedStatuses]=useState<string[]>([]);
   const [complaint, setComplaint] = useState<Complaint | null>(null);
   const [history, setHistory] = useState<CaseHistory[]>([]);
@@ -40,6 +50,7 @@ export const ComplaintDetails: React.FC = () => {
   const [overlapAlerts, setOverlapAlerts] = useState<OverlapAlert[]>([]);
   const [documents, setDocuments] = useState<ComplaintDocument[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
 
   // Document Upload State
   const [uploadFile, setUploadFile] = useState<File | null>(null);
@@ -56,7 +67,7 @@ export const ComplaintDetails: React.FC = () => {
   const [nextActionDate,setNextActionDate]=useState("");
   const [assignee,setAssignee]=useState("");
   const [officers,setOfficers]=useState<any[]>([]);
-  useEffect(()=>{if(user?.role==="BUREAU_HEAD") api.getUsers().then(setOfficers).catch(()=>setOfficers([]));},[user?.role]);
+  useEffect(()=>{if(!allowedActions.assign || !id)return;const timer=setTimeout(()=>api.request(`complaints/${id}/eligible-officers?search=${encodeURIComponent(officerSearch)}`).then(setOfficers).catch(()=>setOfficers([])),200);return()=>clearTimeout(timer);},[allowedActions.assign,id,officerSearch]);
   const [actionModalOpen, setActionModalOpen] = useState(false);
   const [newStatus, setNewStatus] = useState<any>("Under Process");
   const [actionRemarks, setActionRemarks] = useState("");
@@ -89,6 +100,9 @@ export const ComplaintDetails: React.FC = () => {
     try {
       const res = await api.getComplaintDetails(id);
       setComplaint(res.complaint);
+      setLoadError("");
+      setAllowedActions(res.allowedActions || {});
+      if(window.location.hash==="#assignment" && res.allowedActions?.assign) setActionModalOpen(true);
       setPermittedStatuses(res.permittedStatuses || []);
       setNewStatus(res.complaint.status);
       setNextAction(res.complaint.nextAction || "");
@@ -113,7 +127,7 @@ export const ComplaintDetails: React.FC = () => {
         // non-blocking
       }
     } catch (err) {
-      console.error("Failed to load complaint details:", err);
+      setLoadError(localizeError(err instanceof Error ? err.message : ""));
     } finally {
       setLoading(false);
     }
@@ -131,7 +145,7 @@ export const ComplaintDetails: React.FC = () => {
       setAdjudicateModalOpen(false);
       fetchDetails();
     } catch (err: any) {
-      alert(err.message || "Failed to process transfer adjudication.");
+      alert(localizeError(err.message || tr("complaints:failedToProcessTransferAdjudication")));
     } finally {
       setAdjudicateSubmitting(false);
     }
@@ -178,7 +192,7 @@ export const ComplaintDetails: React.FC = () => {
   };
 
   const handleDeleteDocument = async (docId: string) => {
-    if (!complaint || !confirm("Are you sure you want to remove this supporting document?")) return;
+    if (!complaint || !confirm(tr("complaints:areYouSureYouWantToRemoveThisSupporting"))) return;
     try {
       await api.deleteComplaintDocument(complaint.id, docId);
       const docs = await api.getComplaintDocuments(complaint.id);
@@ -186,7 +200,7 @@ export const ComplaintDetails: React.FC = () => {
       const updated = await api.getComplaintDetails(complaint.id);
       setHistory(updated.history);
     } catch (err: any) {
-      alert(err.message || "Failed to delete document.");
+      alert(localizeError(err.message || tr("complaints:failedToDeleteDocument")));
     }
   };
 
@@ -265,52 +279,35 @@ export const ComplaintDetails: React.FC = () => {
       setTransferReason("");
       fetchDetails();
     } catch (err: any) {
-      alert(err.message || "Transfer failed.");
+      alert(localizeError(err.message || tr("complaints:transferFailed")));
     } finally {
       setTransferSubmitting(false);
     }
   };
 
   if (loading) {
-    return <div className="p-12 text-center text-sm text-slate-500">Loading complaint details...</div>;
+    return <LoadingSkeleton label={tr("complaints:loadingComplaintDetails")}/>;
   }
 
   if (!complaint) {
     return (
       <div className="bg-white border border-slate-200 rounded-lg p-8 text-center">
-        <h2 className="text-base font-bold text-slate-800">Case Record Not Found</h2>
-        <Link to="/cases" className="mt-3 inline-block text-xs text-blue-600 hover:underline">
-          &larr; Return to Case Register
-        </Link>
+        {loadError ? <ErrorState message={loadError} onRetry={fetchDetails}/> : <h2 className="text-base font-bold text-slate-800">{tr("complaints:caseRecordNotFound")}</h2>}
+        <Link to="/cases" className="mt-3 inline-block text-xs text-blue-600 hover:underline">{tr("complaints:returnToCaseRegister")}</Link>
       </div>
     );
   }
 
-  const userCanMutate = !!user && !!complaint && (user.role === "COMPETENT_AUTHORITY" || (user.role === "BUREAU_HEAD" && !!user.bureauId && user.bureauId === complaint.currentBureauId) || (user.role === "CASE_OFFICER" && user.id === complaint.assignedOfficerId && !!user.bureauId && user.bureauId === complaint.currentBureauId));
+  const userCanMutate = !!allowedActions.update || !!allowedActions.reopen;
   const canModify = userCanMutate;
   const isBureauAuthorized = () => userCanMutate;
-  const canAdjudicatePendingTransfer = () => !!user && !!pendingTransfer && !!user.permissions?.includes("APPROVE_TRANSFERS") && (user.role === "COMPETENT_AUTHORITY" || (user.role === "BUREAU_HEAD" && user.bureauId === pendingTransfer.toBureauId));
+  const canAdjudicatePendingTransfer = () => !!pendingTransfer?.canDecide;
 
   const lastAction = history && history.length > 0 ? history[0] : null;
 
-  const getNextAction = () => {
-    switch (complaint.status) {
-      case "Pending":
-        return "Initial Scrutiny & Preliminary Officer Allocation";
-      case "Under Process":
-        return "Fact-Finding Inquiry / Verification of Institution Defense";
-      case "Transferred":
-        return "Destination Bureau Acceptance Confirmation";
-      case "Escalated":
-        return "Adjudication & Final Hearing by Competent Authority";
-      case "Disposed":
-        return "Case Disposed & Archived — Final Resolution Recorded";
-      default:
-        return "Review Case Record";
-    }
-  };
+  const getNextAction = () => complaint.nextAction || "No next action recorded";
 
-  const isOverdue = new Date(complaint.expectedDisposalDate) < new Date() && complaint.status !== "Disposed";
+  const isOverdue = complaint.expectedDisposalDate < new Date().toISOString().slice(0,10) && complaint.status !== "Disposed";
   const daysDiff = Math.ceil(
     (new Date(complaint.expectedDisposalDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
   );
@@ -320,67 +317,64 @@ export const ComplaintDetails: React.FC = () => {
       ? "Disposed (Closed)"
       : isOverdue
       ? `Overdue (${Math.abs(daysDiff)} days elapsed)`
-      : daysDiff <= 3
+      : daysDiff <= (allowedActions.approachingDeadlineDays || 3)
       ? `Approaching SLA (${daysDiff} days left)`
       : `Within SLA Standard (${daysDiff} days left)`;
 
   return (
     <div className="space-y-4">
-      {user?.role==="CASE_OFFICER" && userCanMutate && <form className="bg-white border border-slate-200 p-3 space-y-2 text-xs" onSubmit={async e=>{e.preventDefault();setRequestBusy(true);try{await roleRequest(`complaints/${complaint.id}/requests`,"POST",{type:requestType,remarks:requestRemarks});setRequestMessage("Request recorded for supervisory review.");setRequestRemarks("");await fetchDetails();}catch(err:any){setRequestMessage(err.message);}finally{setRequestBusy(false);}}}><h2 className="font-bold">Submit a request to the Bureau Head</h2><label>Request type <select className="border p-1" value={requestType} onChange={e=>setRequestType(e.target.value)}>{["Coordination","Transfer","Escalation","Disposal"].map(t=><option key={t}>{t}</option>)}</select></label><label className="block">Remarks<textarea required className="block border w-full p-2" value={requestRemarks} onChange={e=>setRequestRemarks(e.target.value)}/></label><button disabled={requestBusy} className="bg-[#17365D] text-white px-3 py-2 disabled:opacity-50">Submit request</button><p role="status">{requestMessage}</p></form>}
+
+      {loadError && <ErrorState message={loadError} onRetry={fetchDetails}/>}
       {/* Back button */}
       <div>
-        <Link to="/cases" className="inline-flex items-center space-x-1.5 text-xs font-semibold text-[#003366] hover:underline">
+        <Link to="/cases" className="inline-flex items-center space-x-1.5 text-xs font-semibold text-aicte-navy-700 hover:underline">
           <ChevronLeft className="w-3.5 h-3.5" />
-          <span>Return to Complaint Register</span>
+          <span>{tr("complaints:returnToComplaintRegister")}</span>
         </Link>
       </div>
 
+      {!!allowedActions.request&&<CoordinationCaseLink complaintId={complaint.id}/>}
       {/* Potential Overlapping Cases - Official Coordination Notice */}
       {overlapAlerts.length > 0 && (
-        <div className="bg-[#fffbeb] border border-[#f59e0b] rounded-xs p-3.5 text-[#78350f] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="bg-[#fffbeb] border border-[#f59e0b] rounded-lg p-3.5 text-[#78350f] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-start space-x-3">
-            <div className="p-1.5 bg-[#fef3c7] border border-[#fde68a] rounded-xs shrink-0 mt-0.5 text-[#b45309]">
+            <div className="p-1.5 bg-[#fef3c7] border border-[#fde68a] rounded-lg shrink-0 mt-0.5 text-[#b45309]">
               <GitMerge className="w-4 h-4" />
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <span className="font-bold text-xs uppercase tracking-wider text-[#92400e]">Administrative Alert: Cross-Bureau Case Overlap Detected</span>
-                <span className="bg-[#b45309] text-white font-bold text-[10px] px-1.5 py-0.2 rounded-xs">
-                  {overlapAlerts.length} Alert{overlapAlerts.length > 1 ? "s" : ""}
+                <span className="font-bold text-xs uppercase tracking-wider text-[#92400e]">{tr("complaints:administrativeAlertCrossBureauCaseOverlapDetected")}</span>
+                <span className="bg-[#b45309] text-white font-bold text-xs px-1.5 py-0.2 rounded-lg">
+                  {overlapAlerts.length}{tr("complaints:alert_0eb8b")}{overlapAlerts.length > 1 ? "s" : ""}
                 </span>
               </div>
-              <p className="text-xs text-[#78350f] mt-0.5 leading-normal">
-                Companion complaints have been registered simultaneously across AICTE Bureaus for this institution. Administrative coordination is required prior to formal disposal.
-              </p>
+              <p className="text-xs text-[#78350f] mt-0.5 leading-normal">{tr("complaints:companionComplaintsHaveBeenRegisteredSimultaneouslyAcrossAicteBureaus")}</p>
             </div>
           </div>
           <Link
             to="/overlaps"
-            className="px-3 py-1.5 bg-[#b45309] text-white hover:bg-[#92400e] font-semibold text-xs rounded-xs shrink-0 self-start sm:self-auto flex items-center space-x-1"
+            className="px-3 py-1.5 bg-[#b45309] text-white hover:bg-[#92400e] font-semibold text-xs rounded-lg shrink-0 self-start sm:self-auto flex items-center space-x-1"
           >
-            <span>Open Overlap Center &rarr;</span>
+            <span>{tr("complaints:openOverlapCenter")}</span>
           </Link>
         </div>
       )}
 
       {/* Incoming Transfer Notice & Adjudication */}
       {pendingTransfer && (
-        <div className="bg-[#eff6ff] border border-[#93c5fd] rounded-xs p-3.5 text-[#1e40af] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="bg-[#eff6ff] border border-[#93c5fd] rounded-lg p-3.5 text-[#1e40af] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-start space-x-3">
-            <div className="p-1.5 bg-[#dbeafe] border border-[#bfdbfe] rounded-xs shrink-0 mt-0.5 text-[#1d4ed8]">
+            <div className="p-1.5 bg-[#dbeafe] border border-[#bfdbfe] rounded-lg shrink-0 mt-0.5 text-[#1d4ed8]">
               <ArrowRightLeft className="w-4 h-4" />
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <span className="font-bold text-xs uppercase tracking-wider text-[#1e3a8a]">
-                  Incoming Case Transfer Pending Acceptance
-                </span>
-                <span className="bg-[#2563eb] text-white font-bold text-[10px] px-1.5 py-0.2 rounded-xs">
-                  Route: {pendingTransfer.fromBureauId} &rarr; {pendingTransfer.toBureauId}
+                <span className="font-bold text-xs uppercase tracking-wider text-[#1e3a8a]">{tr("complaints:incomingCaseTransferPendingAcceptance")}</span>
+                <span className="bg-[#2563eb] text-white font-bold text-xs px-1.5 py-0.2 rounded-lg">{tr("complaints:route")}<bdi dir="ltr" className="canonical-value">{pendingTransfer.fromBureauId}</bdi> &rarr; <bdi dir="ltr" className="canonical-value">{pendingTransfer.toBureauId}</bdi>
                 </span>
               </div>
               <p className="text-xs text-[#1e40af] mt-0.5 leading-normal">
-                <strong>Grounds:</strong> {pendingTransfer.transferReason} &bull; Initiated by {pendingTransfer.transferredByName} on {new Date(pendingTransfer.transferredAt).toLocaleString()}
+                <strong>{tr("complaints:grounds")}</strong> <bdi dir="auto" className="original-content">{pendingTransfer.transferReason}</bdi>{tr("complaints:initiatedBy")}{pendingTransfer.transferredByName} on {formatDate(pendingTransfer.transferredAt, true)}
               </p>
             </div>
           </div>
@@ -393,10 +387,8 @@ export const ComplaintDetails: React.FC = () => {
                   setAdjudicateRemarks(`Jurisdiction transfer accepted by ${pendingTransfer.toBureauId}. Case taken under active investigation.`);
                   setAdjudicateModalOpen(true);
                 }}
-                className="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xs text-xs font-semibold cursor-pointer"
-              >
-                Accept Transfer
-              </button>
+                className="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-semibold cursor-pointer"
+              >{tr("complaints:acceptTransfer")}</button>
               <button
                 type="button"
                 onClick={() => {
@@ -404,10 +396,8 @@ export const ComplaintDetails: React.FC = () => {
                   setAdjudicateRemarks(`Transfer declined by ${pendingTransfer.toBureauId}. Case retained under originating bureau jurisdiction.`);
                   setAdjudicateModalOpen(true);
                 }}
-                className="px-3 py-1.5 bg-rose-700 hover:bg-rose-800 text-white rounded-xs text-xs font-semibold cursor-pointer"
-              >
-                Decline Transfer
-              </button>
+                className="px-3 py-1.5 bg-rose-700 hover:bg-rose-800 text-white rounded-lg text-xs font-semibold cursor-pointer"
+              >{tr("complaints:declineTransfer")}</button>
             </div>
           )}
         </div>
@@ -415,26 +405,25 @@ export const ComplaintDetails: React.FC = () => {
 
       {/* Jurisdictional Read-Only Scope Notice */}
       {canModify && !userCanMutate && (
-        <div className="bg-[#f8fafc] border border-[#cbd5e1] rounded-xs p-3 text-xs text-slate-700 flex items-center justify-between">
+        <div className="bg-[#f8fafc] border border-[#e5eaf0] rounded-lg p-3 text-xs text-slate-700 flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <Shield className="w-4 h-4 text-[#003366] shrink-0" />
+            <Shield className="w-4 h-4 text-aicte-navy-700 shrink-0" />
             <span>
-              <strong>Cross-Bureau Jurisdictional Scope:</strong> This case is currently under active handling by <strong>{complaint.currentBureauId}</strong>. As a <strong>{user?.role}</strong>, you have full cross-bureau review visibility. To update status or proceed with official inquiry, initiate an Inter-Bureau Transfer below.
-            </span>
+              <strong>{tr("complaints:crossBureauJurisdictionalScope")}</strong>{tr("complaints:thisCaseIsCurrentlyUnderActiveHandlingBy")}<strong><bdi dir="ltr" className="canonical-value">{complaint.currentBureauId}</bdi></strong>. As a <strong>{localizeLabel(user?.role)}</strong>{tr("complaints:youHaveFullCrossBureauReviewVisibilityToUpdate")}</span>
           </div>
         </div>
       )}
 
       {/* Main Top Case Header */}
-      <div className="bg-white border border-[#cbd5e1] rounded-xs p-4 shadow-none">
+      <div className="bg-white border border-[#e5eaf0] rounded-lg p-4 shadow-none">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-[#e2e8f0]">
           <div className="space-y-1.5">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="font-mono text-sm font-bold text-[#003366] bg-[#f1f5f9] px-2 py-0.5 rounded-xs border border-[#cbd5e1]">
-                {complaint.complaintId}
+              <span className="font-mono text-sm font-bold text-aicte-navy-700 bg-[#f1f5f9] px-2 py-0.5 rounded-lg border border-[#e5eaf0]">
+                <bdi dir="ltr" className="canonical-value">{complaint.complaintId}</bdi>
               </span>
               <span
-                className={`px-2 py-0.5 rounded-xs text-[11px] font-semibold border ${
+                className={`px-2 py-0.5 rounded-lg text-xs font-semibold border ${
                   complaint.status === "Pending"
                     ? "bg-[#fef3c7] text-[#92400e] border-[#fde68a]"
                     : complaint.status === "Under Process"
@@ -446,40 +435,37 @@ export const ComplaintDetails: React.FC = () => {
                     : "bg-[#fee2e2] text-[#b91c1c] border-[#fecaca]"
                 }`}
               >
-                {complaint.status}
+                {localizeLabel(complaint.status)}
               </span>
               <span
-                className={`text-[11px] px-2 py-0.5 rounded-xs font-semibold border ${
+                className={`text-xs px-2 py-0.5 rounded-lg font-semibold border ${
                   complaint.priority === "Critical"
                     ? "bg-[#fee2e2] text-[#991b1b] border-[#f87171]"
                     : complaint.priority === "High"
                     ? "bg-[#fff7ed] text-[#c2410c] border-[#fed7aa]"
-                    : "bg-[#f8fafc] text-slate-700 border-[#cbd5e1]"
+                    : "bg-[#f8fafc] text-slate-700 border-[#e5eaf0]"
                 }`}
-              >
-                Priority: {complaint.priority}
+              >{tr("complaints:priority_7e91b")}{localizeLabel(complaint.priority)}
               </span>
-              <span className="bg-[#f1f5f9] text-[#003366] border border-[#cbd5e1] px-2 py-0.5 rounded-xs text-[11px] font-semibold">
-                Category: {complaint.category}
+              <span className="bg-[#f1f5f9] text-aicte-navy-700 border border-[#e5eaf0] px-2 py-0.5 rounded-lg text-xs font-semibold">{tr("complaints:category_56899")}{complaint.category}
               </span>
               {complaint.hasOverlapAlert && (
                 <Link
                   to="/overlaps"
-                  className="inline-flex items-center space-x-1 bg-[#fffbeb] text-[#92400e] border border-[#fcd34d] px-2 py-0.5 rounded-xs text-[11px] font-bold hover:bg-[#fef3c7]"
+                  className="inline-flex items-center space-x-1 bg-[#fffbeb] text-[#92400e] border border-[#fcd34d] px-2 py-0.5 rounded-lg text-xs font-bold hover:bg-[#fef3c7]"
                 >
                   <GitMerge className="w-3.5 h-3.5 text-[#b45309]" />
-                  <span>Overlap Flagged</span>
+                  <span>{tr("complaints:overlapFlagged")}</span>
                 </Link>
               )}
             </div>
-            <h1 className="text-base sm:text-lg font-bold text-[#002147] tracking-tight">{complaint.title}</h1>
-            <div className="text-xs text-slate-600">
-              Institution:{" "}
+            <h1 className="text-base sm:text-lg font-bold text-aicte-navy-900 tracking-tight"><bdi dir="auto" className="original-content">{complaint.title}</bdi></h1>
+            <div className="text-xs text-slate-600">{tr("complaints:institution")}{" "}
               <Link
                 to={`/institutions/${complaint.institutionId}`}
-                className="font-bold text-[#003366] hover:underline"
+                className="font-bold text-aicte-navy-700 hover:underline"
               >
-                {complaint.institutionName} ({complaint.aictePermanentId})
+                <bdi dir="auto" className="original-content">{complaint.institutionName}</bdi> ({complaint.aictePermanentId})
               </Link>
             </div>
           </div>
@@ -490,44 +476,42 @@ export const ComplaintDetails: React.FC = () => {
               {userCanMutate && (
                 <button
                   onClick={() => {
-                    const permitted = complaint.status === "Pending" ? "Under Process" : complaint.status === "Under Process" ? "Disposed" : "Under Process";
+                    const permitted = complaint.status;
                     setNewStatus(permitted);
                     setActionModalOpen(true);
                   }}
-                  className="px-3 py-1.5 bg-[#003366] text-white rounded-xs text-xs font-semibold hover:bg-[#002147] transition cursor-pointer"
-                >
-                  Update Status / Dispose
-                </button>
+                  className="px-3 py-1.5 bg-aicte-navy-700 text-white rounded-lg text-xs font-semibold hover:bg-aicte-navy-900 transition cursor-pointer"
+                >{tr("complaints:updateCaseProgress")}</button>
               )}
-              <button
+              {allowedActions.transfer && <button
                 onClick={() => setTransferModalOpen(true)}
-                className="px-3 py-1.5 border border-[#cbd5e1] bg-white text-slate-700 rounded-xs text-xs font-medium hover:bg-slate-50 flex items-center space-x-1 cursor-pointer"
+                className="px-3 py-1.5 border border-[#e5eaf0] bg-white text-slate-700 rounded-lg text-xs font-medium hover:bg-slate-50 flex items-center space-x-1 cursor-pointer"
               >
                 <ArrowRightLeft className="w-3.5 h-3.5 text-slate-600" />
-                <span>Transfer Case</span>
-              </button>
-              {userCanMutate && complaint.status !== "Escalated" && (
+                <span>{tr("complaints:transferCase")}</span>
+              </button>}
+              {permittedStatuses.includes("Escalated") && (
                 <button
                   onClick={() => {
                     setNewStatus("Escalated");
                     setActionModalOpen(true);
                   }}
-                  className="px-3 py-1.5 border border-red-300 bg-red-50 text-red-700 rounded-xs text-xs font-medium hover:bg-red-100 flex items-center space-x-1 cursor-pointer"
+                  className="px-3 py-1.5 border border-red-300 bg-red-50 text-red-700 rounded-lg text-xs font-medium hover:bg-red-100 flex items-center space-x-1 cursor-pointer"
                 >
                   <Flame className="w-3.5 h-3.5 text-red-600" />
-                  <span>Escalate</span>
+                  <span>{tr("complaints:escalate")}</span>
                 </button>
               )}
-              {["SYSTEM_ADMIN", "COMPETENT_AUTHORITY", "COMPETENT_AUTHORITY"].includes(user?.role || "") && (
+              {allowedActions.overrideSla && (
                 <button
                   onClick={() => {
                     setNewSlaDeadline(complaint.expectedDisposalDate);
                     setSlaModalOpen(true);
                   }}
-                  className="px-3 py-1.5 border border-amber-300 bg-amber-50 text-amber-900 rounded-xs text-xs font-semibold hover:bg-amber-100 flex items-center space-x-1 cursor-pointer"
+                  className="px-3 py-1.5 border border-amber-300 bg-amber-50 text-amber-900 rounded-lg text-xs font-semibold hover:bg-amber-100 flex items-center space-x-1 cursor-pointer"
                 >
                   <Clock className="w-3.5 h-3.5 text-amber-700" />
-                  <span>Adjust SLA Deadline</span>
+                  <span>{tr("complaints:adjustSlaDeadline")}</span>
                 </button>
               )}
             </div>
@@ -537,76 +521,77 @@ export const ComplaintDetails: React.FC = () => {
         {/* Complete AICTE PS 13-Field Metadata Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5 pt-3.5 text-xs">
           <div>
-            <span className="text-slate-500 block text-[10px] font-bold uppercase tracking-wider">Receiving Bureau</span>
+            <span className="text-slate-500 block text-xs font-bold uppercase tracking-wider">{tr("complaints:receivingBureau")}</span>
             <span className="font-semibold text-slate-800">{complaint.receivingBureauId}</span>
           </div>
           <div>
-            <span className="text-slate-500 block text-[10px] font-bold uppercase tracking-wider">Handling Bureau</span>
-            <span className="font-semibold text-[#003366]">{complaint.currentBureauId}</span>
+            <span className="text-slate-500 block text-xs font-bold uppercase tracking-wider">{tr("complaints:handlingBureau")}</span>
+            <span className="font-semibold text-aicte-navy-700"><bdi dir="ltr" className="canonical-value">{complaint.currentBureauId}</bdi></span>
           </div>
           <div>
-            <span className="text-slate-500 block text-[10px] font-bold uppercase tracking-wider">Assigned Officer</span>
+            <span className="text-slate-500 block text-xs font-bold uppercase tracking-wider">{tr("dashboard:assignedOfficer")}</span>
             <span className="font-semibold text-slate-800">
-              {complaint.assignedOfficerName || "Unassigned"}
+              {complaint.assignedOfficerName || tr("dashboard:unassigned")}
             </span>
           </div>
           <div>
-            <span className="text-slate-500 block text-[10px] font-bold uppercase tracking-wider">Date Received</span>
+            <span className="text-slate-500 block text-xs font-bold uppercase tracking-wider">{tr("complaints:dateReceived")}</span>
             <span className="font-semibold text-slate-800 font-mono">
-              {new Date(complaint.receivedDate).toLocaleDateString()}
+              {formatDate(complaint.receivedDate, false)}
             </span>
           </div>
           <div>
-            <span className="text-slate-500 block text-[10px] font-bold uppercase tracking-wider">Expected Disposal</span>
-            <span className="font-semibold text-slate-800 font-mono">{complaint.expectedDisposalDate}</span>
+            <span className="text-slate-500 block text-xs font-bold uppercase tracking-wider">{tr("complaints:expectedDisposal")}</span>
+            <span className="font-semibold text-slate-800 font-mono">{formatDate(complaint.expectedDisposalDate)}</span>
           </div>
           <div>
-            <span className="text-slate-500 block text-[10px] font-bold uppercase tracking-wider">SLA Status</span>
+            <span className="text-slate-500 block text-xs font-bold uppercase tracking-wider">{tr("complaints:slaStatus")}</span>
             <span
-              className={`font-semibold font-mono text-[11px] ${
+              className={`font-semibold font-mono text-xs ${
                 isOverdue ? "text-red-700 font-bold" : "text-emerald-700 font-bold"
               }`}
             >
-              {slaStatusText}
+              {localizeLabel(slaStatusText)}
             </span>
           </div>
         </div>
 
         {/* Next Action & Last Action Status Strip */}
-        <div className="mt-3 pt-3 border-t border-[#e2e8f0] grid grid-cols-1 md:grid-cols-2 gap-3 text-xs bg-[#f8fafc] p-2.5 rounded-xs border">
+        <div className="mt-3 pt-3 border-t border-[#e2e8f0] grid grid-cols-1 md:grid-cols-2 gap-3 text-xs bg-[#f8fafc] p-2.5 rounded-lg border">
           <div className="flex items-center space-x-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 shrink-0">Last Action:</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-500 shrink-0">{tr("complaints:lastAction")}</span>
             <span className="text-slate-800 font-medium truncate">
-              {lastAction ? `${lastAction.actionType} by ${lastAction.performedByName} (${new Date(lastAction.createdAt).toLocaleDateString()})` : "Registration Recorded"}
+              {lastAction ? tr("complaints:by", {value1: lastAction.actionType, value2: lastAction.performedByName, value3: new Date(lastAction.createdAt).toLocaleDateString()}) : tr("complaints:registrationRecorded")}
             </span>
           </div>
           <div className="flex items-center space-x-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[#003366] shrink-0">Next Action Required:</span>
-            <span className="text-[#002147] font-semibold truncate">
-              {getNextAction()} &bull; Target: {complaint.expectedDisposalDate}
+            <span className="text-xs font-bold uppercase tracking-wider text-aicte-navy-700 shrink-0">{tr("complaints:nextActionRequired")}</span>
+            <span className="text-aicte-navy-900 font-semibold truncate">
+              {getNextAction()}{tr("complaints:nextActionDate")}{formatDate(complaint.nextActionDate) || tr("dashboard:notSet")}
             </span>
           </div>
         </div>
       </div>
 
       {/* Main 2-Column Content: Description & Overlaps left, Timeline right */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2 space-y-4">
+      <nav className="tab-bar" aria-label={tr("navigation:ui.pageContext")}>{["overview", "timeline", "documents", "coordination", "related"].map(tab => <button className="tab-button" type="button" aria-pressed={detailTab === tab} onClick={() => setDetailTab(tab)} key={tab}>{tr("navigation:ui.caseTabs." + tab)}{tab === "documents" ? ` (${formatNumber(documents.length)})` : tab === "related" ? ` (${formatNumber(relatedCases.length + overlapAlerts.length)})` : ""}</button>)}</nav>
+      <div className="space-y-5">
+        <div className="space-y-5" hidden={["timeline", "coordination"].includes(detailTab)}>
           {/* Grievance Statement */}
-          <div className="bg-white border border-[#cbd5e1] rounded-xs shadow-none overflow-hidden">
-            <div className="bg-[#f8fafc] px-4 py-2.5 border-b border-[#cbd5e1] flex items-center justify-between">
-              <h3 className="text-xs font-bold text-[#003366] uppercase tracking-wider flex items-center space-x-1.5">
-                <FileText className="w-3.5 h-3.5 text-[#003366]" />
-                <span>Full Grievance Statement & Allegation</span>
-              </h3>
+          <div hidden={detailTab !== "overview"} className="bg-white border border-[#e5eaf0] rounded-lg shadow-none overflow-hidden">
+            <div className="bg-[#f8fafc] px-4 py-2.5 border-b border-[#e5eaf0] flex items-center justify-between">
+              <h2 className="text-xs font-bold text-aicte-navy-700 uppercase tracking-wider flex items-center space-x-1.5">
+                <FileText className="w-3.5 h-3.5 text-aicte-navy-700" />
+                <span>{tr("complaints:fullGrievanceStatementAllegation")}</span>
+              </h2>
             </div>
             <div className="p-4 space-y-3">
-              <div className="text-xs text-slate-700 leading-relaxed bg-[#f8fafc] p-3.5 rounded-xs border border-[#e2e8f0] whitespace-pre-wrap font-sans">
-                {complaint.description}
+              <div className="text-xs text-slate-700 leading-relaxed bg-[#f8fafc] p-3.5 rounded-lg border border-[#e2e8f0] whitespace-pre-wrap font-sans">
+                <bdi dir="auto" className="original-content">{complaint.description}</bdi>
               </div>
               {complaint.disposalRemarks && (
-                <div className="p-3 bg-[#f0fdf4] border border-[#bbf7d0] rounded-xs text-xs">
-                  <span className="font-bold text-[#166534] block">Official Disposal Resolution Record:</span>
+                <div className="p-3 bg-[#f0fdf4] border border-[#bbf7d0] rounded-lg text-xs">
+                  <span className="font-bold text-[#166534] block">{tr("complaints:officialDisposalResolutionRecord")}</span>
                   <span className="text-[#15803d] mt-1 block">{complaint.disposalRemarks}</span>
                 </div>
               )}
@@ -614,65 +599,63 @@ export const ComplaintDetails: React.FC = () => {
           </div>
 
           {/* Supporting Documents & Evidence Card */}
-          <div className="bg-white border border-[#cbd5e1] rounded-xs shadow-none overflow-hidden">
-            <div className="bg-[#f8fafc] px-4 py-2.5 border-b border-[#cbd5e1] flex items-center justify-between">
-              <h3 className="text-xs font-bold text-[#003366] uppercase tracking-wider flex items-center space-x-1.5">
-                <Paperclip className="w-3.5 h-3.5 text-[#003366]" />
-                <span>Supporting Annexures & Documents ({documents.length})</span>
-              </h3>
+          <div hidden={detailTab !== "documents"} className="bg-white border border-[#e5eaf0] rounded-lg shadow-none overflow-hidden">
+            <div className="bg-[#f8fafc] px-4 py-2.5 border-b border-[#e5eaf0] flex items-center justify-between">
+              <h2 className="text-xs font-bold text-aicte-navy-700 uppercase tracking-wider flex items-center space-x-1.5">
+                <Paperclip className="w-3.5 h-3.5 text-aicte-navy-700" />
+                <span>{tr("complaints:supportingAnnexuresDocuments")}{documents.length})</span>
+              </h2>
             </div>
 
             <div className="p-4 space-y-3">
               {/* Document List */}
               {documents.length === 0 ? (
-                <div className="text-xs text-slate-500 py-3 text-center bg-[#f8fafc] rounded-xs border border-dashed border-[#cbd5e1]">
-                  No supporting documents uploaded yet for this complaint record.
-                </div>
+                <div className="text-xs text-slate-500 py-3 text-center bg-[#f8fafc] rounded-lg border border-dashed border-[#e5eaf0]">{tr("complaints:noSupportingDocumentsUploadedYetForThisComplaintRecord")}</div>
               ) : (
                 <div className="space-y-2">
                   {documents.map(doc => (
                     <div
                       key={doc.id}
-                      className="p-2.5 bg-[#f8fafc] hover:bg-slate-100 border border-[#e2e8f0] rounded-xs flex items-center justify-between text-xs transition"
+                      className="p-2.5 bg-[#f8fafc] hover:bg-slate-100 border border-[#e2e8f0] rounded-lg flex items-center justify-between text-xs transition"
                     >
                       <div className="flex items-center space-x-2.5 overflow-hidden">
-                        <div className="p-1.5 bg-white rounded-xs border border-[#cbd5e1] shrink-0 text-[#003366]">
+                        <div className="p-1.5 bg-white rounded-lg border border-[#e5eaf0] shrink-0 text-aicte-navy-700">
                           <FileText className="w-3.5 h-3.5" />
                         </div>
                         <div className="truncate">
                           <div className="font-semibold text-slate-800 truncate flex items-center space-x-2">
                             <span className="truncate">{doc.originalName}</span>
-                            <span className="text-[10px] bg-[#e0f2fe] text-[#0369a1] px-1.5 py-0.2 rounded-xs font-semibold shrink-0">
-                              {doc.documentType}
+                            <span className="text-xs bg-[#e0f2fe] text-[#0369a1] px-1.5 py-0.2 rounded-lg font-semibold shrink-0">
+                              {localizeLabel(doc.documentType)}
                             </span>
                           </div>
-                          <div className="text-[10px] text-slate-500 mt-0.5">
-                            {Math.round(doc.fileSize / 1024)} KB &bull; Uploaded by {doc.uploadedByName} on {new Date(doc.uploadedAt).toLocaleDateString()}
+                          <div className="text-xs text-slate-500 mt-0.5">
+                            {Math.round(doc.fileSize / 1024)}{tr("complaints:kbUploadedBy")}{doc.uploadedByName} on {formatDate(doc.uploadedAt, false)}
                           </div>
                         </div>
                       </div>
 
-                      <div className="flex items-center space-x-2 shrink-0 ml-3">
+                      <div className="flex items-center space-x-2 shrink-0 ms-3">
                         <button
                           type="button"
                           onClick={async () => {
                             try {
                               await api.downloadComplaintDocument(complaint.id, doc.id, doc.originalName);
                             } catch (err: any) {
-                              alert(err.message || "Failed to download document");
+                              alert(localizeError(err.message || tr("complaints:failedToDownloadDocument")));
                             }
                           }}
-                          className="px-2.5 py-1 bg-white border border-[#cbd5e1] text-slate-700 hover:text-[#003366] rounded-xs text-[11px] font-medium flex items-center space-x-1 cursor-pointer"
+                          className="px-2.5 py-1 bg-white border border-[#e5eaf0] text-slate-700 hover:text-aicte-navy-700 rounded-lg text-xs font-medium flex items-center space-x-1 cursor-pointer"
                         >
                           <ExternalLink className="w-3 h-3" />
-                          <span>Download</span>
+                          <span>{tr("complaints:download")}</span>
                         </button>
-                        {canModify && (
+                        {allowedActions.update && (
                           <button
                             type="button"
                             onClick={() => handleDeleteDocument(doc.id)}
-                            className="p-1 text-slate-400 hover:text-red-600 rounded-xs"
-                            title="Remove file"
+                            className="p-1 text-slate-500 hover:text-red-600 rounded-lg"
+                            title={tr("complaints:removeFile")}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -684,43 +667,43 @@ export const ComplaintDetails: React.FC = () => {
               )}
 
               {/* Upload New Document Form */}
-              {canModify && (
+              {allowedActions.upload && (
                 <form onSubmit={handleUploadDocument} className="pt-3 border-t border-[#e2e8f0] space-y-2.5">
-                  <span className="text-xs font-semibold text-slate-700 block">Attach Official Annexure / Evidence</span>
+                  <span className="text-xs font-semibold text-slate-700 block">{tr("complaints:attachOfficialAnnexureEvidence")}</span>
                   {docError && (
-                    <div className="text-[11px] text-red-700 bg-red-50 p-2 rounded-xs border border-red-200">
-                      {docError}
+                    <div className="text-xs text-red-700 bg-red-50 p-2 rounded-lg border border-red-200">
+                      {localizeError(docError)}
                     </div>
                   )}
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     <select
-                      value={uploadDocType}
+                      aria-label={tr("complaints:documentType")} value={uploadDocType}
                       onChange={e => setUploadDocType(e.target.value)}
-                      className="text-xs bg-white border border-[#cbd5e1] rounded-xs px-2.5 py-1.5 focus:border-[#003366] focus:outline-none"
+                      className="text-xs bg-white border border-[#e5eaf0] rounded-lg px-2.5 py-1.5 focus:border-[#003366] focus:outline-none"
                     >
-                      <option value="Investigation Report">Investigation Report</option>
-                      <option value="Institution Reply">Institution Reply / Defense</option>
-                      <option value="Hearing Notice">Hearing Notice / Summon</option>
-                      <option value="Complaint Evidence">Complaint Evidence</option>
-                      <option value="Other">Other Supporting File</option>
+                      <option value="Investigation Report">{tr("complaints:investigationReport")}</option>
+                      <option value="Institution Reply">{tr("complaints:institutionReplyDefense")}</option>
+                      <option value="Hearing Notice">{tr("complaints:hearingNoticeSummon")}</option>
+                      <option value="Complaint Evidence">{tr("complaints:complaintEvidence")}</option>
+                      <option value="Other">{tr("complaints:otherSupportingFile")}</option>
                     </select>
                     <input
                       type="file"
-                      id="detail-doc-upload"
+                      id="detail-doc-upload" aria-label={tr("complaints:attachOfficialAnnexureEvidence")}
                       onChange={e => {
                         if (e.target.files && e.target.files[0]) {
                           setUploadFile(e.target.files[0]);
                         }
                       }}
-                      className="text-xs text-slate-500 file:mr-2 file:py-1 file:px-2.5 file:rounded-xs file:border-0 file:text-xs file:font-semibold file:bg-slate-200 hover:file:bg-slate-300 cursor-pointer"
+                      className="text-xs text-slate-500 file:me-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-200 hover:file:bg-slate-300 cursor-pointer"
                     />
                     <button
                       type="submit"
                       disabled={!uploadFile || uploadingDoc}
-                      className="px-3 py-1.5 bg-[#003366] text-white rounded-xs text-xs font-semibold hover:bg-[#002147] disabled:opacity-40 flex items-center justify-center space-x-1 cursor-pointer"
+                      className="px-3 py-1.5 bg-aicte-navy-700 text-white rounded-lg text-xs font-semibold hover:bg-aicte-navy-900 disabled:opacity-40 flex items-center justify-center space-x-1 cursor-pointer"
                     >
                       <Upload className="w-3.5 h-3.5" />
-                      <span>{uploadingDoc ? "Uploading..." : "Upload Annexure"}</span>
+                      <span>{uploadingDoc ? tr("complaints:uploading") : tr("complaints:uploadAnnexure")}</span>
                     </button>
                   </div>
                 </form>
@@ -730,42 +713,36 @@ export const ComplaintDetails: React.FC = () => {
 
           {/* Cross-Bureau Overlap Alerts for this case */}
           {overlapAlerts.length > 0 && (
-            <div className="bg-white border border-[#f59e0b] rounded-xs shadow-none overflow-hidden">
+            <div hidden={detailTab !== "related"} className="bg-white border border-[#f59e0b] rounded-lg shadow-none overflow-hidden">
               <div className="bg-[#fffbeb] px-4 py-2.5 border-b border-[#fde68a] flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <GitMerge className="w-4 h-4 text-[#b45309]" />
-                  <h3 className="text-xs font-bold text-[#92400e] uppercase tracking-wider">
-                    Cross-Bureau Overlap Alerts ({overlapAlerts.length})
-                  </h3>
+                  <h2 className="text-xs font-bold text-[#92400e] uppercase tracking-wider">{tr("complaints:crossBureauOverlapAlerts")}{overlapAlerts.length})
+                  </h2>
                 </div>
-                <Link to="/overlaps" className="text-xs text-[#003366] font-semibold hover:underline">
-                  Compare in Overlap Center &rarr;
-                </Link>
+                <Link to="/overlaps" className="text-xs text-aicte-navy-700 font-semibold hover:underline">{tr("complaints:compareInOverlapCenter")}</Link>
               </div>
 
               <div className="p-4 space-y-2.5">
                 {overlapAlerts.map(alert => (
                   <div
                     key={alert.id}
-                    className="p-3 bg-[#fffbeb]/50 border border-[#fde68a] rounded-xs space-y-1.5 text-xs"
+                    className="p-3 bg-[#fffbeb]/50 border border-[#fde68a] rounded-lg space-y-1.5 text-xs"
                   >
                     <div className="flex items-center justify-between">
                       <span className="font-mono font-bold text-[#92400e]">{alert.alertId}</span>
-                      <span className="bg-[#fef3c7] text-[#92400e] border border-[#fde68a] px-1.5 py-0.2 rounded-xs font-bold text-[10px]">
-                        Match Confidence: {alert.ruleMatchScore}%
+                      <span className="bg-[#fef3c7] text-[#92400e] border border-[#fde68a] px-1.5 py-0.2 rounded-lg font-bold text-xs">{tr("complaints:matchConfidence")}{alert.ruleMatchScore}%
                       </span>
                     </div>
 
-                    <div className="font-semibold text-slate-800">
-                      Companion Case:{" "}
-                      <span className="text-[#003366] font-mono">
+                    <div className="font-semibold text-slate-800">{tr("complaints:companionCase")}{" "}
+                      <span className="text-aicte-navy-700 font-mono">
                         {alert.complaintIdA === complaint.id ? alert.complaintRefB : alert.complaintRefA}
-                      </span>{" "}
-                      under {alert.complaintIdA === complaint.id ? alert.bureauB : alert.bureauA}
+                      </span>{" "}{tr("complaints:under")}{alert.complaintIdA === complaint.id ? alert.bureauB : alert.bureauA}
                     </div>
 
-                    <div className="text-slate-600 text-[11px]">
-                      <strong>Rule Trigger:</strong> {alert.matchReasons.join("; ")}
+                    <div className="text-slate-600 text-xs">
+                      <strong>{tr("complaints:ruleTrigger")}</strong> {alert.matchReasons.join("; ")}
                     </div>
                   </div>
                 ))}
@@ -775,25 +752,23 @@ export const ComplaintDetails: React.FC = () => {
 
           {/* Linked Related Cases */}
           {relatedCases.length > 0 && (
-            <div className="bg-white border border-[#cbd5e1] rounded-xs shadow-none overflow-hidden">
-              <div className="bg-[#f8fafc] px-4 py-2.5 border-b border-[#cbd5e1]">
-                <h3 className="text-xs font-bold text-[#003366] uppercase tracking-wider">
-                  Confirmed Related Cases
-                </h3>
+            <div hidden={detailTab !== "related"} className="bg-white border border-[#e5eaf0] rounded-lg shadow-none overflow-hidden">
+              <div className="bg-[#f8fafc] px-4 py-2.5 border-b border-[#e5eaf0]">
+                <h2 className="text-xs font-bold text-aicte-navy-700 uppercase tracking-wider">{tr("complaints:confirmedRelatedCases")}</h2>
               </div>
               <div className="divide-y divide-[#e2e8f0] p-4">
                 {relatedCases.map(rel => (
                   <div key={rel.id} className="py-2.5 flex items-center justify-between text-xs first:pt-0 last:pb-0">
                     <div>
-                      <span className="font-mono font-semibold text-[#003366]">
+                      <span className="font-mono font-semibold text-aicte-navy-700">
                         {rel.complaintIdA === complaint.id ? rel.complaintRefB : rel.complaintRefA}
                       </span>
-                      <span className="ml-2 text-[10px] bg-slate-100 text-slate-700 px-1.5 py-0.2 rounded-xs font-medium border border-slate-200">
+                      <span className="ms-2 text-xs bg-slate-100 text-slate-700 px-1.5 py-0.2 rounded-lg font-medium border border-slate-200">
                         {rel.relationshipType}
                       </span>
-                      <div className="text-[11px] text-slate-600 mt-0.5">{rel.notes}</div>
+                      <div className="text-xs text-slate-600 mt-0.5">{rel.notes}</div>
                     </div>
-                    <span className="text-[10px] text-slate-500">Linked by {rel.linkedByName}</span>
+                    <span className="text-xs text-slate-500">{tr("complaints:linkedBy")}{rel.linkedByName}</span>
                   </div>
                 ))}
               </div>
@@ -802,32 +777,29 @@ export const ComplaintDetails: React.FC = () => {
         </div>
 
         {/* Right Column: Case History & Audit Timeline */}
-        <div className="bg-white border border-[#cbd5e1] rounded-xs shadow-none overflow-hidden h-fit">
-          <div className="bg-[#f8fafc] px-4 py-2.5 border-b border-[#cbd5e1] flex items-center space-x-2">
-            <History className="w-3.5 h-3.5 text-[#003366]" />
-            <h3 className="text-xs font-bold uppercase tracking-wider text-[#003366]">
-              Chronological Audit Trail
-            </h3>
+        <div hidden={detailTab !== "timeline"} className="bg-white border border-[#e5eaf0] rounded-lg shadow-none overflow-hidden h-fit">
+          <div className="bg-[#f8fafc] px-4 py-2.5 border-b border-[#e5eaf0] flex items-center space-x-2">
+            <History className="w-3.5 h-3.5 text-aicte-navy-700" />
+            <h2 className="text-xs font-bold uppercase tracking-wider text-aicte-navy-700">{tr("complaints:chronologicalAuditTrail")}</h2>
           </div>
 
           <div className="p-4">
-            <div className="relative pl-4 space-y-4 before:content-[''] before:absolute before:left-1.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-[#cbd5e1]">
+            <div className="relative ps-4 space-y-4 before:content-[''] before:absolute before:start-1.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-[#cbd5e1]">
               {history.map((hist, i) => (
                 <div key={hist.id || i} className="relative text-xs">
-                  <div className="absolute -left-4 top-1 w-2.5 h-2.5 rounded-full bg-[#003366] border-2 border-white ring-1 ring-[#cbd5e1]" />
+                  <div className="absolute -start-4 top-1 w-2.5 h-2.5 rounded-full bg-aicte-navy-700 border-2 border-white ring-1 ring-[#cbd5e1]" />
                   <div className="font-semibold text-slate-800 flex items-center justify-between">
                     <span>{hist.actionType}</span>
-                    <span className="text-[10px] text-slate-500 font-mono">
-                      {new Date(hist.createdAt).toLocaleDateString()}
+                    <span className="text-xs text-slate-500 font-mono">
+                      {formatDate(hist.createdAt, false)}
                     </span>
                   </div>
                   {hist.toStatus && (
-                    <span className="inline-block mt-0.5 px-1.5 py-0.2 rounded-xs text-[10px] bg-[#f1f5f9] text-[#003366] font-medium border border-[#cbd5e1]">
-                      Status: {hist.toStatus}
+                    <span className="inline-block mt-0.5 px-1.5 py-0.2 rounded-lg text-xs bg-[#f1f5f9] text-aicte-navy-700 font-medium border border-[#e5eaf0]">{tr("complaints:statusLabel")}{localizeLabel(hist.toStatus)}
                     </span>
                   )}
-                  <p className="text-slate-600 text-[11px] mt-1 leading-normal">{hist.remarks}</p>
-                  <div className="text-[10px] text-slate-400 mt-0.5">By {hist.performedByName}</div>
+                  <p className="text-slate-600 text-xs mt-1 leading-normal"><bdi dir="auto" className="original-content">{hist.remarks}</bdi></p>
+                  <div className="text-xs text-slate-500 mt-0.5">By {hist.performedByName}</div>
                 </div>
               ))}
             </div>
@@ -835,133 +807,132 @@ export const ComplaintDetails: React.FC = () => {
         </div>
       </div>
 
+      {detailTab === "related" && !overlapAlerts.length && !relatedCases.length && <div className="surface"><EmptyState title={tr("complaints:noRecordsMatchTheSpecifiedSearchAndFilterParameters")}/></div>}
       {/* UPDATE STATUS MODAL */}
+      <div hidden={detailTab !== "coordination"} className="space-y-4">
+      {!!allowedActions.request&&<section className="border border-slate-200 bg-white p-4" id="coordination"><CoordinationCaseLink complaintId={complaint.id}/></section>}
+      <WorkflowRequests complaint={complaint} canSubmit={!!allowedActions.request} onChange={fetchDetails}/>
+      </div>
       {actionModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-xs shadow-lg max-w-md w-full border border-[#cbd5e1] overflow-hidden">
-            <div className="bg-[#f8fafc] px-4 py-3 border-b border-[#cbd5e1] flex items-center justify-between">
-              <h3 className="text-sm font-bold text-[#002147]">Update Complaint Status</h3>
-              <button onClick={() => setActionModalOpen(false)} className="text-slate-400 hover:text-slate-700 cursor-pointer">
+        <ModalFrame className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4" onClose={() => setActionModalOpen(false)}>
+          <div className="bg-white rounded-lg shadow-lg max-w-md w-full border border-[#e5eaf0] overflow-hidden">
+            <div className="bg-[#f8fafc] px-4 py-3 border-b border-[#e5eaf0] flex items-center justify-between">
+              <h3 className="text-sm font-bold text-aicte-navy-900">{tr("complaints:updateComplaintStatus")}</h3>
+              <button onClick={() => setActionModalOpen(false)} className="text-slate-500 hover:text-slate-700 cursor-pointer" aria-label={tr("common:cancel")}>
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <form onSubmit={handleUpdateStatus} className="p-4 space-y-3.5">
               {actionError && (
-                <div className="p-2.5 bg-red-50 text-red-700 text-xs rounded-xs border border-red-200">
-                  {actionError}
+                <div className="p-2.5 bg-red-50 text-red-700 text-xs rounded-lg border border-red-200">
+                  {localizeError(actionError)}
                 </div>
               )}
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  New Status (Permitted Transitions from {complaint.status})
+                <label className="block text-xs font-semibold text-slate-700 mb-1">{tr("complaints:newStatusPermittedTransitionsFrom")}{localizeLabel(complaint.status)})
                 </label>
                 <select
+                  aria-label={tr("complaints:newCaseStatus")}
                   value={newStatus}
                   onChange={e => setNewStatus(e.target.value)}
-                  className="w-full bg-white border border-[#cbd5e1] rounded-xs px-3 py-1.5 text-xs focus:border-[#003366] focus:outline-none"
+                  className="w-full bg-white border border-[#e5eaf0] rounded-lg px-3 py-1.5 text-xs focus:border-[#003366] focus:outline-none"
                 >
-                  <option value={complaint.status}>{complaint.status} (Record action)</option>
-                  {permittedStatuses.map(status=><option key={status} value={status}>{status}</option>)}
+                  <option value={complaint.status}>{localizeLabel(complaint.status)}{tr("complaints:recordAction")}</option>
+                  {permittedStatuses.map(status=><option key={status} value={status}>{localizeLabel(status)}</option>)}
                 </select>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Official Action Remarks / Findings <span className="text-red-600">*</span>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">{tr("complaints:officialActionRemarksFindings")}<span className="text-red-600">*</span>
                 </label>
                 <textarea
                   rows={4}
                   required
+                  aria-label={tr("complaints:officialActionRemarks")}
                   value={actionRemarks}
                   onChange={e => setActionRemarks(e.target.value)}
-                  placeholder="Record verification notes, notice dispatched dates, institution reply findings..."
-                  className="w-full bg-white border border-[#cbd5e1] rounded-xs px-3 py-1.5 text-xs focus:border-[#003366] focus:outline-none"
+                  placeholder={tr("complaints:recordVerificationNotesNoticeDispatchedDatesInstitutionReplyFindings")}
+                  className="w-full bg-white border border-[#e5eaf0] rounded-lg px-3 py-1.5 text-xs focus:border-[#003366] focus:outline-none"
                 />
               </div>
 
-              <label className="block text-xs">Next action<input className="block w-full border p-2" value={nextAction} onChange={e=>setNextAction(e.target.value)}/></label>
-              <label className="block text-xs">Next action date<input type="date" className="block border p-2" value={nextActionDate} onChange={e=>setNextActionDate(e.target.value)}/></label>
-              {user?.role==="BUREAU_HEAD"&&<label className="block text-xs">Assign officer<select className="block border p-2" value={assignee} onChange={e=>setAssignee(e.target.value)}><option value="">Keep current assignment</option>{officers.map(o=><option key={o.id} value={o.id}>{o.fullName}</option>)}</select></label>}
+              <label className="block text-xs">{tr("complaints:nextAction")}<input className="block w-full border p-2" value={nextAction} onChange={e=>setNextAction(e.target.value)}/></label>
+              <label className="block text-xs">{tr("complaints:nextActionDate_aea40")}<input type="date" className="block border p-2" value={nextActionDate} onChange={e=>setNextActionDate(e.target.value)}/></label>
+              {allowedActions.assign&&<fieldset id="assignment" className="block text-sm"><legend>{tr("navigation:officerAssignment")}</legend><label>{tr("complaints:searchEligibleOfficers")}<input className="block border p-2" value={officerSearch} onChange={e=>setOfficerSearch(e.target.value)}/></label><label>{tr("complaints:assignOfficer")}<select className="block border p-2" value={assignee} onChange={e=>setAssignee(e.target.value)}><option value="">{tr("complaints:keepCurrentAssignment")}</option>{officers.map(o=><option key={o.id} value={o.id}>{o.fullName} ({formatNumber(o.activeCases)}{tr("complaints:activeCases")}</option>)}</select></label></fieldset>}
               <div className="flex justify-end space-x-2 pt-3 border-t border-[#e2e8f0]">
                 <button
                   type="button"
                   onClick={() => setActionModalOpen(false)}
-                  className="px-3 py-1.5 border border-[#cbd5e1] rounded-xs text-xs font-medium text-slate-700 hover:bg-slate-50 cursor-pointer"
-                >
-                  Cancel
-                </button>
+                  className="px-3 py-1.5 border border-[#e5eaf0] rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-50 cursor-pointer"
+                >{tr("common:cancel")}</button>
                 <button
                   type="submit"
                   disabled={actionSubmitting}
-                  className="px-3.5 py-1.5 bg-[#003366] text-white rounded-xs text-xs font-semibold hover:bg-[#002147] disabled:opacity-50 cursor-pointer"
+                  className="px-3.5 py-1.5 bg-aicte-navy-700 text-white rounded-lg text-xs font-semibold hover:bg-aicte-navy-900 disabled:opacity-50 cursor-pointer"
                 >
-                  {actionSubmitting ? "Saving..." : "Confirm & Commit"}
+                  {actionSubmitting ? tr("complaints:saving") : tr("complaints:confirmCommit")}
                 </button>
               </div>
             </form>
           </div>
-        </div>
+        </ModalFrame>
       )}
 
       {/* SLA OVERRIDE MODAL (Feature 4) */}
       {slaModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-xs shadow-lg max-w-md w-full border border-[#cbd5e1] overflow-hidden">
-            <div className="bg-[#f8fafc] px-4 py-3 border-b border-[#cbd5e1] flex items-center justify-between">
+        <ModalFrame className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4" onClose={() => setSlaModalOpen(false)}>
+          <div className="bg-white rounded-lg shadow-lg max-w-md w-full border border-[#e5eaf0] overflow-hidden">
+            <div className="bg-[#f8fafc] px-4 py-3 border-b border-[#e5eaf0] flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-bold text-[#002147]">Authorized SLA Target Override</h3>
-                <p className="text-[11px] text-slate-500">Record an official SLA deadline extension with full audit trail.</p>
+                <h3 className="text-sm font-bold text-aicte-navy-900">{tr("complaints:authorizedSlaTargetOverride")}</h3>
+                <p className="text-xs text-slate-500">{tr("complaints:recordAnOfficialSlaDeadlineExtensionWithFullAudit")}</p>
               </div>
-              <button onClick={() => setSlaModalOpen(false)} className="text-slate-400 hover:text-slate-700 cursor-pointer">
+              <button onClick={() => setSlaModalOpen(false)} className="text-slate-500 hover:text-slate-700 cursor-pointer" aria-label={tr("common:cancel")}>
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <form onSubmit={handleOverrideSla} className="p-4 space-y-3.5">
               {slaError && (
-                <div className="p-2.5 bg-red-50 text-red-700 text-xs rounded-xs border border-red-200">
-                  {slaError}
+                <div className="p-2.5 bg-red-50 text-red-700 text-xs rounded-lg border border-red-200">
+                  {localizeError(slaError)}
                 </div>
               )}
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Current Target Deadline
-                </label>
-                <input
+                <label className="block text-xs font-semibold text-slate-700 mb-1">{tr("complaints:currentTargetDeadline")}</label>
+                <input aria-label={tr("complaints:currentTargetDeadline")}
                   type="text"
                   readOnly
                   value={complaint.expectedDisposalDate}
-                  className="w-full bg-[#f1f5f9] border border-[#cbd5e1] rounded-xs px-3 py-1.5 text-xs font-mono text-slate-600"
+                  className="w-full bg-[#f1f5f9] border border-[#e5eaf0] rounded-lg px-3 py-1.5 text-xs font-mono text-slate-600"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  New Adjusted Disposal Deadline <span className="text-red-600">*</span>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">{tr("complaints:newAdjustedDisposalDeadline")}<span className="text-red-600">*</span>
                 </label>
-                <input
+                <input aria-label={tr("complaints:newAdjustedDisposalDeadline")}
                   type="date"
                   required
                   value={newSlaDeadline}
                   onChange={e => setNewSlaDeadline(e.target.value)}
-                  className="w-full bg-white border border-[#cbd5e1] rounded-xs px-3 py-1.5 text-xs focus:border-[#003366] focus:outline-none"
+                  className="w-full bg-white border border-[#e5eaf0] rounded-lg px-3 py-1.5 text-xs focus:border-[#003366] focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Administrative Override Reason & Justification <span className="text-red-600">*</span>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">{tr("complaints:administrativeOverrideReasonJustification")}<span className="text-red-600">*</span>
                 </label>
-                <textarea
+                <textarea aria-label={tr("complaints:administrativeOverrideReasonJustification")}
                   rows={4}
                   required
                   value={slaOverrideReason}
                   onChange={e => setSlaOverrideReason(e.target.value)}
-                  placeholder="Mandatory administrative justification (e.g., Court stay order, expert fact-finding committee report extension)..."
-                  className="w-full bg-white border border-[#cbd5e1] rounded-xs px-3 py-1.5 text-xs focus:border-[#003366] focus:outline-none"
+                  placeholder={tr("complaints:mandatoryAdministrativeJustificationEGCourtStayOrderExpert")}
+                  className="w-full bg-white border border-[#e5eaf0] rounded-lg px-3 py-1.5 text-xs focus:border-[#003366] focus:outline-none"
                 />
               </div>
 
@@ -969,63 +940,58 @@ export const ComplaintDetails: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setSlaModalOpen(false)}
-                  className="px-3 py-1.5 border border-[#cbd5e1] rounded-xs text-xs font-medium text-slate-700 hover:bg-slate-50 cursor-pointer"
-                >
-                  Cancel
-                </button>
+                  className="px-3 py-1.5 border border-[#e5eaf0] rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-50 cursor-pointer"
+                >{tr("common:cancel")}</button>
                 <button
                   type="submit"
                   disabled={slaSubmitting}
-                  className="px-3.5 py-1.5 bg-[#b45309] text-white rounded-xs text-xs font-semibold hover:bg-[#92400e] disabled:opacity-50 cursor-pointer"
+                  className="px-3.5 py-1.5 bg-[#b45309] text-white rounded-lg text-xs font-semibold hover:bg-[#92400e] disabled:opacity-50 cursor-pointer"
                 >
-                  {slaSubmitting ? "Committing..." : "Apply SLA Override"}
+                  {slaSubmitting ? tr("complaints:committing") : tr("complaints:applySlaOverride")}
                 </button>
               </div>
             </form>
           </div>
-        </div>
+        </ModalFrame>
       )}
 
       {/* TRANSFER MODAL */}
       {transferModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-xs shadow-lg max-w-md w-full border border-[#cbd5e1] overflow-hidden">
-            <div className="bg-[#f8fafc] px-4 py-3 border-b border-[#cbd5e1] flex items-center justify-between">
-              <h3 className="text-sm font-bold text-[#002147]">Transfer Case Jurisdiction</h3>
-              <button onClick={() => setTransferModalOpen(false)} className="text-slate-400 hover:text-slate-700 cursor-pointer">
+        <ModalFrame className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4" onClose={() => setTransferModalOpen(false)}>
+          <div className="bg-white rounded-lg shadow-lg max-w-md w-full border border-[#e5eaf0] overflow-hidden">
+            <div className="bg-[#f8fafc] px-4 py-3 border-b border-[#e5eaf0] flex items-center justify-between">
+              <h3 className="text-sm font-bold text-aicte-navy-900">{tr("complaints:transferCaseJurisdiction")}</h3>
+              <button onClick={() => setTransferModalOpen(false)} className="text-slate-500 hover:text-slate-700 cursor-pointer" aria-label={tr("common:cancel")}>
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <form onSubmit={handleTransfer} className="p-4 space-y-3.5">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Destination Bureau / Cell
-                </label>
-                <select
+                <label className="block text-xs font-semibold text-slate-700 mb-1">{tr("complaints:destinationBureauCell")}</label>
+                <select aria-label={tr("complaints:destinationBureauCell")}
                   value={transferBureau}
                   onChange={e => setTransferBureau(e.target.value)}
-                  className="w-full bg-white border border-[#cbd5e1] rounded-xs px-3 py-1.5 text-xs focus:border-[#003366] focus:outline-none"
+                  className="w-full bg-white border border-[#e5eaf0] rounded-lg px-3 py-1.5 text-xs focus:border-[#003366] focus:outline-none"
                 >
-                  <option value="RB">Regulation Bureau (RB)</option>
-                  <option value="PGRC">Public Grievance Redressal Cell (PGRC)</option>
-                  <option value="RO">Regional Offices (RO)</option>
-                  <option value="AB">Approval Bureau (AB)</option>
-                  <option value="PB">Policy & Academic Bureau (PB)</option>
+                  <option value="RB">{tr("complaints:regulationBureauRb")}</option>
+                  <option value="PGRC">{tr("complaints:publicGrievanceRedressalCellPgrc")}</option>
+                  <option value="RO">{tr("complaints:regionalOfficesRo")}</option>
+                  <option value="AB">{tr("complaints:approvalBureauAb")}</option>
+                  <option value="PB">{tr("complaints:policyAcademicBureauPb")}</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Transfer Justification & Reason <span className="text-red-600">*</span>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">{tr("complaints:transferJustificationReason")}<span className="text-red-600">*</span>
                 </label>
-                <textarea
+                <textarea aria-label={tr("complaints:transferJustificationReason")}
                   rows={4}
                   required
                   value={transferReason}
                   onChange={e => setTransferReason(e.target.value)}
-                  placeholder="Explain why this complaint requires cross-bureau reassignment..."
-                  className="w-full bg-white border border-[#cbd5e1] rounded-xs px-3 py-1.5 text-xs focus:border-[#003366] focus:outline-none"
+                  placeholder={tr("complaints:explainWhyThisComplaintRequiresCrossBureauReassignment")}
+                  className="w-full bg-white border border-[#e5eaf0] rounded-lg px-3 py-1.5 text-xs focus:border-[#003366] focus:outline-none"
                 />
               </div>
 
@@ -1033,60 +999,57 @@ export const ComplaintDetails: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setTransferModalOpen(false)}
-                  className="px-3 py-1.5 border border-[#cbd5e1] rounded-xs text-xs font-medium text-slate-700 hover:bg-slate-50 cursor-pointer"
-                >
-                  Cancel
-                </button>
+                  className="px-3 py-1.5 border border-[#e5eaf0] rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-50 cursor-pointer"
+                >{tr("common:cancel")}</button>
                 <button
                   type="submit"
                   disabled={transferSubmitting}
-                  className="px-3.5 py-1.5 bg-[#003366] text-white rounded-xs text-xs font-semibold hover:bg-[#002147] disabled:opacity-50 cursor-pointer"
+                  className="px-3.5 py-1.5 bg-aicte-navy-700 text-white rounded-lg text-xs font-semibold hover:bg-aicte-navy-900 disabled:opacity-50 cursor-pointer"
                 >
-                  {transferSubmitting ? "Transferring..." : "Confirm Transfer"}
+                  {transferSubmitting ? tr("complaints:transferring") : tr("complaints:confirmTransfer")}
                 </button>
               </div>
             </form>
           </div>
-        </div>
+        </ModalFrame>
       )}
 
       {/* TRANSFER ADJUDICATION MODAL */}
       {adjudicateModalOpen && pendingTransfer && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-xs shadow-lg max-w-md w-full border border-[#cbd5e1] overflow-hidden">
+        <ModalFrame className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4" onClose={() => setAdjudicateModalOpen(false)}>
+          <div className="bg-white rounded-lg shadow-lg max-w-md w-full border border-[#e5eaf0] overflow-hidden">
             <div className={`px-4 py-3 text-white flex items-center justify-between ${
               adjudicateAction === "Accepted" ? "bg-emerald-800" : "bg-rose-800"
             }`}>
               <h3 className="text-sm font-bold text-white">
-                {adjudicateAction === "Accepted" ? "Accept Jurisdiction Transfer" : "Decline Case Transfer"}
+                {adjudicateAction === "Accepted" ? tr("complaints:acceptJurisdictionTransfer") : tr("complaints:declineCaseTransfer")}
               </h3>
-              <button onClick={() => setAdjudicateModalOpen(false)} className="text-slate-200 hover:text-white cursor-pointer">
+              <button onClick={() => setAdjudicateModalOpen(false)} className="text-slate-200 hover:text-white cursor-pointer" aria-label={tr("common:cancel")}>
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <form onSubmit={handleConfirmTransferAdjudicate} className="p-4 space-y-3.5">
-              <div className="p-2.5 bg-[#f8fafc] border border-slate-200 rounded-xs space-y-1 text-xs">
+              <div className="p-2.5 bg-[#f8fafc] border border-slate-200 rounded-lg space-y-1 text-xs">
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold text-slate-600">Route:</span>
-                  <span className="font-mono font-bold text-[#003366]">{pendingTransfer.fromBureauId} &rarr; {pendingTransfer.toBureauId}</span>
+                  <span className="font-semibold text-slate-600">{tr("complaints:route_61ab9")}</span>
+                  <span className="font-mono font-bold text-aicte-navy-700"><bdi dir="ltr" className="canonical-value">{pendingTransfer.fromBureauId}</bdi> &rarr; <bdi dir="ltr" className="canonical-value">{pendingTransfer.toBureauId}</bdi></span>
                 </div>
-                <div className="text-[11px] text-slate-600 mt-1 pt-1 border-t border-slate-200">
-                  <span className="font-semibold text-slate-700">Originating Reason:</span> {pendingTransfer.transferReason}
+                <div className="text-xs text-slate-600 mt-1 pt-1 border-t border-slate-200">
+                  <span className="font-semibold text-slate-700">{tr("complaints:originatingReason")}</span> <bdi dir="auto" className="original-content">{pendingTransfer.transferReason}</bdi>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Official Adjudication Remarks & Justification <span className="text-red-600">*</span>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">{tr("complaints:officialAdjudicationRemarksJustification")}<span className="text-red-600">*</span>
                 </label>
-                <textarea
+                <textarea aria-label={tr("complaints:officialAdjudicationRemarksJustification")}
                   rows={3}
                   required
                   value={adjudicateRemarks}
                   onChange={e => setAdjudicateRemarks(e.target.value)}
-                  placeholder="State the regulatory grounds for accepting or declining this jurisdiction transfer..."
-                  className="w-full bg-white border border-[#cbd5e1] rounded-xs px-3 py-1.5 text-xs focus:border-[#003366] focus:outline-none"
+                  placeholder={tr("complaints:stateTheRegulatoryGroundsForAcceptingOrDecliningThis")}
+                  className="w-full bg-white border border-[#e5eaf0] rounded-lg px-3 py-1.5 text-xs focus:border-[#003366] focus:outline-none"
                 />
               </div>
 
@@ -1094,25 +1057,23 @@ export const ComplaintDetails: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setAdjudicateModalOpen(false)}
-                  className="px-3 py-1.5 border border-[#cbd5e1] rounded-xs text-xs font-medium text-slate-700 hover:bg-slate-50 cursor-pointer"
-                >
-                  Cancel
-                </button>
+                  className="px-3 py-1.5 border border-[#e5eaf0] rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-50 cursor-pointer"
+                >{tr("common:cancel")}</button>
                 <button
                   type="submit"
                   disabled={adjudicateSubmitting}
-                  className={`px-3.5 py-1.5 text-white rounded-xs text-xs font-semibold disabled:opacity-50 cursor-pointer ${
+                  className={`px-3.5 py-1.5 text-white rounded-lg text-xs font-semibold disabled:opacity-50 cursor-pointer ${
                     adjudicateAction === "Accepted"
                       ? "bg-emerald-700 hover:bg-emerald-800"
                       : "bg-rose-700 hover:bg-rose-800"
                   }`}
                 >
-                  {adjudicateSubmitting ? "Submitting..." : adjudicateAction === "Accepted" ? "Confirm & Accept" : "Confirm & Decline"}
+                  {adjudicateSubmitting ? tr("complaints:submitting") : adjudicateAction === "Accepted" ? tr("complaints:confirmAccept") : tr("complaints:confirmDecline")}
                 </button>
               </div>
             </form>
           </div>
-        </div>
+        </ModalFrame>
       )}
     </div>
   );

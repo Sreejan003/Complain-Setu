@@ -1,0 +1,17 @@
+/* Noto Sans Tamil; source: https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;600&display=swap; license: ./OFL.txt */
+@font-face {
+  font-family: 'Noto Sans Tamil';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: normal;
+  font-display: swap;
+  src: url(./851301d820bfa1a0.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Noto Sans Tamil';
+  font-style: normal;
+  font-weight: 600;
+  font-stretch: normal;
+  font-display: swap;
+  src: url(./6f64231df6188d4e.ttf) format('truetype');
+}

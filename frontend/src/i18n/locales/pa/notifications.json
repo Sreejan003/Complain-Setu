@@ -1,0 +1,20 @@
+{
+  "overdue": "ਬਕਾਇਆ",
+  "statusUpdate": "ਸਥਿਤੀ ਅੱਪਡੇਟ",
+  "governmentOfIndiaAicteAdministrativeAlerts": "ਭਾਰਤ ਸਰਕਾਰ • AICTE ਪ੍ਰਬੰਧਕੀ ਚੇਤਾਵਨੀਆਂ",
+  "officialNotificationCenter": "ਅਧਿਕਾਰਤ ਸੂਚਨਾ ਕੇਂਦਰ",
+  "auditAlertsForNewlyDetectedOverlapsApproachingSlaDeadlines": "ਨਵੇਂ ਖੋਜੇ ਗਏ ਓਵਰਲੈਪਾਂ ਲਈ ਆਡਿਟ ਅਲਰਟ, SLA ਡੈੱਡਲਾਈਨ ਦੇ ਨੇੜੇ ਆਉਣ, ਕੇਸ ਟ੍ਰਾਂਸਫਰ, ਅਤੇ ਵਾਧਾ।",
+  "markAllRead": "ਸਭ ਨੂੰ ਪੜ੍ਹਿਆ ਹੋਇਆ ਚਿੰਨ੍ਹਿਤ ਕਰੋ",
+  "filterByType": "ਕਿਸਮ ਦੁਆਰਾ ਫਿਲਟਰ ਕਰੋ:",
+  "allNotificationTypes": "ਸਾਰੀਆਂ ਸੂਚਨਾ ਕਿਸਮਾਂ",
+  "overdueDeadlines": "ਓਵਰਡਿਊ ਡੈੱਡਲਾਈਨ",
+  "caseTransfers": "ਕੇਸ ਟ੍ਰਾਂਸਫਰ",
+  "statusUpdates": "ਸਥਿਤੀ ਅੱਪਡੇਟ",
+  "unreadOnly": "ਸਿਰਫ਼ ਅਣਪੜ੍ਹਿਆ",
+  "loadingNotifications": "ਸੂਚਨਾਵਾਂ ਲੋਡ ਕੀਤੀਆਂ ਜਾ ਰਹੀਆਂ ਹਨ...",
+  "noOfficialNotificationsRecorded": "ਕੋਈ ਅਧਿਕਾਰਤ ਸੂਚਨਾਵਾਂ ਦਰਜ ਨਹੀਂ ਕੀਤੀਆਂ ਗਈਆਂ।",
+  "reviewInOverlapCenter": "ਓਵਰਲੈਪ ਸੈਂਟਰ → ਵਿੱਚ ਸਮੀਖਿਆ ਕਰੋ",
+  "inspectCaseFile": "ਕੇਸ ਫਾਈਲ ਦੀ ਜਾਂਚ ਕਰੋ →",
+  "markAsRead": "ਪੜ੍ਹੇ ਵਜੋਂ ਨਿਸ਼ਾਨਦੇਹੀ ਕਰੋ",
+  "alerts": " ਚੇਤਾਵਨੀਆਂ"
+}

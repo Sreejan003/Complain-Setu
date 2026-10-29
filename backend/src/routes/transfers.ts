@@ -1,4 +1,4 @@
-import { roleOf } from "../security/rbac.js";
+import { roleOf, authorize } from "../security/rbac.js";
 import { Router, Response } from "express";
 import { store } from "../db/store.js";
 import { requireAuth, requireRole, AuthenticatedRequest } from "../middleware/auth.js";
@@ -12,7 +12,8 @@ transfersRouter.use(requireAuth, (req: AuthenticatedRequest, res, next) => {
   if (req.method === "PATCH") {
     if (!req.user!.permissions?.includes("APPROVE_TRANSFERS")) return res.status(403).json({error:"Transfer approval has not been delegated to this account."});
     const transfer = store.getTransfers().find(t => t.id === req.path.split("/")[1]);
-    if (!transfer || transfer.acceptanceStatus !== "Pending" || (role === "BUREAU_HEAD" && req.user!.bureauId !== transfer.toBureauId)) return res.status(403).json({error:"Only the receiving Bureau Head or authorized authority may respond to a pending transfer."});
+    const complaint=transfer ? store.getTransferComplaint(transfer.complaintId) : undefined;
+    if (!transfer || !complaint || !authorize(req.user!,"transfer.respond",complaint,{region:store.getComplaintRegion(complaint),receivingBureauId:transfer.toBureauId,pending:transfer.acceptanceStatus==="Pending"})) return res.status(403).json({error:"Only the receiving Bureau Head or authorized authority may respond to a pending transfer."});
   }
   next();
 });
@@ -20,7 +21,7 @@ transfersRouter.use(requireAuth, (req: AuthenticatedRequest, res, next) => {
 // Get transfer history (Authenticated)
 transfersRouter.get("/", requireAuth, (_req: AuthenticatedRequest, res: Response) => {
   const transfers = store.getTransfers();
-  return res.json(transfers);
+  return res.json(transfers.map(t=>{const c=store.getTransferComplaint(t.complaintId);return {...t,canDecide:!!c&&authorize(_req.user!,"transfer.respond",c,{region:store.getComplaintRegion(c),receivingBureauId:t.toBureauId,pending:t.acceptanceStatus==="Pending"})};}));
 });
 
 // Initiate case transfer
@@ -48,6 +49,7 @@ transfersRouter.post(
       return res.status(403).json({ error: "Access Denied: You can only transfer cases currently in PGRC." });
     }
 
+    if (!authorize(req.user!,"transfer.initiate",complaint,{region:store.getComplaintRegion(complaint)})) return res.status(403).json({error:"Transfer initiation is not authorized."});
     try {
       const transfer = store.transferCase(
         complaintId,
@@ -69,7 +71,7 @@ transfersRouter.post(
 
       return res.status(201).json(transfer);
     } catch (err: any) {
-      return res.status(400).json({ error: err.message || "Failed to process case transfer." });
+      return res.status(err.status || 400).json({ error: err.message || "Failed to process case transfer." });
     }
   }
 );

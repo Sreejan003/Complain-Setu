@@ -1,3 +1,4 @@
+import { queryString } from "./query.js";
 import {
   UserProfile,
   Institution,
@@ -24,12 +25,22 @@ async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
     const errorBody = await res.json().catch(() => ({ error: res.statusText }));
     if (res.status===401 || errorBody.code==="SESSION_REVOKED") window.dispatchEvent(new Event("aicte-session-expired"));
-    throw new Error(errorBody.error || `HTTP ${res.status}: ${res.statusText}`);
+    throw Object.assign(new Error(errorBody.error || `HTTP ${res.status}: ${res.statusText}`),{code:errorBody.code,status:res.status});
   }
   return res.json();
 }
 
 export const api = {
+  async request<T = any>(path: string, method = "GET", body?: unknown): Promise<T> {
+    const res=await fetch(API_BASE+"/"+path,{method,headers:{...getAuthHeader(),"Content-Type":"application/json"},...(body!==undefined?{body:JSON.stringify(body)}:{})});
+    return handleResponse<T>(res);
+  },
+  async downloadCsv(filters: Record<string,string> = {}) {
+    const res=await fetch(API_BASE+"/analytics/export-csv?"+new URLSearchParams(filters),{headers:getAuthHeader()});
+    if(!res.ok) {await handleResponse(res);return;}
+    const url=URL.createObjectURL(await res.blob());
+    const link=document.createElement("a");link.href=url;link.download="aicte-complaints.csv";link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  },
   // Auth
   async login(email: string, password?: string): Promise<{ token: string; user: UserProfile }> {
     const res = await fetch(`${API_BASE}/auth/login`, {
@@ -91,14 +102,14 @@ export const api = {
 
   // Complaints
   async getComplaints(params?: Record<string, any>): Promise<{ data: Complaint[]; pagination: any }> {
-    const query = new URLSearchParams(params).toString();
+    const query = queryString(params);
     const res = await fetch(`${API_BASE}/complaints?${query}`, {
       headers: { ...getAuthHeader() }
     });
     return handleResponse(res);
   },
 
-  async getComplaintDetails(id: string): Promise<{ complaint: Complaint; permittedStatuses?: string[]; history: CaseHistory[]; relatedCases: RelatedCase[]; overlapAlerts: OverlapAlert[] }> {
+  async getComplaintDetails(id: string): Promise<{ complaint: Complaint; allowedActions?: any; permittedStatuses?: string[]; history: CaseHistory[]; relatedCases: RelatedCase[]; overlapAlerts: OverlapAlert[] }> {
     const res = await fetch(`${API_BASE}/complaints/${id}`, {
       headers: { ...getAuthHeader() }
     });
@@ -357,8 +368,7 @@ export const api = {
 
   getExportCsvUrl(filters?: Record<string, string>): string {
     const query = new URLSearchParams(filters);
-    const token = localStorage.getItem("aicte_token");
-    if (token) query.set("token", token);
+    // The URL is a location only; authenticated downloads use downloadCsv().
     return `${API_BASE}/analytics/export-csv?${query.toString()}`;
   },
 

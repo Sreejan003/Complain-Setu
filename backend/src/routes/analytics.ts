@@ -1,3 +1,4 @@
+import { roleDashboard } from "../services/roleDashboard.js";
 import { getEscalationConfig } from "../services/slaScheduler.js";
 import { Router, Response } from "express";
 import { store } from "../db/store.js";
@@ -9,18 +10,7 @@ analyticsRouter.use(requireAuth, (req: AuthenticatedRequest, res, next) => {
   next();
 });
 
-analyticsRouter.get("/role-dashboard", (req: AuthenticatedRequest,res) => {
-  const analytics = store.getDashboardAnalytics();
-  const cases = store.getComplaints({limit:10,page:Number(req.query.page)||1,search:String(req.query.search||""),status:String(req.query.status||""),category:String(req.query.category||""),assignedOfficerId:String(req.query.officer||""),receivedFrom:String(req.query.from||""),receivedTo:String(req.query.to||""),sortBy:"expectedDisposalDate",sortOrder:"asc"});
-  const all = store.getPerformanceReport();
-  const today = new Date().toISOString().slice(0,10);
-  const threshold = getEscalationConfig().approachingDeadlineDays;
-  const until = new Date(Date.now()+threshold*86400000).toISOString().slice(0,10);
-
-  // Counts operate on the full scoped collection, independent of the visible page.
-  const extras = store.getRoleCounts(until,today);
-  res.json({role:req.user!.role,kpi:analytics.kpi,...extras,cases:{...cases,data:cases.data.map(c=>({...c,lastAction:store.getLastAction(c.id)}))},performance:all,threshold});
-});
+analyticsRouter.get("/role-dashboard", (req: AuthenticatedRequest,res) => res.json(roleDashboard(req.user!,req.query)));
 
 // Overall dashboard analytics KPIs and charts (Authenticated)
 analyticsRouter.get("/dashboard", requireAuth, (_req: AuthenticatedRequest, res: Response) => {
@@ -64,7 +54,7 @@ analyticsRouter.get(
       effectiveRegion = req.user.region;
     }
 
-    const complaints = store.getComplaints({
+    const filter = {
       bureau: bureau as string,
       status: status as string,
       category: category as string,
@@ -72,8 +62,11 @@ analyticsRouter.get(
       region: effectiveRegion,
       receivedFrom: receivedFrom as string,
       receivedTo: receivedTo as string,
-      limit: 5000
-    }).data;
+      limit: 100
+    };
+    const first = store.getComplaints(filter);
+    const complaints = [...first.data];
+    for(let page=2;page<=first.pagination.totalPages;page++) complaints.push(...store.getComplaints({...filter,page}).data);
 
     // Generate CSV formatted content
     const headers = [

@@ -1,0 +1,190 @@
+{
+  "note": "Resource shape, interpolation and technical checks only. These results do not constitute native-language review.",
+  "checksPassed": true,
+  "locales": [
+    {
+      "locale": "en",
+      "keys": 1227,
+      "draftTranslated": 0,
+      "englishFallback": 0,
+      "productionEnabled": true,
+      "review": "source"
+    },
+    {
+      "locale": "hi",
+      "keys": 1227,
+      "draftTranslated": 989,
+      "englishFallback": 238,
+      "productionEnabled": false,
+      "review": "draft"
+    },
+    {
+      "locale": "mr",
+      "keys": 1227,
+      "draftTranslated": 986,
+      "englishFallback": 241,
+      "productionEnabled": false,
+      "review": "draft"
+    },
+    {
+      "locale": "gu",
+      "keys": 1227,
+      "draftTranslated": 987,
+      "englishFallback": 240,
+      "productionEnabled": false,
+      "review": "draft"
+    },
+    {
+      "locale": "ta",
+      "keys": 1227,
+      "draftTranslated": 986,
+      "englishFallback": 241,
+      "productionEnabled": false,
+      "review": "draft"
+    },
+    {
+      "locale": "te",
+      "keys": 1227,
+      "draftTranslated": 988,
+      "englishFallback": 239,
+      "productionEnabled": false,
+      "review": "draft"
+    },
+    {
+      "locale": "bn",
+      "keys": 1227,
+      "draftTranslated": 989,
+      "englishFallback": 238,
+      "productionEnabled": false,
+      "review": "draft"
+    },
+    {
+      "locale": "kn",
+      "keys": 1227,
+      "draftTranslated": 987,
+      "englishFallback": 240,
+      "productionEnabled": false,
+      "review": "draft"
+    },
+    {
+      "locale": "ml",
+      "keys": 1227,
+      "draftTranslated": 985,
+      "englishFallback": 242,
+      "productionEnabled": false,
+      "review": "draft"
+    },
+    {
+      "locale": "pa",
+      "keys": 1227,
+      "draftTranslated": 987,
+      "englishFallback": 240,
+      "productionEnabled": false,
+      "review": "draft"
+    },
+    {
+      "locale": "or",
+      "keys": 1227,
+      "draftTranslated": 987,
+      "englishFallback": 240,
+      "productionEnabled": false,
+      "review": "draft"
+    },
+    {
+      "locale": "as",
+      "keys": 1227,
+      "draftTranslated": 984,
+      "englishFallback": 243,
+      "productionEnabled": false,
+      "review": "draft"
+    },
+    {
+      "locale": "ur",
+      "keys": 1227,
+      "draftTranslated": 988,
+      "englishFallback": 239,
+      "productionEnabled": false,
+      "review": "draft"
+    },
+    {
+      "locale": "ne",
+      "keys": 1227,
+      "draftTranslated": 987,
+      "englishFallback": 240,
+      "productionEnabled": false,
+      "review": "draft"
+    },
+    {
+      "locale": "sa",
+      "keys": 1227,
+      "draftTranslated": 990,
+      "englishFallback": 237,
+      "productionEnabled": false,
+      "review": "draft"
+    },
+    {
+      "locale": "mai",
+      "keys": 1227,
+      "draftTranslated": 987,
+      "englishFallback": 240,
+      "productionEnabled": false,
+      "review": "draft"
+    },
+    {
+      "locale": "kok",
+      "keys": 1227,
+      "draftTranslated": 993,
+      "englishFallback": 234,
+      "productionEnabled": false,
+      "review": "draft"
+    },
+    {
+      "locale": "doi",
+      "keys": 1227,
+      "draftTranslated": 979,
+      "englishFallback": 248,
+      "productionEnabled": false,
+      "review": "draft"
+    },
+    {
+      "locale": "brx",
+      "keys": 1227,
+      "draftTranslated": 13,
+      "englishFallback": 1214,
+      "productionEnabled": false,
+      "review": "draft"
+    },
+    {
+      "locale": "mni-Mtei",
+      "keys": 1227,
+      "draftTranslated": 974,
+      "englishFallback": 253,
+      "productionEnabled": false,
+      "review": "draft"
+    },
+    {
+      "locale": "sat-Olck",
+      "keys": 1227,
+      "draftTranslated": 982,
+      "englishFallback": 245,
+      "productionEnabled": false,
+      "review": "draft"
+    },
+    {
+      "locale": "ks-Arab",
+      "keys": 1227,
+      "draftTranslated": 15,
+      "englishFallback": 1212,
+      "productionEnabled": false,
+      "review": "draft"
+    },
+    {
+      "locale": "sd-Arab",
+      "keys": 1227,
+      "draftTranslated": 987,
+      "englishFallback": 240,
+      "productionEnabled": false,
+      "review": "draft"
+    }
+  ]
+}

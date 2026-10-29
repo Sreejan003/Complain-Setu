@@ -1,0 +1,17 @@
+/* Noto Sans Gurmukhi; source: https://fonts.googleapis.com/css2?family=Noto+Sans+Gurmukhi:wght@400;600&display=swap; license: ./OFL.txt */
+@font-face {
+  font-family: 'Noto Sans Gurmukhi';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: normal;
+  font-display: swap;
+  src: url(./3606058721f515e9.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Noto Sans Gurmukhi';
+  font-style: normal;
+  font-weight: 600;
+  font-stretch: normal;
+  font-display: swap;
+  src: url(./eeae1ed048f9fcab.ttf) format('truetype');
+}

@@ -1,0 +1,17 @@
+/* Noto Sans Telugu; source: https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@400;600&display=swap; license: ./OFL.txt */
+@font-face {
+  font-family: 'Noto Sans Telugu';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: normal;
+  font-display: swap;
+  src: url(./9249e7ea223c40c8.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Noto Sans Telugu';
+  font-style: normal;
+  font-weight: 600;
+  font-stretch: normal;
+  font-display: swap;
+  src: url(./0d3a26ecd868b501.ttf) format('truetype');
+}

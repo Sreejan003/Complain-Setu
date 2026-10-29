@@ -1,5 +1,6 @@
-import { effectiveProfile } from "../security/rbac.js";
+import { effectiveProfile, knownRole } from "../security/rbac.js";
 import { Router, Response } from "express";
+import { randomUUID } from "node:crypto";
 import bcrypt from "bcryptjs";
 import { store } from "../db/store.js";
 import { generateToken, requireAuth, AuthenticatedRequest } from "../middleware/auth.js";
@@ -54,7 +55,7 @@ authRouter.post("/login", (req, res: Response) => {
   }
 
   const profile = store.getProfileByEmail(normalizedEmail);
-  if (!profile || !profile.isActive) {
+  if (!profile || !profile.isActive || !knownRole(profile.role)) {
     recordFailedAttempt(normalizedEmail);
     return res.status(401).json({ error: "Invalid credentials or inactive official profile." });
   }
@@ -112,7 +113,7 @@ authRouter.get("/me", requireAuth, (req: AuthenticatedRequest, res: Response) =>
 
 authRouter.post("/logout", requireAuth, (req: AuthenticatedRequest,res) => {
   const profile = store.getProfileById(req.user!.id)!;
-  store.saveProfile({...profile,updatedAt:new Date().toISOString()});
+  store.saveProfile({...profile,updatedAt:new Date().toISOString(),sessionVersion:randomUUID()});
   store.addAuditLog({userId:profile.id,userName:profile.fullName,action:"LOGOUT",entityType:"Authentication",entityId:profile.id,details:{}});
   return res.json({success:true});
 });

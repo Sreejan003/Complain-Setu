@@ -1,0 +1,15 @@
+/* Noto Naskh Arabic; source: https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;600&display=swap; license: ./OFL.txt */
+@font-face {
+  font-family: 'Noto Naskh Arabic';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(./87742bebcb4fe8d2.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Noto Naskh Arabic';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(./35ae9d9bf51e7880.ttf) format('truetype');
+}

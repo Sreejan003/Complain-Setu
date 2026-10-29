@@ -7,14 +7,20 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
+    "check:i18n": "node scripts/check-i18n.mjs",
+    "test:coordination": "node scripts/test-coordination.mjs",
+    "test:interface": "node scripts/test-interface.mjs",
+    "prepare:i18n-drafts": "node scripts/prepare-i18n-drafts.mjs",
     "preview": "vite preview"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.3.3",
     "clsx": "^2.1.1",
+    "i18next": "^26.5.11",
     "lucide-react": "^1.61.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
+    "react-i18next": "^17.1.9",
     "react-router-dom": "^7.18.4",
     "recharts": "^3.10.1",
     "tailwind-merge": "^3.7.0"

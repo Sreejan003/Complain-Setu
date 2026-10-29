@@ -2,18 +2,17 @@ import { store } from "../db/store.js";
 import { DEFAULT_ESCALATION_CONFIG, EscalationConfig } from "../config/constants.js";
 import { Complaint, Notification } from "../models/types.js";
 import { v4 as uuidv4 } from "uuid";
+import {coordination} from "./coordination.js";
 
-let currentConfig: EscalationConfig = { ...DEFAULT_ESCALATION_CONFIG };
 let schedulerTimer: NodeJS.Timeout | null = null;
 let isCycleRunning = false;
 
 export function getEscalationConfig(): EscalationConfig {
-  return { ...currentConfig };
+  return {...DEFAULT_ESCALATION_CONFIG,...store.getSlaSettings()};
 }
 
 export function updateEscalationConfig(updates: Partial<EscalationConfig>): EscalationConfig {
-  currentConfig = { ...currentConfig, ...updates };
-  return { ...currentConfig };
+  return store.saveSlaSettings({...getEscalationConfig(), ...updates});
 }
 
 export interface SlaCycleResult {
@@ -64,7 +63,7 @@ export function runSlaEvaluationCycle(configOverride?: Partial<EscalationConfig>
 
   isCycleRunning = true;
   try {
-    const config = { ...currentConfig, ...configOverride };
+    const config = { ...getEscalationConfig(), ...configOverride };
     const now = new Date();
     const todayStr = now.toISOString().split("T")[0];
     const todayUtc = parseDateOnly(todayStr);
@@ -242,6 +241,7 @@ export function startSlaScheduler(intervalMinutes = 15): NodeJS.Timeout {
 
   schedulerTimer = setInterval(() => {
     try {
+      coordination.reminders();
       runSlaEvaluationCycle();
     } catch (err) {
       console.error("[SLA Engine] Error during scheduled evaluation cycle:", err);

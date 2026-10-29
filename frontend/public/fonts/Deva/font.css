@@ -1,0 +1,17 @@
+/* Noto Sans Devanagari; source: https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600&display=swap; license: ./OFL.txt */
+@font-face {
+  font-family: 'Noto Sans Devanagari';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: normal;
+  font-display: swap;
+  src: url(./25732d070bfcfd33.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Noto Sans Devanagari';
+  font-style: normal;
+  font-weight: 600;
+  font-stretch: normal;
+  font-display: swap;
+  src: url(./6c52824c4ab80703.ttf) format('truetype');
+}

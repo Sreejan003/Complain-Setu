@@ -1,0 +1,6 @@
+{
+  "permissionDenied": "Permission denied.",
+  "sessionExpired": "Your session has expired. Please log in again.",
+  "retryLogin_one": "Too many failed login attempts. Please try again in {{count}} second.",
+  "retryLogin_other": "Too many failed login attempts. Please try again in {{count}} seconds."
+}

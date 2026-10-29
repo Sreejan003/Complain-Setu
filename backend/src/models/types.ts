@@ -16,6 +16,29 @@ export interface Profile {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  sessionVersion?: string;
+}
+
+export interface WorkflowRequest {
+  id: string;
+  complaintId: string;
+  complaintRef: string;
+  institutionName: string;
+  bureauId: string;
+  type: "Transfer" | "Escalation" | "Disposal" | "Coordination";
+  status: "Pending" | "Approved" | "Rejected";
+  remarks: string;
+  destinationBureauId?: string;
+  requestedBy: string;
+  requestedByName: string;
+  requestedAt: string;
+  caseVersion: string;
+  assignedOfficerId?: string;
+  reviewedBy?: string;
+  reviewedByName?: string;
+  decisionRemarks?: string;
+  decidedAt?: string;
+  transferId?: string;
 }
 
 export interface Institution {
@@ -109,6 +132,12 @@ export interface CaseTransfer {
   transferredByName: string;
   transferredAt: string;
   acceptanceStatus: "Pending" | "Accepted" | "Rejected";
+  sourceCaseVersion?: string;
+  sourceStatus?: ComplaintStatus;
+  decisionRemarks?: string;
+  decidedBy?: string;
+  decidedByName?: string;
+  decidedAt?: string;
 }
 
 export interface RelatedCase {
@@ -200,7 +229,7 @@ export interface Notification {
   message: string;
   notificationType: "Overlap Alert" | "Deadline" | "Overdue" | "Transfer" | "Status Update";
   referenceId?: string;
-  referenceType?: "complaint" | "overlap" | "transfer";
+  referenceType?: "complaint" | "overlap" | "transfer" | "coordination";
   isRead: boolean;
   readByUserIds?: string[];
   createdAt: string;

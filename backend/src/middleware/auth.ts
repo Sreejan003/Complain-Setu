@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { roleOf, effectiveProfile, mayRead, requestScope } from "../security/rbac.js";
+import { roleOf, effectiveProfile, mayRead, requestScope, knownRole, authorize } from "../security/rbac.js";
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { Profile, Complaint } from "../models/types.js";
@@ -34,7 +34,7 @@ export interface AuthenticatedRequest extends Request {
 export function generateToken(profile: Profile): string {
   return jwt.sign(
     {
-      sessionVersion: profile.updatedAt,
+      sessionVersion: profile.sessionVersion || profile.updatedAt,
       id: profile.id,
       email: profile.email,
       role: profile.role,
@@ -77,10 +77,11 @@ export function requireAuth(req: AuthenticatedRequest, res: Response, next: Next
     }
 
     const user = store.getProfileById(decoded.id);
-    if (!user || !user.isActive || decoded.sessionVersion !== user.updatedAt) {
+    if (!user || !user.isActive || decoded.sessionVersion !== (user.sessionVersion || user.updatedAt)) {
       return res.status(403).json({ error: "User account inactive, session revoked, or not found.", code:"SESSION_REVOKED" });
     }
 
+    if (!knownRole(user.role)) return res.status(403).json({error:"Unrecognized account role."});
     req.user = effectiveProfile(user);
     requestScope.run(req.user, () => next());
   } catch (err: any) {
@@ -115,6 +116,6 @@ export function canAccessComplaint(user: Profile, complaint: Complaint, institut
   return mayRead(effectiveProfile(user), complaint, institutionRegion || store.getInstitutionById(complaint.institutionId)?.region);
 }
 export function canMutateComplaint(user: Profile, complaint: Complaint, institutionRegion?: string): { allowed: boolean; reason?: string } {
-  const allowed = roleOf(user.role) !== "Institutional User" && canAccessComplaint(user, complaint, institutionRegion);
+  const allowed = authorize(user, "case.update", complaint, {region:institutionRegion || store.getInstitutionById(complaint.institutionId)?.region});
   return { allowed, reason: allowed ? undefined : "Access denied: complaint is outside your authorized scope." };
 }

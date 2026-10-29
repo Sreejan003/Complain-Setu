@@ -112,6 +112,8 @@ export interface CaseTransfer {
 }
 
 export interface OverlapAlert {
+  canDecide?: boolean;
+  canCoordinate?: boolean;
   id: string;
   alertId: string;
   institutionId: string;
@@ -187,7 +189,7 @@ export interface Notification {
   message: string;
   notificationType: "Overlap Alert" | "Deadline" | "Overdue" | "Transfer" | "Status Update";
   referenceId?: string;
-  referenceType?: "complaint" | "overlap" | "transfer";
+  referenceType?: "complaint" | "overlap" | "transfer" | "coordination";
   isRead: boolean;
   readByUserIds?: string[];
   createdAt: string;
@@ -254,6 +256,9 @@ export interface ComplaintDocument {
 }
 
 export interface InstitutionDashboardMetrics {
+  bureauInvolvement?: {bureau:string;total:number;pending:number}[];
+  coordination?: {bureauA:string;bureauB:string;status:string}[];
+  visibility?: {aggregateScope:string;caseScope:string;canReadCases:boolean};
   institution: Institution;
   kpis: {
     totalComplaints: number;
@@ -263,6 +268,8 @@ export interface InstitutionDashboardMetrics {
     overdueCount: number;
     highPriorityCount: number;
     activeOverlapCount: number;
+    escalatedCount?: number;
+    transferredCount?: number;
   };
   distribution: {
     byStatus: { name: string; count: number }[];

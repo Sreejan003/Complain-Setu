@@ -1,4 +1,7 @@
-import { RoleDashboard } from "./pages/RoleDashboard.js";
+import { LoadingSkeleton } from "./components/ui/Interface.js";
+import { tr } from "./i18n/index.js";
+const RoleDashboard = React.lazy(() => import("./pages/RoleDashboard.js").then(module => ({ default: module.RoleDashboard })));
+const CrossBureauCoordinationWorkspace = React.lazy(() => import("./components/common/CrossBureauCoordinationWorkspace.js").then(module => ({ default: module.CrossBureauCoordinationWorkspace })));
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext.js";
@@ -6,18 +9,18 @@ import { AppLayout } from "./components/layout/AppLayout.js";
 import { ProtectedRoute } from "./components/common/ProtectedRoute.js";
 
 // Pages
-import { LoginPage } from "./pages/LoginPage.js";
-import { OverviewDashboard } from "./pages/OverviewDashboard.js";
-import { InstitutionProfile } from "./pages/InstitutionProfile.js";
-import { ComplaintRegister } from "./pages/ComplaintRegister.js";
-import { CaseList } from "./pages/CaseList.js";
-import { ComplaintDetails } from "./pages/ComplaintDetails.js";
-import { OverlapCenter } from "./pages/OverlapCenter.js";
-import { WorkflowTransfers } from "./pages/WorkflowTransfers.js";
-import { NotificationsPage } from "./pages/NotificationsPage.js";
-import { ReportsAnalytics } from "./pages/ReportsAnalytics.js";
-import { AdministrationPage } from "./pages/AdministrationPage.js";
-import { InstitutionDashboard } from "./pages/InstitutionDashboard.js";
+const LoginPage = React.lazy(() => import("./pages/LoginPage.js").then(module => ({ default: module.LoginPage })));
+const OverviewDashboard = React.lazy(() => import("./pages/OverviewDashboard.js").then(module => ({ default: module.OverviewDashboard })));
+const InstitutionProfile = React.lazy(() => import("./pages/InstitutionProfile.js").then(module => ({ default: module.InstitutionProfile })));
+const ComplaintRegister = React.lazy(() => import("./pages/ComplaintRegister.js").then(module => ({ default: module.ComplaintRegister })));
+const CaseList = React.lazy(() => import("./pages/CaseList.js").then(module => ({ default: module.CaseList })));
+const ComplaintDetails = React.lazy(() => import("./pages/ComplaintDetails.js").then(module => ({ default: module.ComplaintDetails })));
+const OverlapCenter = React.lazy(() => import("./pages/OverlapCenter.js").then(module => ({ default: module.OverlapCenter })));
+const WorkflowTransfers = React.lazy(() => import("./pages/WorkflowTransfers.js").then(module => ({ default: module.WorkflowTransfers })));
+const NotificationsPage = React.lazy(() => import("./pages/NotificationsPage.js").then(module => ({ default: module.NotificationsPage })));
+const ReportsAnalytics = React.lazy(() => import("./pages/ReportsAnalytics.js").then(module => ({ default: module.ReportsAnalytics })));
+const AdministrationPage = React.lazy(() => import("./pages/AdministrationPage.js").then(module => ({ default: module.AdministrationPage })));
+const InstitutionDashboard = React.lazy(() => import("./pages/InstitutionDashboard.js").then(module => ({ default: module.InstitutionDashboard })));
 
 /** Smart index — Institutional Users land on the Single-Window Portal */
 const RoleAwareIndex: React.FC = () => {
@@ -33,7 +36,7 @@ export const App: React.FC = () => {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Routes>
+        <React.Suspense fallback={<div className="p-6"><LoadingSkeleton label={tr("dashboard:loadingAuthorizedRecords")}/></div>}><Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route
             path="/"
@@ -57,7 +60,7 @@ export const App: React.FC = () => {
             <Route path="institutions" element={<Navigate to="/institution-dashboard" replace />} />
             <Route path="institutions/:id" element={<InstitutionProfile />} />
 
-            <Route path="complaints/register" element={<ComplaintRegister />} />
+            <Route path="complaints/register" element={<ProtectedRoute allowedRoles={["BUREAU_HEAD","COMPETENT_AUTHORITY","Institutional User"]}><ComplaintRegister /></ProtectedRoute>} />
             <Route path="cases" element={<CaseList />} />
             <Route path="cases/:id" element={<ComplaintDetails />} />
             <Route
@@ -77,6 +80,8 @@ export const App: React.FC = () => {
               }
             />
             <Route path="notifications" element={<NotificationsPage />} />
+            <Route path="coordination" element={<ProtectedRoute allowedRoles={["COMPETENT_AUTHORITY","BUREAU_HEAD","CASE_OFFICER"]}><CrossBureauCoordinationWorkspace/></ProtectedRoute>}/>
+            <Route path="coordination/:id" element={<ProtectedRoute allowedRoles={["COMPETENT_AUTHORITY","BUREAU_HEAD","CASE_OFFICER"]}><CrossBureauCoordinationWorkspace/></ProtectedRoute>}/>
             <Route
               path="analytics"
               element={
@@ -95,7 +100,7 @@ export const App: React.FC = () => {
             />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
-        </Routes>
+        </Routes></React.Suspense>
       </AuthProvider>
     </BrowserRouter>
   );

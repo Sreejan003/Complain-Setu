@@ -1,0 +1,17 @@
+/* Noto Sans Malayalam; source: https://fonts.googleapis.com/css2?family=Noto+Sans+Malayalam:wght@400;600&display=swap; license: ./OFL.txt */
+@font-face {
+  font-family: 'Noto Sans Malayalam';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: normal;
+  font-display: swap;
+  src: url(./7257ed1681e91801.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Noto Sans Malayalam';
+  font-style: normal;
+  font-weight: 600;
+  font-stretch: normal;
+  font-display: swap;
+  src: url(./20934b7ac8fb4a0c.ttf) format('truetype');
+}

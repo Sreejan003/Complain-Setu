@@ -1,0 +1,17 @@
+/* Noto Sans Gujarati; source: https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;600&display=swap; license: ./OFL.txt */
+@font-face {
+  font-family: 'Noto Sans Gujarati';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: normal;
+  font-display: swap;
+  src: url(./978c3db013eae4ad.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Noto Sans Gujarati';
+  font-style: normal;
+  font-weight: 600;
+  font-stretch: normal;
+  font-display: swap;
+  src: url(./5d3bc9afc7655e37.ttf) format('truetype');
+}

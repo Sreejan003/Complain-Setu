@@ -1,147 +1,26 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
-import {
-  LayoutDashboard,
-  Building2,
-  FilePlus2,
-  FolderKanban,
-  GitMerge,
-  ArrowRightLeft,
-  Bell,
-  BarChart3,
-  Settings,
-  ShieldCheck,
-  Building
-} from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
+import { LayoutDashboard, Building2, FilePlus2, FolderKanban, GitMerge, ArrowRightLeft, Bell, BarChart3, Settings, ShieldCheck, Users, ClipboardList, PanelsTopLeft, X } from "lucide-react";
+import { tr, localizeLabel, useLocaleRender } from "../../i18n/index.js";
 import { useAuth } from "../../context/AuthContext.js";
-
-interface NavItem {
-  to: string;
-  label: string;
-  icon: React.ElementType;
+import { navigationForRole, navigationActive } from "./navigation.js";
+const icons: Record<string, React.ElementType> = { dashboard: LayoutDashboard, institutions: Building2, register: FilePlus2, cases: FolderKanban, assignment: Users, coordination: PanelsTopLeft, overlaps: GitMerge, transfers: ArrowRightLeft, reports: BarChart3, users: Users, permissions: ShieldCheck, audit: ClipboardList, notifications: Bell, settings: Settings };
+export function Sidebar({ collapsed, mobile = false, onClose }: { collapsed: boolean; mobile?: boolean; onClose?: () => void }) {
+  useLocaleRender();
+  const { user } = useAuth(), location = useLocation();
+  const items = navigationForRole(user?.role || "");
+  return <aside id="app-navigation" aria-label={tr("navigation:ui.primaryNavigation")} className={`bg-aicte-navy-900 text-white flex flex-col shrink-0 h-full ${collapsed ? "w-[76px]" : "w-[248px]"} ${mobile ? "w-[min(288px,85vw)]" : ""}`}>
+    <div className={`flex items-center gap-3 px-5 h-[83px] border-b border-white/10 shrink-0 ${collapsed ? "justify-center px-0" : ""}`}>
+      <div className="w-9 h-9 bg-white/10 border border-white/15 rounded-lg grid place-items-center shrink-0"><ShieldCheck className="w-5 h-5 text-teal-200" aria-hidden="true"/></div>
+      {!collapsed && <div className="min-w-0"><p className="font-semibold text-[17px] tracking-tight">Complain Setu</p><p className="text-[11px] text-slate-300">AICTE · IICMCS</p></div>}
+      {mobile && <button className="icon-button ms-auto text-white" onClick={onClose} aria-label={tr("navigation:ui.closeNavigation")}><X className="w-5 h-5"/></button>}
+    </div>
+    <nav className="flex-1 overflow-y-auto px-3 pb-5" aria-label={tr("navigation:ui.primaryNavigation")}>
+      {(["main", "operations", "insights", "system"] as const).filter(group => items.some(item => item.group === group)).map(group => <div key={group} className={collapsed ? "mt-5 pt-3 border-t border-white/10 first:border-0 first:pt-0" : ""}>
+        {!collapsed && <h2 className="nav-group-label">{tr("navigation:ui.groups." + group)}</h2>}
+        <div className="space-y-1">{items.filter(item => item.group === group).map(item => { const Icon = icons[item.icon]; const label = item.key === "coordination" ? tr("workflow:crossBureau.title") : localizeLabel(item.label); return <Link key={item.key} to={item.to} onClick={onClose} className={`nav-link ${collapsed ? "justify-center px-0" : ""}`} aria-current={navigationActive(item, location.pathname, location.search, location.hash) ? "page" : undefined} aria-label={collapsed ? label : undefined} title={collapsed ? label : undefined}><Icon className="w-[18px] h-[18px] shrink-0" aria-hidden="true"/>{!collapsed && <span className="leading-snug">{label}</span>}</Link>; })}</div>
+      </div>)}
+    </nav>
+    {!collapsed && <div className="border-t border-white/10 px-5 py-4 text-xs"><p className="font-medium text-slate-200">{localizeLabel(user?.role)}</p><p className="text-slate-300 mt-1"><bdi dir="ltr">{user?.bureauId || "AICTE"}</bdi>{user?.region ? <> · <bdi dir="auto">{user.region}</bdi></> : null}</p></div>}
+  </aside>;
 }
-
-interface SidebarProps {
-  collapsed: boolean;
-}
-
-// Role-based navigation items (strictly official, no promotional badges)
-const ALL_NAV_ITEMS: NavItem[] = [
-  { to: "/",                     label: "Overview Dashboard",        icon: LayoutDashboard },
-  { to: "/institution-dashboard",label: "Single-Window Portal",      icon: Building2 },
-  { to: "/complaints/register",  label: "Register Complaint",        icon: FilePlus2 },
-  { to: "/cases",                label: "Complaint Register",        icon: FolderKanban },
-  { to: "/overlaps",             label: "Overlap Detection",         icon: GitMerge },
-  { to: "/transfers",            label: "Workflow & Transfers",      icon: ArrowRightLeft },
-  { to: "/notifications",        label: "Notification Center",       icon: Bell },
-  { to: "/analytics",            label: "Reports & Analytics",       icon: BarChart3 },
-  { to: "/admin/dashboard#users", label: "User Management", icon: Settings },
-  { to: "/admin/dashboard#permissions", label: "Roles & Permissions", icon: ShieldCheck },
-  { to: "/admin/dashboard#bureaus", label: "Bureau/Cell Management", icon: Building },
-  { to: "/admin/dashboard#audit", label: "Audit Logs", icon: FilePlus2 },
-  { to: "/admin",                label: "Administration",            icon: Settings },
-];
-
-const ROLE_NAV_KEYS: Record<string,string[]> = {
-  SYSTEM_ADMIN:["/","/admin/dashboard#users","/admin/dashboard#permissions","/admin/dashboard#bureaus","/admin/dashboard#audit","/admin","/notifications"],
-  COMPETENT_AUTHORITY:["/","/institution-dashboard","/cases","/overlaps","/transfers","/analytics","/notifications"],
-  BUREAU_HEAD:["/","/institution-dashboard","/complaints/register","/cases","/overlaps","/transfers","/analytics","/notifications"],
-  CASE_OFFICER:["/","/cases","/overlaps","/analytics","/notifications"],
-  "Institutional User":["/institution-dashboard","/complaints/register","/notifications"]
-};
-
-export const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
-  const { user } = useAuth();
-  const role = user?.role ?? "";
-  // Strictly enforce deny-by-default: unrecognized or missing roles receive zero navigation items
-  const allowedKeys = ROLE_NAV_KEYS[role] ?? [];
-
-  const navItems = ALL_NAV_ITEMS
-    .filter(item => allowedKeys.includes(item.to))
-    .map(item => {
-      if (item.to === "/") return {...item,to:user?.role === "SYSTEM_ADMIN"?"/admin/dashboard":user?.role === "COMPETENT_AUTHORITY"?"/authority/dashboard":user?.role === "BUREAU_HEAD"?"/bureau/dashboard":"/officer/dashboard",label:"Dashboard"};
-      if (item.to === "/admin") return {...item,label:"System Settings"};
-      if (item.to === "/cases") {
-        const label = role === "CASE_OFFICER"
-          ? "My Assigned Cases"
-          : role === "Institutional User"
-          ? "Institution Grievances"
-          : "Complaint Register";
-        return { ...item, label };
-      }
-      return item;
-    });
-
-  return (
-    <aside
-      className={`bg-[#002147] text-slate-200 transition-all duration-150 border-r border-[#001733] flex flex-col justify-between shrink-0 select-none ${
-        collapsed ? "w-14" : "w-60"
-      }`}
-    >
-      <div className="py-2.5">
-        {/* Officer Assignment Context Box */}
-        {!collapsed && user && (
-          <div className="px-3 mb-2.5">
-            <div className="bg-[#0b2545] border border-[#163860] rounded-xs p-2 text-xs">
-              <div className="flex items-center space-x-1.5 text-white font-semibold text-[11px] uppercase tracking-wider">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                <span className="truncate">{{SYSTEM_ADMIN:"System Administrator",COMPETENT_AUTHORITY:"Competent Authority",BUREAU_HEAD:"Bureau/Cell Head",CASE_OFFICER:"Case Handling Officer","Institutional User":"Institutional User"}[user.role]}</span>
-              </div>
-              <div className="text-[11px] text-slate-300 font-medium truncate mt-0.5">
-                {user.fullName}
-              </div>
-              {user.bureauId && (
-                <div className="mt-1 text-[10px] bg-[#12375b] text-amber-300 px-1.5 py-0.2 rounded-xs inline-block font-mono border border-[#1d4b73]">
-                  BUREAU: {user.bureauId}
-                </div>
-              )}
-              {user.role === "Institutional User" && user.institutionName && (
-                <div className="mt-1 text-[10px] text-slate-300 truncate">
-                  {user.institutionName}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Navigation Links */}
-        <nav className="space-y-0.5 px-1.5">
-          {navItems.map(item => {
-            const Icon = item.icon;
-            return (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end={item.to === "/"}
-                className={({ isActive }) =>
-                  `flex items-center ${
-                    collapsed ? "justify-center px-2 py-2.5" : "px-3 py-2"
-                  } rounded-xs text-xs font-medium transition-colors ${
-                    isActive
-                      ? "bg-[#0b2545] text-white border-l-3 border-[#ff9933] font-semibold"
-                      : "text-slate-300 hover:bg-[#08203e] hover:text-white"
-                  }`
-                }
-                title={collapsed ? item.label : undefined}
-              >
-                <Icon className="w-4 h-4 shrink-0 text-slate-300" />
-                {!collapsed && (
-                  <span className="ml-2.5 truncate text-[12px]">{item.label}</span>
-                )}
-              </NavLink>
-            );
-          })}
-        </nav>
-      </div>
-
-      {/* Footer System Info */}
-      {!collapsed && (
-        <div className="p-3 border-t border-[#001733] text-[10px] text-slate-400 bg-[#001c3d]">
-          <div className="font-semibold text-slate-300">AICTE Grievance Portal</div>
-          <div>NIC Standard Architecture</div>
-          <div className="text-slate-500 mt-0.5">v2.6.4 (SIH 2026 Edition)</div>
-        </div>
-      )}
-    </aside>
-  );
-};

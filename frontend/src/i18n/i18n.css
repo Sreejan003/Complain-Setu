@@ -1,0 +1,11 @@
+/* Interface fonts are script-specific. Original records retain their own Unicode text. */
+html { --interface-font: 'Inter', 'Nirmala UI', 'Segoe UI', system-ui, sans-serif; }
+body { font-family: var(--interface-font); }
+html:not([lang="en"]) body { line-height: 1.65; }
+[dir="rtl"] .recharts-wrapper, [dir="rtl"] .recharts-surface { direction: ltr; }
+[dir="rtl"] .lucide-arrow-right, [dir="rtl"] .lucide-arrow-left,
+[dir="rtl"] .lucide-chevron-right, [dir="rtl"] .lucide-chevron-left { transform: scaleX(-1); }
+.canonical-value { direction: ltr; unicode-bidi: isolate; overflow-wrap: anywhere; }
+.original-content { unicode-bidi: plaintext; }
+input[type="email"], input[type="password"], input[type="url"], input[type="date"], input[type="number"] { direction: ltr; unicode-bidi: isolate; }
+button, label, th { overflow-wrap: break-word; }

@@ -1,3 +1,5 @@
+import { tr, localizeLabel, useLocaleRender } from "../i18n/index.js";
+import { formatDate, formatNumber } from "../i18n/localeUtils.js";
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -42,6 +44,7 @@ import { useAuth } from "../context/AuthContext.js";
 type MyWorkTab = "assigned" | "overdue" | "due_soon" | "overlaps" | "transfers";
 
 export const OverviewDashboard: React.FC = () => {
+  useLocaleRender();
   const [data, setData] = useState<DashboardAnalytics | null>(null);
   const [recentComplaints, setRecentComplaints] = useState<Complaint[]>([]);
   const [assignedCases, setAssignedCases] = useState<Complaint[]>([]);
@@ -120,10 +123,10 @@ export const OverviewDashboard: React.FC = () => {
   if (loading && !data) {
     return (
       <div className="flex items-center justify-center min-h-[420px]">
-        <div className="flex flex-col items-center space-y-3 bg-white border border-slate-200 p-8 rounded-xs shadow-xs">
+        <div className="flex flex-col items-center space-y-3 bg-white border border-slate-200 p-8 rounded-lg shadow-xs">
           <RefreshCw className="w-7 h-7 text-[#17365D] animate-spin" />
-          <span className="text-xs font-semibold text-slate-700">Loading Centralized Dashboard Data...</span>
-          <span className="text-[11px] text-slate-500 font-mono">Synchronizing AICTE Bureau records & SLA monitors</span>
+          <span className="text-xs font-semibold text-slate-700">{tr("dashboard:loadingCentralizedDashboardData")}</span>
+          <span className="text-xs text-slate-500 font-mono">{tr("dashboard:synchronizingAicteBureauRecordsSlaMonitors")}</span>
         </div>
       </div>
     );
@@ -148,7 +151,7 @@ export const OverviewDashboard: React.FC = () => {
       sub: "Across all bureaus",
       icon: FileText,
       color: "text-[#0F172A]",
-      accent: "border-l-4 border-l-[#17365D]",
+      accent: "border-s-4 border-s-[#17365D]",
       link: "/cases"
     },
     {
@@ -157,7 +160,7 @@ export const OverviewDashboard: React.FC = () => {
       sub: "Awaiting initial intake",
       icon: Clock,
       color: "text-amber-800",
-      accent: "border-l-4 border-l-amber-500",
+      accent: "border-s-4 border-l-amber-500",
       link: "/cases?status=Pending"
     },
     {
@@ -166,7 +169,7 @@ export const OverviewDashboard: React.FC = () => {
       sub: "Active investigations",
       icon: RefreshCw,
       color: "text-blue-800",
-      accent: "border-l-4 border-l-blue-600",
+      accent: "border-s-4 border-l-blue-600",
       link: "/cases?status=Under%20Process"
     },
     {
@@ -175,7 +178,7 @@ export const OverviewDashboard: React.FC = () => {
       sub: "Disposal orders issued",
       icon: CheckCircle2,
       color: "text-emerald-800",
-      accent: "border-l-4 border-l-emerald-600",
+      accent: "border-s-4 border-l-emerald-600",
       link: "/cases?status=Disposed"
     },
     {
@@ -184,7 +187,7 @@ export const OverviewDashboard: React.FC = () => {
       sub: "Statutory SLA exceeded",
       icon: AlertCircle,
       color: "text-rose-700 font-bold",
-      accent: "border-l-4 border-l-rose-600 bg-rose-50/20",
+      accent: "border-s-4 border-l-rose-600 bg-rose-50/20",
       link: "/cases?isOverdue=true"
     },
     {
@@ -193,7 +196,7 @@ export const OverviewDashboard: React.FC = () => {
       sub: "Coordination required",
       icon: GitMerge,
       color: "text-purple-900 font-bold",
-      accent: "border-l-4 border-l-purple-600 bg-purple-50/20",
+      accent: "border-s-4 border-l-purple-600 bg-purple-50/20",
       link: "/overlaps?alertStatus=Pending Review"
     }
   ];
@@ -201,39 +204,36 @@ export const OverviewDashboard: React.FC = () => {
   return (
     <div className="space-y-4">
       {/* SECTION A — Simple, Clean Executive Header */}
-      <div className="bg-white border border-[#E2E8F0] rounded-xs p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 shadow-xs">
+      <div className="bg-white border border-[#E2E8F0] rounded-lg p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 shadow-xs">
         <div>
           <div className="flex items-center space-x-2">
-            <h1 className="text-xl font-bold text-[#0F172A] tracking-tight">Dashboard</h1>
-            <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-xs bg-slate-100 text-slate-700 border border-slate-200">
-              {user?.role || "Official"}
+            <h1 className="text-xl font-bold text-[#0F172A] tracking-tight">{tr("navigation:dashboard")}</h1>
+            <span className="text-xs font-mono font-semibold px-2 py-0.5 rounded-lg bg-slate-100 text-slate-700 border border-slate-200">
+              {localizeLabel(user?.role) || tr("complaints:official")}
             </span>
             {user?.bureauId && (
-              <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-xs bg-[#17365D] text-white">
-                {user.bureauId}
+              <span className="text-xs font-mono font-semibold px-2 py-0.5 rounded-lg bg-[#17365D] text-white">
+                <bdi dir="ltr" className="canonical-value">{user.bureauId}</bdi>
               </span>
             )}
           </div>
-          <p className="text-xs text-[#64748B] mt-0.5">
-            Monitor complaints and coordinate actions across AICTE Bureaus.
-          </p>
+          <p className="text-xs text-[#64748B] mt-0.5">{tr("dashboard:monitorComplaintsAndCoordinateActionsAcrossAicteBureaus")}</p>
         </div>
 
         <div className="flex items-center space-x-2.5 self-start sm:self-auto shrink-0 text-xs">
           {lastUpdated && (
-            <span className="text-[11px] text-[#64748B] hidden md:inline font-mono">
-              Last updated: {lastUpdated}
+            <span className="text-xs text-[#64748B] hidden md:inline font-mono">{tr("dashboard:lastUpdated")}{lastUpdated}
             </span>
           )}
 
           <button
             onClick={() => fetchDashboardData(true)}
             disabled={refreshing}
-            className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-white border border-[#E2E8F0] hover:bg-slate-50 text-slate-700 rounded-xs font-semibold transition cursor-pointer disabled:opacity-50"
-            title="Refresh dashboard data"
+            className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-white border border-[#E2E8F0] hover:bg-slate-50 text-slate-700 rounded-lg font-semibold transition cursor-pointer disabled:opacity-50"
+            title={tr("dashboard:refreshDashboardData")}
           >
             <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin text-[#17365D]" : ""}`} />
-            <span>{refreshing ? "Refreshing..." : "Refresh"}</span>
+            <span>{refreshing ? tr("dashboard:refreshing_5b7bd") : tr("common:refresh")}</span>
           </button>
 
 
@@ -248,20 +248,20 @@ export const OverviewDashboard: React.FC = () => {
             <div
               key={idx}
               onClick={() => navigate(card.link)}
-              className={`bg-white border border-[#E2E8F0] rounded-xs p-3 cursor-pointer hover:border-slate-400 hover:bg-slate-50/80 transition-all ${card.accent} flex flex-col justify-between shadow-xs`}
+              className={`bg-white border border-[#E2E8F0] rounded-lg p-3 cursor-pointer hover:border-slate-400 hover:bg-slate-50/80 transition-all ${card.accent} flex flex-col justify-between shadow-xs`}
             >
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold text-[#64748B] uppercase tracking-wider">
-                  {card.title}
+                <span className="text-xs font-bold text-[#64748B] uppercase tracking-wider">
+                  {localizeLabel(card.title)}
                 </span>
-                <Icon className="w-4 h-4 text-slate-400" />
+                <Icon className="w-4 h-4 text-slate-500" />
               </div>
               <div className="mt-2.5">
                 <div className={`text-2xl font-bold font-mono tracking-tight ${card.color}`}>
-                  {card.value}
+                  {formatNumber(card.value)}
                 </div>
-                <div className="text-[11px] text-[#64748B] mt-0.5 truncate font-medium">
-                  {card.sub}
+                <div className="text-xs text-[#64748B] mt-0.5 truncate font-medium">
+                  {localizeLabel(card.sub)}
                 </div>
               </div>
             </div>
@@ -270,32 +270,30 @@ export const OverviewDashboard: React.FC = () => {
       </div>
 
       {/* SECTION D — RECENT COMPLAINTS REGISTER TABLE */}
-      <div className="bg-white border border-[#E2E8F0] rounded-xs shadow-xs overflow-hidden">
+      <div className="bg-white border border-[#E2E8F0] rounded-lg shadow-xs overflow-hidden">
         <div className="px-4 py-3 bg-slate-50/80 border-b border-[#E2E8F0] flex items-center justify-between">
           <div>
-            <h2 className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">
-              Recent Complaints
-            </h2>
-            <p className="text-[11px] text-[#64748B]">Latest grievance intake records across AICTE divisions</p>
+            <h2 className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">{tr("dashboard:recentComplaints")}</h2>
+            <p className="text-xs text-[#64748B]">{tr("dashboard:latestGrievanceIntakeRecordsAcrossAicteDivisions")}</p>
           </div>
           <Link to="/cases" className="text-xs text-[#17365D] font-bold hover:underline flex items-center space-x-1">
-            <span>View Complete Register</span>
+            <span>{tr("dashboard:viewCompleteRegister")}</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-slate-700 gov-table">
+          <table className="w-full text-start text-xs text-slate-700 gov-table">
             <thead>
               <tr className="bg-slate-100 text-slate-800 font-bold border-b border-slate-200">
-                <th className="py-2.5 px-3">Complaint ID</th>
-                <th className="py-2.5 px-3">Institution Name</th>
-                <th className="py-2.5 px-2 text-center">Bureau</th>
-                <th className="py-2.5 px-3">Assigned Officer</th>
-                <th className="py-2.5 px-2 text-center">Status</th>
-                <th className="py-2.5 px-2 text-center">Priority</th>
-                <th className="py-2.5 px-3">Due Date</th>
-                <th className="py-2.5 px-3 text-right">Action</th>
+                <th className="py-2.5 px-3">{tr("complaints:complaintId")}</th>
+                <th className="py-2.5 px-3">{tr("complaints:institutionName")}</th>
+                <th className="py-2.5 px-2 text-center">{tr("dashboard:bureau")}</th>
+                <th className="py-2.5 px-3">{tr("dashboard:assignedOfficer")}</th>
+                <th className="py-2.5 px-2 text-center">{tr("complaints:status_bae7d")}</th>
+                <th className="py-2.5 px-2 text-center">{tr("complaints:priority")}</th>
+                <th className="py-2.5 px-3">{tr("dashboard:dueDate")}</th>
+                <th className="py-2.5 px-3 text-end">{tr("dashboard:action")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#E2E8F0] bg-white">
@@ -310,22 +308,22 @@ export const OverviewDashboard: React.FC = () => {
                     className="hover:bg-slate-50 transition cursor-pointer"
                   >
                     <td className="py-2.5 px-3 font-mono font-bold text-[#17365D] whitespace-nowrap">
-                      {c.complaintId}
+                      <bdi dir="ltr" className="canonical-value">{c.complaintId}</bdi>
                     </td>
                     <td className="py-2.5 px-3 max-w-[220px] truncate font-medium text-slate-900">
-                      {c.institutionName}
+                      <bdi dir="auto" className="original-content">{c.institutionName}</bdi>
                     </td>
                     <td className="py-2.5 px-2 text-center whitespace-nowrap">
-                      <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded-xs bg-slate-100 text-slate-800 border border-slate-200">
-                        {c.currentBureauId}
+                      <span className="font-mono text-xs font-bold px-1.5 py-0.5 rounded-lg bg-slate-100 text-slate-800 border border-slate-200">
+                        <bdi dir="ltr" className="canonical-value">{c.currentBureauId}</bdi>
                       </span>
                     </td>
-                    <td className="py-2.5 px-3 max-w-[160px] truncate text-slate-600 text-[11px]">
-                      {c.assignedOfficerName || "Unassigned"}
+                    <td className="py-2.5 px-3 max-w-[160px] truncate text-slate-600 text-xs">
+                      {c.assignedOfficerName || tr("dashboard:unassigned")}
                     </td>
                     <td className="py-2.5 px-2 text-center whitespace-nowrap">
                       <span
-                        className={`px-2 py-0.5 rounded-xs text-[10px] font-semibold border ${
+                        className={`px-2 py-0.5 rounded-lg text-xs font-semibold border ${
                           c.status === "Pending"
                             ? "bg-amber-50 text-amber-800 border-amber-300"
                             : c.status === "Under Process"
@@ -337,12 +335,12 @@ export const OverviewDashboard: React.FC = () => {
                             : "bg-purple-50 text-purple-800 border-purple-300"
                         }`}
                       >
-                        {c.status}
+                        {localizeLabel(c.status)}
                       </span>
                     </td>
                     <td className="py-2.5 px-2 text-center whitespace-nowrap">
                       <span
-                        className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-xs ${
+                        className={`text-xs font-semibold px-1.5 py-0.5 rounded-lg ${
                           c.priority === "Critical"
                             ? "text-rose-800 bg-rose-50 border border-rose-200 font-bold"
                             : c.priority === "High"
@@ -350,25 +348,22 @@ export const OverviewDashboard: React.FC = () => {
                             : "text-slate-600 bg-slate-100"
                         }`}
                       >
-                        {c.priority}
+                        {localizeLabel(c.priority)}
                       </span>
                     </td>
-                    <td className="py-2.5 px-3 font-mono text-[11px] whitespace-nowrap">
+                    <td className="py-2.5 px-3 font-mono text-xs whitespace-nowrap">
                       {isOverdue ? (
                         <span className="text-rose-700 font-bold">
-                          {c.expectedDisposalDate} (Overdue)
-                        </span>
+                          {formatDate(c.expectedDisposalDate)}{tr("dashboard:overdue")}</span>
                       ) : (
-                        <span className="text-slate-600">{c.expectedDisposalDate}</span>
+                        <span className="text-slate-600">{formatDate(c.expectedDisposalDate)}</span>
                       )}
                     </td>
-                    <td className="py-2.5 px-3 text-right whitespace-nowrap" onClick={e => e.stopPropagation()}>
+                    <td className="py-2.5 px-3 text-end whitespace-nowrap" onClick={e => e.stopPropagation()}>
                       <Link
                         to={`/cases/${c.id}`}
-                        className="px-2.5 py-1 bg-white hover:bg-[#17365D] hover:text-white text-slate-700 rounded-xs text-[11px] font-semibold border border-slate-300 transition"
-                      >
-                        Inspect
-                      </Link>
+                        className="px-2.5 py-1 bg-white hover:bg-[#17365D] hover:text-white text-slate-700 rounded-lg text-xs font-semibold border border-slate-200 transition"
+                      >{tr("complaints:inspect")}</Link>
                     </td>
                   </tr>
                 );
@@ -381,42 +376,37 @@ export const OverviewDashboard: React.FC = () => {
       {/* SECTION E — BUREAU WORKLOAD & STATUS ANALYTICS (All Charts Preserved) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3.5">
         {/* Chart 1: Bureau Workload Distribution */}
-        <div className="lg:col-span-2 bg-white border border-[#E2E8F0] rounded-xs p-4 shadow-xs">
+        <div className="lg:col-span-2 bg-white border border-[#E2E8F0] rounded-lg p-4 shadow-xs">
           <div className="flex items-center justify-between pb-2 mb-3 border-b border-slate-200">
             <div>
-              <h2 className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">
-                Bureau & Division Workload Distribution
-              </h2>
-              <p className="text-[11px] text-[#64748B]">Active vs Disposed complaints across regulatory divisions</p>
+              <h2 className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">{tr("dashboard:bureauDivisionWorkloadDistribution")}</h2>
+              <p className="text-xs text-[#64748B]">{tr("dashboard:activeVsDisposedComplaintsAcrossRegulatoryDivisions")}</p>
             </div>
-            <span className="text-[10px] font-mono bg-slate-100 text-slate-700 px-2 py-0.5 rounded-xs border border-slate-200">
-              {data?.bureauWorkload?.length || 5} BUREAUS
-            </span>
+            <span className="text-xs font-mono bg-slate-100 text-slate-700 px-2 py-0.5 rounded-lg border border-slate-200">
+              {data?.bureauWorkload?.length || 5}{tr("dashboard:bureaus")}</span>
           </div>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={data?.bureauWorkload || []} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="2 2" vertical={false} stroke="#E2E8F0" />
                 <XAxis dataKey="bureau" tick={{ fontSize: 11, fill: "#475569" }} />
-                <YAxis tick={{ fontSize: 11, fill: "#475569" }} />
-                <Tooltip
+                <YAxis tickFormatter={(value:any)=>formatNumber(value)} tick={{ fontSize: 11, fill: "#475569" }} />
+                <Tooltip formatter={(value:any,name:any)=>[typeof value==="number"?formatNumber(value):value,localizeLabel(name)]} labelFormatter={(label:any)=>localizeLabel(label)}
                   contentStyle={{ backgroundColor: "#ffffff", borderColor: "#CBD5E1", borderRadius: "2px", fontSize: "11px" }}
                 />
-                <Legend wrapperStyle={{ fontSize: "11px", paddingTop: "6px" }} />
-                <Bar dataKey="active" name="Active Cases" fill="#17365D" radius={[2, 2, 0, 0]} />
-                <Bar dataKey="disposed" name="Disposed Cases" fill="#16A34A" radius={[2, 2, 0, 0]} />
+                <Legend formatter={(value:any)=>localizeLabel(value)} wrapperStyle={{ fontSize: "11px", paddingTop: "6px" }} />
+                <Bar dataKey="active" name={tr("dashboard:activeCases")} fill="#17365D" radius={[2, 2, 0, 0]} />
+                <Bar dataKey="disposed" name={tr("dashboard:disposedCases")} fill="#16A34A" radius={[2, 2, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* Chart 2: Status Distribution Ratio */}
-        <div className="bg-white border border-[#E2E8F0] rounded-xs p-4 shadow-xs">
+        <div className="bg-white border border-[#E2E8F0] rounded-lg p-4 shadow-xs">
           <div className="pb-2 mb-3 border-b border-slate-200">
-            <h2 className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">
-              Complaint Status Ratio
-            </h2>
-            <p className="text-[11px] text-[#64748B]">Breakdown by resolution lifecycle stage</p>
+            <h2 className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">{tr("dashboard:complaintStatusRatio")}</h2>
+            <p className="text-xs text-[#64748B]">{tr("dashboard:breakdownByResolutionLifecycleStage")}</p>
           </div>
           <div className="h-44">
             <ResponsiveContainer width="100%" height="100%">
@@ -434,16 +424,16 @@ export const OverviewDashboard: React.FC = () => {
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip contentStyle={{ borderRadius: "2px", fontSize: "11px" }} />
+                <Tooltip formatter={(value:any,name:any)=>[typeof value==="number"?formatNumber(value):value,localizeLabel(name)]} labelFormatter={(label:any)=>localizeLabel(label)} contentStyle={{ borderRadius: "2px", fontSize: "11px" }} />
               </PieChart>
             </ResponsiveContainer>
           </div>
-          <div className="grid grid-cols-2 gap-1.5 pt-2 border-t border-slate-100 text-[11px]">
+          <div className="grid grid-cols-2 gap-1.5 pt-2 border-t border-slate-100 text-xs">
             {data?.statusDistribution.map((s, i) => (
               <div key={i} className="flex items-center space-x-1.5">
-                <span className="w-2.5 h-2.5 rounded-xs shrink-0" style={{ backgroundColor: s.color }} />
-                <span className="text-slate-600 truncate">{s.name}:</span>
-                <span className="font-semibold text-slate-800 font-mono">{s.count}</span>
+                <span className="w-2.5 h-2.5 rounded-lg shrink-0" style={{ backgroundColor: s.color }} />
+                <span className="text-slate-600 truncate">{localizeLabel(s.name)}:</span>
+                <span className="font-semibold text-slate-800 font-mono">{formatNumber(s.count)}</span>
               </div>
             ))}
           </div>
@@ -453,13 +443,11 @@ export const OverviewDashboard: React.FC = () => {
       {/* Chart 3 & 4: Monthly Trends & Ageing Analysis */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3.5">
         {/* Monthly Trend */}
-        <div className="lg:col-span-2 bg-white border border-[#E2E8F0] rounded-xs p-4 shadow-xs">
+        <div className="lg:col-span-2 bg-white border border-[#E2E8F0] rounded-lg p-4 shadow-xs">
           <div className="flex items-center justify-between pb-2 mb-3 border-b border-slate-200">
             <div>
-              <h2 className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">
-                Monthly Intake vs Disposal Velocity
-              </h2>
-              <p className="text-[11px] text-[#64748B]">6-Month historical intake velocity compared to resolution turnaround</p>
+              <h2 className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">{tr("dashboard:monthlyIntakeVsDisposalVelocity")}</h2>
+              <p className="text-xs text-[#64748B]">{tr("dashboard:6MonthHistoricalIntakeVelocityComparedToResolutionTurnaround")}</p>
             </div>
           </div>
           <div className="h-52">
@@ -467,32 +455,30 @@ export const OverviewDashboard: React.FC = () => {
               <LineChart data={data?.monthlyTrends || []} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="2 2" vertical={false} stroke="#E2E8F0" />
                 <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#475569" }} />
-                <YAxis tick={{ fontSize: 11, fill: "#475569" }} />
-                <Tooltip contentStyle={{ borderRadius: "2px", fontSize: "11px" }} />
-                <Legend wrapperStyle={{ fontSize: "11px", paddingTop: "4px" }} />
-                <Line type="monotone" dataKey="filed" name="Complaints Filed" stroke="#17365D" strokeWidth={2} dot={{ r: 2 }} />
-                <Line type="monotone" dataKey="disposed" name="Complaints Disposed" stroke="#16A34A" strokeWidth={2} dot={{ r: 2 }} />
+                <YAxis tickFormatter={(value:any)=>formatNumber(value)} tick={{ fontSize: 11, fill: "#475569" }} />
+                <Tooltip formatter={(value:any,name:any)=>[typeof value==="number"?formatNumber(value):value,localizeLabel(name)]} labelFormatter={(label:any)=>localizeLabel(label)} contentStyle={{ borderRadius: "2px", fontSize: "11px" }} />
+                <Legend formatter={(value:any)=>localizeLabel(value)} wrapperStyle={{ fontSize: "11px", paddingTop: "4px" }} />
+                <Line type="monotone" dataKey="filed" name={tr("dashboard:complaintsFiled")} stroke="#17365D" strokeWidth={2} dot={{ r: 2 }} />
+                <Line type="monotone" dataKey="disposed" name={tr("dashboard:complaintsDisposed")} stroke="#16A34A" strokeWidth={2} dot={{ r: 2 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* Case Ageing */}
-        <div className="bg-white border border-[#E2E8F0] rounded-xs p-4 shadow-xs">
+        <div className="bg-white border border-[#E2E8F0] rounded-lg p-4 shadow-xs">
           <div className="pb-2 mb-3 border-b border-slate-200">
-            <h2 className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">
-              Pending Case Ageing
-            </h2>
-            <p className="text-[11px] text-[#64748B]">Days active complaints have been pending</p>
+            <h2 className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">{tr("dashboard:pendingCaseAgeing")}</h2>
+            <p className="text-xs text-[#64748B]">{tr("dashboard:daysActiveComplaintsHaveBeenPending")}</p>
           </div>
           <div className="h-52">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={data?.caseAgeing || []} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="2 2" vertical={false} stroke="#E2E8F0" />
                 <XAxis dataKey="range" tick={{ fontSize: 10, fill: "#475569" }} />
-                <YAxis tick={{ fontSize: 10, fill: "#475569" }} />
-                <Tooltip contentStyle={{ borderRadius: "2px", fontSize: "11px" }} />
-                <Bar dataKey="count" name="Cases" fill="#b45309" radius={[2, 2, 0, 0]}>
+                <YAxis tickFormatter={(value:any)=>formatNumber(value)} tick={{ fontSize: 10, fill: "#475569" }} />
+                <Tooltip formatter={(value:any,name:any)=>[typeof value==="number"?formatNumber(value):value,localizeLabel(name)]} labelFormatter={(label:any)=>localizeLabel(label)} contentStyle={{ borderRadius: "2px", fontSize: "11px" }} />
+                <Bar dataKey="count" name={tr("dashboard:cases")} fill="#b45309" radius={[2, 2, 0, 0]}>
                   {(data?.caseAgeing || []).map((entry, index) => (
                     <Cell key={`age-${index}`} fill={entry.color} />
                   ))}

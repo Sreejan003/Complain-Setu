@@ -1,5 +1,7 @@
 # Four-role RBAC implementation
 
+This document describes the earlier implementation. For the current permission policy, distinct dashboards, structured approvals, verification results and data-preservation limits, see [RBAC_DASHBOARD_UPGRADE.md](RBAC_DASHBOARD_UPGRADE.md).
+
 ## Architecture and implementation boundary
 
 The application retains React 19, TypeScript, Vite, Tailwind, Express, bcrypt, JWTs, and the existing synchronous persistent JSON store. Existing routes import that store directly. The repository also contains a PostgreSQL adapter and SQL schema, but those are not the storage path used by the application routes. This implementation secures the active JSON path; it does not claim PostgreSQL deployment verification.

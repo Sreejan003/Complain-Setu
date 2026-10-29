@@ -1,281 +1,48 @@
-import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import {
-  Bell,
-  Search,
-  Shield,
-  ChevronDown,
-  Database,
-  Menu,
-  CheckCircle2,
-  AlertTriangle,
-  RotateCcw,
-  LogOut,
-  User,
-  Building2
-} from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Bell, Search, Menu, ChevronDown, ChevronRight, LogOut, Check, ShieldCheck } from "lucide-react";
+import { LanguageSelector } from "../common/LanguageSelector.js";
 import { useAuth } from "../../context/AuthContext.js";
 import { api } from "../../services/api.js";
 import { Notification } from "../../services/types.js";
+import { coordinationNotice } from "../../services/coordinationNotice.js";
+import { tr, localizeError, localizeLabel, useLocaleRender } from "../../i18n/index.js";
+import { formatDate, formatNumber } from "../../i18n/localeUtils.js";
+import { canVisit } from "../../services/access.js";
+import { navigationActive, navigationForRole } from "./navigation.js";
 
-export const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) => {
-  const { user, demoAccounts, switchUserRole, logout } = useAuth();
-  const navigate = useNavigate();
-  const [showRoleMenu, setShowRoleMenu] = useState(false);
-  const [showNotifMenu, setShowNotifMenu] = useState(false);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [globalSearch, setGlobalSearch] = useState("");
-
-  const loadNotifications = async () => {
-    try {
-      const data = await api.getNotifications();
-      setNotifications(data);
-    } catch {
-      // ignore
-    }
-  };
-
+export const Navbar: React.FC<{ onToggleSidebar: () => void; navigationExpanded: boolean }> = ({ onToggleSidebar, navigationExpanded }) => {
+  useLocaleRender();
+  const { user, demoAccounts, switchUserRole, logout } = useAuth(), navigate = useNavigate(), location = useLocation();
+  const [menu, setMenu] = useState<"profile" | "notifications" | null>(null), [notifications, setNotifications] = useState<Notification[]>([]), [globalSearch, setGlobalSearch] = useState(""), [error, setError] = useState("");
+  const profileRoot = useRef<HTMLDivElement>(null), notificationRoot = useRef<HTMLDivElement>(null);
+  async function loadNotifications() { try { setNotifications(await api.getNotifications()); } catch { /* Existing session handling remains in the API client. */ } }
+  useEffect(() => { loadNotifications(); const timer = setInterval(loadNotifications, 20000); return () => clearInterval(timer); }, [user]);
   useEffect(() => {
-    loadNotifications();
-    const timer = setInterval(loadNotifications, 20000);
-    return () => clearInterval(timer);
-  }, [user]);
-
-  const unreadCount = notifications.filter(n => !n.isRead).length;
-
-  const handleGlobalSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (globalSearch.trim()) {
-      navigate(`/cases?search=${encodeURIComponent(globalSearch.trim())}`);
-      setGlobalSearch("");
-    }
-  };
-
-  return (
-    <header className="bg-white border-b border-slate-300 sticky top-0 z-30">
-      {/* 1. Official Tricolor Top Stripe */}
-      <div className="gov-tricolor-bar" />
-
-      {/* 2. Top Ministry & National Portal Identification Bar */}
-      <div className="bg-[#0b2545] text-slate-200 text-[11px] px-4 py-1 flex items-center justify-between border-b border-[#12375b]">
-        <div className="flex items-center space-x-2 font-medium tracking-wide">
-          <span className="text-white font-semibold">भारत सरकार</span>
-          <span className="text-slate-400">|</span>
-          <span className="text-slate-200">Government of India</span>
-          <span className="text-slate-400 hidden sm:inline">|</span>
-          <span className="text-slate-300 hidden sm:inline">शिक्षा मंत्रालय (Ministry of Education)</span>
+    function outside(event: MouseEvent) { if (!profileRoot.current?.contains(event.target as Node) && !notificationRoot.current?.contains(event.target as Node)) setMenu(null); }
+    function escape(event: KeyboardEvent) { if (event.key === "Escape" && menu) { const root = menu === "profile" ? profileRoot : notificationRoot; setMenu(null); root.current?.querySelector<HTMLButtonElement>("button")?.focus(); } }
+    document.addEventListener("mousedown", outside); document.addEventListener("keydown", escape);
+    return () => { document.removeEventListener("mousedown", outside); document.removeEventListener("keydown", escape); };
+  }, [menu]);
+  useEffect(() => { setMenu(null); }, [location.pathname]);
+  const unread = notifications.filter(n => !n.isRead).length;
+  const current = navigationForRole(user?.role || "").find(item => navigationActive(item, location.pathname, location.search, location.hash));
+  const context = current?.key === "coordination" ? tr("workflow:crossBureau.title") : localizeLabel(current?.label || "Dashboard");
+  const popup = "absolute end-0 top-full mt-3 bg-white border border-slate-200 rounded-xl shadow-xl z-40 overflow-hidden max-w-[calc(100vw-2rem)]";
+  return <header className="shrink-0 bg-white border-b border-slate-200 z-30 relative">
+    <div className="min-h-[83px] flex flex-wrap md:flex-nowrap items-center gap-3 px-4 sm:px-6 py-3">
+      <button type="button" onClick={onToggleSidebar} className="icon-button border border-slate-200 shrink-0" aria-label={tr("navigation:toggleSidebar")} aria-controls="app-navigation" aria-expanded={navigationExpanded}><Menu className="w-[18px] h-[18px]" aria-hidden="true"/></button>
+      <div className="min-w-0 flex-1"><Link to="/" title={tr("navigation:aicte")} className="text-[11px] text-slate-500 font-medium block">AICTE · IICMCS</Link><nav aria-label={tr("navigation:ui.pageContext")} className="flex gap-1 items-center text-sm font-semibold text-aicte-navy-800"><span className="hidden xl:inline text-slate-500 font-normal">Complain Setu</span><ChevronRight className="hidden xl:block w-3.5 h-3.5 text-slate-400 rtl:rotate-180" aria-hidden="true"/><span className="truncate" title={context}>{context}</span></nav></div>
+      {canVisit(user?.role || "", "/cases") && <form onSubmit={event => { event.preventDefault(); if (globalSearch.trim()) { navigate(`/cases?search=${encodeURIComponent(globalSearch.trim())}`); setGlobalSearch(""); } }} role="search" className="hidden xl:block w-[min(25vw,320px)] me-2"><div className="relative"><Search className="w-4 h-4 absolute start-3 top-1/2 -translate-y-1/2 text-slate-400" aria-hidden="true"/><input type="search" className="control w-full ps-9 bg-slate-50 border-slate-200" aria-label={tr("navigation:searchComplaintIdAicteOrPermanentId")} placeholder={tr("navigation:ui.searchPlaceholder")} value={globalSearch} onChange={event => setGlobalSearch(event.target.value)}/></div></form>}
+      <div className="flex items-center gap-1.5 ms-auto"><LanguageSelector/>
+        <div className="relative" ref={notificationRoot}><button className="icon-button relative" onClick={() => { setError(""); setMenu(menu === "notifications" ? null : "notifications"); }} aria-label={tr("navigation:notifications")} aria-expanded={menu === "notifications"} aria-controls="notification-popover"><Bell className="w-[19px] h-[19px]" aria-hidden="true"/>{unread > 0 && <span className="absolute end-1 top-1 min-w-4 h-4 px-1 bg-red-600 text-white rounded-full text-[9px] border-2 border-white leading-3 text-center">{unread > 9 ? "9+" : formatNumber(unread)}</span>}</button>
+          {menu === "notifications" && <section id="notification-popover" aria-label={tr("navigation:notifications")} className={`${popup} w-96`}><div className="px-4 py-3 flex justify-between items-center border-b border-slate-100"><h2 className="text-sm font-semibold">{tr("navigation:notifications")} <span className="text-slate-500">({formatNumber(unread)})</span></h2><button className="text-xs text-aicte-navy-700 font-medium p-1" onClick={async () => { try { await api.markAllNotificationsRead(); await loadNotifications(); } catch (e) { setError(localizeError(e instanceof Error ? e.message : "")); } }}>{tr("navigation:markAllRead")}</button></div>{error && <p className="text-xs text-red-700 p-3" role="alert">{error}</p>}<div className="max-h-[min(60vh,400px)] overflow-y-auto divide-y divide-slate-100">{!notifications.length ? <p className="text-sm text-slate-500 p-6 text-center">{tr("navigation:noActiveNotifications")}</p> : notifications.slice(0, 10).map(n => <button key={n.id} className={`w-full text-start p-4 flex gap-3 hover:bg-slate-50 ${!n.isRead ? "bg-blue-50/40" : ""}`} onClick={async () => { try { if (!n.isRead) { await api.markNotificationRead(n.id); await loadNotifications(); } setMenu(null); navigate(n.referenceType === "coordination" ? `/coordination/${n.referenceId}` : n.notificationType === "Overlap Alert" ? "/overlaps" : "/cases"); } catch (e) { setError(localizeError(e instanceof Error ? e.message : "")); } }}><span className="mt-1 w-7 h-7 bg-slate-100 rounded-full grid place-items-center shrink-0"><Bell className="w-3.5 h-3.5 text-slate-500"/></span><span className="min-w-0"><span className="block text-[13px] font-semibold"><bdi dir="auto">{coordinationNotice(n, "title")}</bdi></span><span className="block text-xs text-slate-600 line-clamp-2 mt-1"><bdi dir="auto">{coordinationNotice(n, "message")}</bdi></span><span className="block text-xs text-slate-500 mt-2">{formatDate(n.createdAt, true)}</span></span></button>)}</div><Link to="/notifications" className="block p-3 text-center text-sm text-aicte-navy-700 font-medium border-t border-slate-100" onClick={() => setMenu(null)}>{tr("navigation:viewAllNotifications")}</Link></section>}
         </div>
-        <div className="flex items-center space-x-3 text-[11px]">
-          <span className="hidden md:inline text-slate-300">
-            अखिल भारतीय तकनीकी शिक्षा परिषद (AICTE)
-          </span>
-          <span className="text-slate-400 hidden md:inline">|</span>
-          <span className="bg-amber-500/20 text-amber-300 border border-amber-400/40 px-1.5 py-0.2 rounded-xs font-mono text-[10px]">
-            DEMO ENVIRONMENT
-          </span>
+        <div className="h-7 border-s border-slate-200 mx-2 hidden sm:block"/>
+        <div className="relative" ref={profileRoot}><button className="flex items-center gap-2 p-1 rounded-lg text-start" onClick={() => setMenu(menu === "profile" ? null : "profile")} aria-expanded={menu === "profile"} aria-controls="profile-popover" aria-label={`${user?.fullName} · ${localizeLabel(user?.role)}`}><span className="w-9 h-9 rounded-full bg-aicte-navy-100 text-aicte-navy-800 grid place-items-center font-semibold">{user?.fullName?.charAt(0) || "O"}</span><span className="hidden lg:block max-w-[170px]"><span className="block text-[13px] font-semibold truncate"><bdi>{user?.fullName}</bdi></span><span className="block text-[11px] text-slate-500 truncate">{localizeLabel(user?.role)}{user?.bureauId ? ` · ${user.bureauId}` : ""}</span></span><ChevronDown className="w-3.5 h-3.5 text-slate-400 hidden sm:block" aria-hidden="true"/></button>
+          {menu === "profile" && <section id="profile-popover" aria-label={tr("navigation:activeOfficerRoleContext")} className={`${popup} w-80 p-2`}><div className="px-3 py-3 border-b border-slate-100 mb-2"><p className="text-sm font-semibold flex items-center gap-2"><ShieldCheck className="w-4 h-4 text-teal-700"/>{tr("navigation:activeOfficerRoleContext")}</p><p className="text-xs text-slate-500 mt-1">{localizeLabel(user?.role)} · {user?.bureauId || "AICTE"}</p></div><div className="max-h-[50vh] overflow-y-auto">{demoAccounts.map(account => <button className={`w-full text-start p-3 rounded-lg text-sm hover:bg-slate-50 flex justify-between gap-3 ${account.email === user?.email ? "bg-aicte-navy-50" : ""}`} key={account.id} onClick={() => { switchUserRole(account.email); setMenu(null); }}><span className="min-w-0"><span className="block font-medium truncate"><bdi>{account.fullName}</bdi></span><span className="block text-xs text-slate-500">{localizeLabel(account.role)}</span><span className="block text-xs text-slate-500 truncate">{account.designation}</span></span>{account.email === user?.email && <Check className="w-4 h-4 text-teal-700 shrink-0"/>}</button>)}</div><button className="w-full flex items-center gap-2 text-red-700 text-sm font-medium p-3 border-t border-slate-100 mt-2" onClick={() => { setMenu(null); logout(); navigate("/login"); }}><LogOut className="w-4 h-4" aria-hidden="true"/>{tr("navigation:signOut")}</button></section>}
         </div>
       </div>
-
-      {/* 3. Official Government Portal Masthead */}
-      <div className="px-4 py-2 flex items-center justify-between gap-4 bg-white">
-        {/* Left: Emblem Representation & Official Title */}
-        <div className="flex items-center space-x-3">
-          <button
-            onClick={onToggleSidebar}
-            className="p-1 rounded text-slate-700 hover:text-[#003366] hover:bg-slate-100 border border-slate-300 transition cursor-pointer"
-            title="Toggle Menu"
-            aria-label="Toggle Sidebar"
-          >
-            <Menu className="w-5 h-5" />
-          </button>
-
-          <Link to="/" className="flex items-center space-x-2.5">
-            {/* National Crest / AICTE Seal Representation */}
-            <div className="w-9 h-9 rounded-xs bg-[#003366] border border-[#002147] flex items-center justify-center text-white shrink-0">
-              <Shield className="w-5 h-5 text-amber-400" />
-            </div>
-            <div>
-              <div className="text-[11px] font-semibold text-slate-600 leading-none">
-                अखिल भारतीय तकनीकी शिक्षा परिषद • AICTE
-              </div>
-              <div className="text-base font-bold text-[#003366] tracking-tight leading-tight mt-0.5">
-                Complaint Monitoring System
-              </div>
-              <div className="text-[10px] text-slate-500 font-medium hidden sm:block">
-                Inter-Bureau Grievance Redressal & Statutory SLA Compliance Portal
-              </div>
-            </div>
-          </Link>
-        </div>
-
-        {/* Center: Primary Administrative Reference Search */}
-        <form onSubmit={handleGlobalSearch} className="hidden lg:flex items-center flex-1 max-w-sm mx-4">
-          <div className="relative w-full">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              value={globalSearch}
-              onChange={e => setGlobalSearch(e.target.value)}
-              placeholder="Search Complaint ID (AICTE/...) or Permanent ID..."
-              className="w-full bg-slate-50 border border-slate-300 text-slate-800 text-xs rounded-xs pl-8 pr-3 py-1.5 focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#003366] focus:border-[#003366] transition"
-            />
-          </div>
-        </form>
-
-        {/* Right: Administrative Utility Bar */}
-        <div className="flex items-center space-x-2.5">
-          {/* Notifications Dropdown */}
-          <div className="relative">
-            <button
-              onClick={() => setShowNotifMenu(!showNotifMenu)}
-              className="relative p-1.5 rounded-xs text-slate-600 hover:text-[#003366] hover:bg-slate-100 border border-slate-200 transition cursor-pointer"
-              title="Official Notifications"
-              aria-label="Notifications"
-            >
-              <Bell className="w-4 h-4" />
-              {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-700 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-white">
-                  {unreadCount > 9 ? "9+" : unreadCount}
-                </span>
-              )}
-            </button>
-
-            {showNotifMenu && (
-              <div className="absolute right-0 mt-1.5 w-80 sm:w-96 bg-white border border-slate-300 rounded-xs shadow-md z-50 overflow-hidden">
-                <div className="px-3 py-2 bg-slate-100 border-b border-slate-200 flex items-center justify-between text-xs font-semibold text-slate-800">
-                  <span>NOTIFICATIONS ({unreadCount} UNREAD)</span>
-                  <button
-                    onClick={async () => {
-                      await api.markAllNotificationsRead();
-                      loadNotifications();
-                    }}
-                    className="text-[11px] text-[#003366] hover:underline font-normal cursor-pointer"
-                  >
-                    Mark all read
-                  </button>
-                </div>
-                <div className="max-h-72 overflow-y-auto divide-y divide-slate-100 text-xs">
-                  {notifications.length === 0 ? (
-                    <div className="p-4 text-center text-xs text-slate-500">No active notifications</div>
-                  ) : (
-                    notifications.slice(0, 10).map(n => (
-                      <div
-                        key={n.id}
-                        onClick={async () => {
-                          if (!n.isRead) {
-                            await api.markNotificationRead(n.id);
-                            loadNotifications();
-                          }
-                          setShowNotifMenu(false);
-                          if (n.notificationType === "Overlap Alert") {
-                            navigate("/overlaps");
-                          } else {
-                            navigate("/cases");
-                          }
-                        }}
-                        className={`p-2.5 hover:bg-slate-50 cursor-pointer transition flex items-start space-x-2 ${!n.isRead ? "bg-blue-50/60" : ""}`}
-                      >
-                        <div className="mt-0.5">
-                          {n.notificationType === "Overlap Alert" ? (
-                            <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
-                          ) : (
-                            <Bell className="w-3.5 h-3.5 text-slate-500" />
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="font-semibold text-slate-800 truncate">{n.title}</div>
-                          <div className="text-slate-600 text-[11px] line-clamp-2 mt-0.5">{n.message}</div>
-                          <div className="text-slate-400 text-[10px] mt-1">{new Date(n.createdAt).toLocaleDateString()}</div>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-                <div className="p-2 border-t border-slate-200 bg-slate-50 text-center">
-                  <Link
-                    to="/notifications"
-                    onClick={() => setShowNotifMenu(false)}
-                    className="text-xs text-[#003366] hover:underline font-semibold"
-                  >
-                    View All Notifications &rarr;
-                  </Link>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Officer Role & Profile Utility Box */}
-          <div className="relative">
-            <button
-              onClick={() => setShowRoleMenu(!showRoleMenu)}
-              className="flex items-center space-x-2 bg-slate-50 hover:bg-slate-100 border border-slate-300 px-2.5 py-1 rounded-xs transition cursor-pointer text-left"
-            >
-              <div className="w-6 h-6 rounded-xs bg-[#003366] text-white flex items-center justify-center text-xs font-bold font-mono">
-                {user?.fullName.charAt(0) || "O"}
-              </div>
-              <div className="hidden sm:block">
-                <div className="text-xs font-bold text-slate-800 leading-tight truncate max-w-[150px]">
-                  {user?.fullName || "Officer"}
-                </div>
-                <div className="text-[10px] text-slate-500 font-medium">
-                  {user?.role || "Logged In"} {user?.bureauId ? `• ${user.bureauId}` : ""}
-                </div>
-              </div>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
-            </button>
-
-            {showRoleMenu && (
-              <div className="absolute right-0 mt-1.5 w-72 bg-white border border-slate-300 rounded-xs shadow-md z-50 p-2">
-                <div className="px-2 py-1 text-[10px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200 mb-1">
-                  Active Officer / Role Context
-                </div>
-                <div className="space-y-0.5">
-                  {demoAccounts.map(acc => (
-                    <button
-                      key={acc.id}
-                      onClick={() => {
-                        switchUserRole(acc.email);
-                        setShowRoleMenu(false);
-                      }}
-                      className={`w-full text-left p-2 rounded-xs hover:bg-slate-50 text-xs transition flex items-start space-x-2 cursor-pointer ${
-                        user?.email === acc.email ? "bg-blue-50/80 border border-blue-200 font-medium" : ""
-                      }`}
-                    >
-                      <div className="flex-1 min-w-0">
-                        <div className="font-semibold text-slate-800 flex items-center justify-between">
-                          <span className="truncate">{acc.fullName}</span>
-                          {user?.email === acc.email && (
-                            <CheckCircle2 className="w-3.5 h-3.5 text-[#003366]" />
-                          )}
-                        </div>
-                        <div className="text-[11px] text-[#003366] font-medium">{acc.role}</div>
-                        <div className="text-[10px] text-slate-400 truncate">{acc.designation}</div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-
-                <div className="pt-2 mt-2 border-t border-slate-200">
-                  <button
-                    onClick={() => {
-                      setShowRoleMenu(false);
-                      logout();
-                      navigate("/login");
-                    }}
-                    className="w-full text-left px-2.5 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50 rounded-xs transition flex items-center justify-between cursor-pointer"
-                  >
-                    <span className="flex items-center gap-1.5">
-                      <LogOut className="w-3.5 h-3.5" />
-                      Sign Out
-                    </span>
-                    <span className="text-[10px] text-slate-400 font-normal">Close Session</span>
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </header>
-  );
+    </div>
+  </header>;
 };

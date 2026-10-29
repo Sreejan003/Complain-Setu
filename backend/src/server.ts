@@ -15,13 +15,14 @@ import { transfersRouter } from "./routes/transfers.js";
 import { notificationsRouter } from "./routes/notifications.js";
 import { analyticsRouter } from "./routes/analytics.js";
 import { adminRouter } from "./routes/admin.js";
+import {coordinationRouter} from "./routes/coordination.js";
 import { requireAuth, AuthenticatedRequest } from "./middleware/auth.js";
 import { store } from "./db/store.js";
 import { startSlaScheduler } from "./services/slaScheduler.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const UPLOADS_DIR = path.resolve(__dirname, "../uploads");
+const UPLOADS_DIR = process.env.DATA_DIR ? path.join(process.env.DATA_DIR,"uploads") : path.resolve(__dirname, "../uploads");
 if (!fs.existsSync(UPLOADS_DIR)) {
   fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 }
@@ -80,6 +81,7 @@ app.use("/api/transfers", transfersRouter);
 app.use("/api/notifications", notificationsRouter);
 app.use("/api/analytics", analyticsRouter);
 app.use("/api/admin", adminRouter);
+app.use("/api/coordination",coordinationRouter);
 
 app.get("/health", (_req, res) => {
   res.json({

@@ -1,0 +1,20 @@
+{
+  "overdue": "ओवरड्यू",
+  "statusUpdate": "स्थिति अद्यतन",
+  "governmentOfIndiaAicteAdministrativeAlerts": "भारत सरकार • AICTE प्रशासनिक अलर्ट",
+  "officialNotificationCenter": "आधिकारिक अधिसूचना केन्द्र",
+  "auditAlertsForNewlyDetectedOverlapsApproachingSlaDeadlines": "Audit alerts for newly detected overlaps, approaching SLA deadlines, case transfers, and escalations.",
+  "markAllRead": "मार्क ऑल रीड",
+  "filterByType": "प्रकार के अनुसार फ़िल्टर:",
+  "allNotificationTypes": "सभी अधिसूचना प्रकार",
+  "overdueDeadlines": "समय सीमा समाप्त",
+  "caseTransfers": "केस ट्रांसफर",
+  "statusUpdates": "स्थिति अपडेट",
+  "unreadOnly": "केवल अपठित",
+  "loadingNotifications": "सूचना लोड भ रहल अछि...",
+  "noOfficialNotificationsRecorded": "कोनो आधिकारिक अधिसूचना दर्ज नहि भेल।",
+  "reviewInOverlapCenter": "ओवरलैप सेंटर में समीक्षा →",
+  "inspectCaseFile": "केस फाइल के निरीक्षण →",
+  "markAsRead": "पढ़ल जेना निशान लगाउ",
+  "alerts": " अलर्ट करैत अछि"
+}

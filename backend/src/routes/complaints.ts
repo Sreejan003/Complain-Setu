@@ -1,5 +1,6 @@
-import { STATUS_TRANSITIONS } from "../config/constants.js";
-import { roleOf } from "../security/rbac.js";
+import { STATUS_TRANSITIONS, COMPLAINT_CATEGORIES, PRIORITIES, DEFAULT_ESCALATION_CONFIG } from "../config/constants.js";
+import { roleOf, authorize, caseCapabilities, effectiveProfile } from "../security/rbac.js";
+import {coordinationAccess} from "../security/coordination.js";
 import { Router, Response } from "express";
 import multer from "multer";
 import path from "path";
@@ -10,6 +11,7 @@ import { store } from "../db/store.js";
 import { requireAuth, requireRole, AuthenticatedRequest, canAccessComplaint, canMutateComplaint } from "../middleware/auth.js";
 import { detectOverlapsForComplaint } from "../services/overlapEngine.js";
 
+const validDate = (value: unknown) => typeof value==="string" && /^\d{4}-\d{2}-\d{2}$/.test(value) && Number.isFinite(Date.parse(value)) && new Date(value).toISOString().slice(0,10)===value;
 export const complaintsRouter = Router();
 complaintsRouter.use(requireAuth, (req: AuthenticatedRequest, res, next) => {
   const role = roleOf(req.user!.role);
@@ -17,14 +19,17 @@ complaintsRouter.use(requireAuth, (req: AuthenticatedRequest, res, next) => {
   const id = req.path.split("/")[1];
   if (id && !["stream", "check-overlap"].includes(id) && !store.getComplaintById(id)) return res.status(404).json({error:"Complaint not found in authorized scope."});
   if (req.method === "PATCH" && req.path.endsWith("/status")) {
-    if (req.body.status === "Escalated" && !req.user!.permissions?.includes("APPROVE_ESCALATIONS")) return res.status(403).json({error:"Escalation decision permission has not been delegated."});
-    if (role === "COMPETENT_AUTHORITY" && req.body.assignedOfficerId && !req.user!.permissions?.includes("ASSIGN_OFFICERS")) return res.status(403).json({error:"Officer assignment has not been delegated."});
-    if (role === "CASE_OFFICER" && (req.body.assignedOfficerId !== undefined || ["Disposed","Transferred","Escalated"].includes(req.body.status))) return res.status(403).json({error:"Assignment and final decisions require a Bureau Head or Competent Authority."});
-    if (req.body.status === "Transferred") return res.status(400).json({error:"Use the recorded transfer workflow."});
-    if (req.body.assignedOfficerId) {
-      const officer = store.getProfileById(req.body.assignedOfficerId);
-      const complaint = store.getComplaintById(id);
-      if (!officer?.isActive || roleOf(officer.role) !== "CASE_OFFICER" || !officer.bureauId || officer.bureauId !== complaint?.currentBureauId || (req.user!.region && officer.region !== req.user!.region)) return res.status(400).json({error:"Select an active case officer within the case bureau and region."});
+    const complaint=store.getComplaintById(id)!;
+    const context={region:store.getComplaintRegion(complaint),proposedStatus:req.body.status};
+    const status=req.body.status;
+    if(complaint.status==="Disposed" && status!=="Under Process") return res.status(403).json({error:"Closed cases require an explicit authorized reopening."});
+    const action=complaint.status==="Disposed" ? "case.reopen" : status==="Disposed" ? "case.dispose" : status==="Escalated" ? "case.escalate" : "case.update";
+    if (!authorize(req.user!,action,complaint,context)) return res.status(403).json({error:"This case action is not authorized."});
+    if (status==="Transferred") return res.status(400).json({error:"Use the recorded transfer workflow."});
+    if (req.body.assignedOfficerId!==undefined) {
+      if (!authorize(req.user!,"case.assign",complaint,context)) return res.status(403).json({error:"Officer assignment is not authorized."});
+      const officer=store.getProfileById(req.body.assignedOfficerId);
+      if (!officer || !eligibleOfficer(officer,complaint.currentBureauId,context.region,req.user!)) return res.status(400).json({error:"Select an active case officer eligible for this bureau and region."});
     }
   }
   if (req.method === "POST" && req.path === "/") {
@@ -36,7 +41,7 @@ complaintsRouter.use(requireAuth, (req: AuthenticatedRequest, res, next) => {
     if (req.user!.bureauId && req.body.receivingBureauId !== req.user!.bureauId) return res.status(403).json({error:"Receiving bureau is outside your scope."});
     if (req.body.assignedOfficerId) {
       const officer = store.getProfileById(req.body.assignedOfficerId);
-      if (!officer?.isActive || roleOf(officer.role) !== "CASE_OFFICER" || officer.bureauId !== req.body.receivingBureauId) return res.status(400).json({error:"Invalid case officer assignment."});
+      if (!officer?.isActive || roleOf(officer.role) !== "CASE_OFFICER" || officer.bureauId !== req.body.receivingBureauId || (officer.region && officer.region!==institution.region) || (req.user!.role==="COMPETENT_AUTHORITY" && !req.user!.permissions?.includes("ASSIGN_OFFICERS"))) return res.status(400).json({error:"Invalid case officer assignment."});
     }
   }
   if (req.path.endsWith("/override-sla") && role !== "COMPETENT_AUTHORITY") return res.status(403).json({error:"Supervisory authority required."});
@@ -64,8 +69,11 @@ export function broadcastCaseEvent(event: {
     try {
       const current = store.getProfileById(client.user.id);
       const complaint = event.complaintId ? store.getComplaintById(event.complaintId) : undefined;
-      if (!current?.isActive || current.updatedAt !== client.user.updatedAt) {client.res.end();sseClients.splice(i,1);continue;}
-      if (!complaint || !canAccessComplaint(current, complaint)) continue;
+      if (!current?.isActive || (current.sessionVersion || current.updatedAt) !== (client.user.sessionVersion || client.user.updatedAt)) {client.res.end();sseClients.splice(i,1);continue;}
+      if(event.type==="COORDINATION_UPDATED"){
+        const session=store.getCoordinationSessions().find(s=>s.id===event.sessionId);
+        if(!session||!coordinationAccess(effectiveProfile(current),session,store.getCoordinationSource(session.primaryComplaintId)).read)continue;
+      }else if (!complaint || !canAccessComplaint(current, complaint)) continue;
       client.res.write(`data: ${payload}\n\n`);
     } catch {
       sseClients.splice(i, 1);
@@ -214,7 +222,8 @@ complaintsRouter.get("/:id", requireAuth, (req: AuthenticatedRequest, res: Respo
 
   return res.json({
     complaint,
-    permittedStatuses: (STATUS_TRANSITIONS[complaint.status] || []).filter(status => status!=="Transferred" && (req.user!.role!=="CASE_OFFICER" || !["Disposed","Escalated"].includes(status)) && (status!=="Escalated" || req.user!.permissions?.includes("APPROVE_ESCALATIONS")) && (complaint.status!=="Disposed" || req.user!.role==="COMPETENT_AUTHORITY")),
+    allowedActions: {...caseCapabilities(req.user!,complaint,store.getComplaintRegion(complaint)),approachingDeadlineDays:store.getSlaSettings()?.approachingDeadlineDays || DEFAULT_ESCALATION_CONFIG.approachingDeadlineDays},
+    permittedStatuses: caseCapabilities(req.user!,complaint,store.getComplaintRegion(complaint)).permittedStatuses,
     history,
     relatedCases,
     overlapAlerts: overlapAlerts.map(o => ({...o,complaintDescA:store.getComplaintById(o.complaintIdA)?o.complaintDescA:"",complaintDescB:store.getComplaintById(o.complaintIdB)?o.complaintDescB:"",explanation:undefined}))
@@ -255,17 +264,24 @@ complaintsRouter.get("/:id/related", requireAuth, (req: AuthenticatedRequest, re
   return res.json(related);
 });
 
-// Requests record an officer recommendation; they never approve or change ownership/status.
-complaintsRouter.post("/:id/requests", requireAuth, (req: AuthenticatedRequest,res)=>{
-  const complaint = store.getComplaintById(req.params.id);
-  if (!complaint || !canMutateComplaint(req.user!,complaint).allowed) return res.status(403).json({error:"Case request access denied."});
-  const {type,remarks} = req.body;
-  if (!["Transfer","Escalation","Disposal","Coordination"].includes(type) || typeof remarks!=="string" || !remarks.trim() || remarks.length>5000) return res.status(400).json({error:"Valid request type and remarks required."});
-  const timestamp = new Date().toISOString();
-  store.addCaseHistory({id:uuidv4(),complaintId:complaint.id,actionType:type+" Requested",remarks:remarks.trim(),performedBy:req.user!.id,performedByName:req.user!.fullName,createdAt:timestamp});
-  store.getProfiles().filter(p=>p.isActive && ((p.role==="BUREAU_HEAD" && p.bureauId===complaint.currentBureauId) || p.role==="COMPETENT_AUTHORITY")).filter(p=>canAccessComplaint(p,complaint)).forEach(p=>store.addNotification({id:uuidv4(),recipientId:p.id,title:type+" request: "+complaint.complaintId,message:remarks.trim(),notificationType:"Status Update",referenceId:complaint.id,referenceType:"complaint",isRead:false,createdAt:timestamp}));
-  store.addAuditLog({userId:req.user!.id,userName:req.user!.fullName,action:"CASE_REQUEST",entityType:"Complaint",entityId:complaint.id,details:{type,remarks:remarks.trim()}});
-  return res.status(201).json({success:true});
+function eligibleOfficer(profile: any, bureau: string, region: string | undefined, actor: any) {
+  const officer=effectiveProfile(profile);
+  return officer.isActive && officer.role==="CASE_OFFICER" && officer.bureauId===bureau && (!officer.region || officer.region===region) && (!actor.region || officer.region===actor.region);
+}
+complaintsRouter.get("/:id/eligible-officers", (req: AuthenticatedRequest,res)=>{
+  const complaint=store.getComplaintById(req.params.id)!;
+  if (!authorize(req.user!,"case.assign",complaint,{region:store.getComplaintRegion(complaint)})) return res.status(403).json({error:"Assignment lookup not authorized."});
+  const search=String(req.query.search||"").toLowerCase();
+  return res.json(store.getProfiles().filter(p=>eligibleOfficer(p,complaint.currentBureauId,store.getComplaintRegion(complaint),req.user!)).filter(p=>p.fullName.toLowerCase().includes(search)).map(p=>({id:p.id,fullName:p.fullName,bureauId:effectiveProfile(p).bureauId,region:p.region,activeCases:store.getScopedComplaints().filter(c=>c.assignedOfficerId===p.id&&c.status!=="Disposed").length})));
+});
+complaintsRouter.get("/:id/requests", (req: AuthenticatedRequest,res)=>res.json(store.getWorkflowRequests().filter(r=>r.complaintId===req.params.id).map(r=>({...r,canReview:store.canReviewRequest(req.user!,r),canApprove:store.canApproveRequest(req.user!,r)}))));
+complaintsRouter.post("/:id/requests", (req: AuthenticatedRequest,res)=>{
+  try {return res.status(201).json(store.submitWorkflowRequest(req.params.id,req.body,req.user!));}
+  catch(error:any){return res.status(error.status||400).json({error:error.message});}
+});
+complaintsRouter.patch("/:id/requests/:requestId/decision", (req: AuthenticatedRequest,res)=>{
+  try {return res.json(store.decideWorkflowRequest(req.params.id,req.params.requestId,req.body,req.user!));}
+  catch(error:any){return res.status(error.status||400).json({error:error.message});}
 });
 
 // Register new complaint
@@ -285,10 +301,11 @@ complaintsRouter.post(
       expectedDisposalDate
     } = req.body;
 
-    if (!institutionId || !category || !title || !description || !receivingBureauId || !priority) {
+    if (!institutionId || !category || typeof title!=="string" || !title.trim() || typeof description!=="string" || !description.trim() || !receivingBureauId || !PRIORITIES.includes(priority) || !COMPLAINT_CATEGORIES.includes(category)) {
       return res.status(400).json({ error: "All mandatory complaint registration fields must be filled." });
     }
 
+    if(expectedDisposalDate!==undefined && !validDate(expectedDisposalDate)) return res.status(400).json({error:"Expected disposal date must be a valid calendar date."});
     try {
       const result = await store.createComplaint(
         {
@@ -328,7 +345,7 @@ complaintsRouter.patch(
   (req: AuthenticatedRequest, res: Response) => {
     const { status, priority, assignedOfficerId, remarks, disposalRemarks, lastKnownUpdatedAt, nextAction, nextActionDate } = req.body;
 
-    if ((nextAction !== undefined && (typeof nextAction !== "string" || nextAction.length>2000)) || (nextActionDate && (typeof nextActionDate !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(nextActionDate) || !Number.isFinite(Date.parse(nextActionDate))))) return res.status(400).json({error:"Invalid next action or action date."});
+    if ((nextAction !== undefined && (typeof nextAction !== "string" || nextAction.length>2000)) || (nextActionDate && (typeof nextActionDate !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(nextActionDate) || !Number.isFinite(Date.parse(nextActionDate)) || new Date(nextActionDate).toISOString().slice(0,10)!==nextActionDate))) return res.status(400).json({error:"Invalid next action or action date."});
     if (priority && !["Low","Medium","High","Critical"].includes(priority)) return res.status(400).json({error:"Invalid priority."});
     if (!remarks || typeof remarks !== "string" || remarks.trim().length === 0) {
       return res.status(400).json({ error: "Officer action remarks are mandatory for audit compliance." });
@@ -349,7 +366,7 @@ complaintsRouter.patch(
 
     const institution = store.getInstitutionById(complaint.institutionId);
     const mutationPerm = canMutateComplaint(req.user!, complaint, institution?.region);
-    if (!mutationPerm.allowed) {
+    if (!mutationPerm.allowed && !(req.body.status && authorize(req.user!,"case.reopen",complaint,{region:institution?.region}))) {
       return res.status(403).json({ error: mutationPerm.reason || "Access Denied: You do not have permission to modify this complaint." });
     }
 
@@ -391,7 +408,7 @@ complaintsRouter.post(
   (req: AuthenticatedRequest, res: Response) => {
     const { newDeadline, overrideReason } = req.body;
 
-    if (!newDeadline || !/^\d{4}-\d{2}-\d{2}$/.test(newDeadline)) {
+    if (!validDate(newDeadline)) {
       return res.status(400).json({ error: "A valid statutory deadline in YYYY-MM-DD format is required." });
     }
 
@@ -428,7 +445,7 @@ complaintsRouter.post(
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const UPLOAD_DIR = path.resolve(__dirname, "../../uploads");
+const UPLOAD_DIR = process.env.DATA_DIR ? path.join(process.env.DATA_DIR,"uploads") : path.resolve(__dirname, "../../uploads");
 if (!fs.existsSync(UPLOAD_DIR)) {
   fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 }
@@ -521,7 +538,7 @@ complaintsRouter.post(
       return res.status(404).json({ error: "Complaint not found." });
     }
 
-    if (!canAccessComplaint(req.user!, complaint)) {
+    if (!authorize(req.user!, "evidence.upload", complaint, {region:store.getComplaintRegion(complaint)})) {
       return res.status(403).json({ error: "Access Denied: You do not have permission to attach documents to this complaint." });
     }
 

@@ -1,0 +1,17 @@
+/* Noto Sans Kannada; source: https://fonts.googleapis.com/css2?family=Noto+Sans+Kannada:wght@400;600&display=swap; license: ./OFL.txt */
+@font-face {
+  font-family: 'Noto Sans Kannada';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: normal;
+  font-display: swap;
+  src: url(./54cc114e31bd93a2.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Noto Sans Kannada';
+  font-style: normal;
+  font-weight: 600;
+  font-stretch: normal;
+  font-display: swap;
+  src: url(./9b0fb07b72eb4a58.ttf) format('truetype');
+}

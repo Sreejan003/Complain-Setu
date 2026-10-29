@@ -169,8 +169,11 @@ async function runTests() {
     assert.strictEqual(transferResult.fromBureauId, initialBureau);
     assert.strictEqual(transferResult.toBureauId, "RB");
 
+    assert.strictEqual(store.getComplaintById(testComp.id)!.currentBureauId,initialBureau,"Pending transfer must preserve ownership");
+    store.respondToTransfer(transferResult.id,"Accepted","Accepted by authorized receiving supervisor",{...adminUser,role:"COMPETENT_AUTHORITY",permissions:["APPROVE_TRANSFERS"],bureauId:"RB"});
+    assert.strictEqual(store.getComplaintById(testComp.id)!.currentBureauId,"RB");
     const historyAfterTransfer = store.getCaseHistory(testComp.id);
-    const transferEntry = historyAfterTransfer.find(h => h.actionType === "Case Transferred");
+    const transferEntry = historyAfterTransfer.find(h => h.actionType === "Transfer Requested");
     assert(Boolean(transferEntry), "Transfer entry must be present in case history");
     console.log("  ✓ Passed: Complete transfer audit trail retained.");
     passed++;

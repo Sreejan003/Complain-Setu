@@ -1,0 +1,15 @@
+/* Noto Sans Ol Chiki; source: https://fonts.googleapis.com/css2?family=Noto+Sans+Ol+Chiki:wght@400;600&display=swap; license: ./OFL.txt */
+@font-face {
+  font-family: 'Noto Sans Ol Chiki';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(./48863d38cab24b35.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Noto Sans Ol Chiki';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(./d588fa898f69152f.ttf) format('truetype');
+}

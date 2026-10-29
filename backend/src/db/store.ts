@@ -1,10 +1,12 @@
-import { BUREAUS, STATUS_TRANSITIONS } from "../config/constants.js";
-import { requestScope, mayRead, roleOf, effectiveProfile } from "../security/rbac.js";
+import { BUREAUS, STATUS_TRANSITIONS, EscalationConfig, DEFAULT_ESCALATION_CONFIG } from "../config/constants.js";
+import { requestScope, mayRead, mayViewInstitution, roleOf, effectiveProfile, authorize } from "../security/rbac.js";
+import {coordinationAccess} from "../security/coordination.js";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { v4 as uuidv4 } from "uuid";
 import {
+  WorkflowRequest,
   Profile,
   Institution,
   Complaint,
@@ -26,6 +28,9 @@ const DATA_DIR = process.env.DATA_DIR || path.resolve(__dirname, "../../data");
 const DB_FILE = path.join(DATA_DIR, "db.json");
 
 interface DatabaseSchema {
+  coordinationSessions?: import("../models/coordination.js").CoordinationSession[];
+  slaConfig?: EscalationConfig;
+  workflowRequests?: WorkflowRequest[];
   bureaus?: typeof BUREAUS;
   profiles: Profile[];
   institutions: Institution[];
@@ -46,10 +51,20 @@ interface DatabaseSchema {
 export class Store implements IRepository {
   public readonly mode = "Local Persistent JSON Store (ACID)";
   private data: DatabaseSchema;
+  private transactionDepth = 0;
 
   constructor() {
     this.data = this.loadData();
   }
+  /** Internal coordination repository access; API access must use CoordinationService. */
+  public getCoordinationSessions() {return structuredClone(this.data.coordinationSessions||[]);}
+  public saveCoordinationSession(session:import("../models/coordination.js").CoordinationSession) {
+    this.data.coordinationSessions??=[];const index=this.data.coordinationSessions.findIndex(s=>s.id===session.id);
+    if(index<0)this.data.coordinationSessions.push(structuredClone(session));else this.data.coordinationSessions[index]=structuredClone(session);
+    this.persist();
+  }
+  public getCoordinationSource(id:string) {return this.data.complaints.find(c=>c.id===id);}
+  public getCoordinationDocument(id:string) {return this.data.documents?.find(d=>d.id===id);}
 
   public async healthCheck(): Promise<DatabaseHealthResult> {
     try {
@@ -87,11 +102,7 @@ export class Store implements IRepository {
         if (!parsed.documents) {
           parsed.documents = [];
         }
-        for (const p of SEED_PROFILES) {
-          if (!parsed.profiles.some(existing => existing.id === p.id || existing.email === p.email)) {
-            parsed.profiles.push(p);
-          }
-        }
+
         return parsed;
       } catch (err) {
         throw new Error("Existing database could not be read; refusing to replace historical records.");
@@ -154,14 +165,96 @@ export class Store implements IRepository {
   }
 
   private persist(dataToSave?: DatabaseSchema) {
+    if (this.transactionDepth) return;
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+    const temporary = DB_FILE + "." + uuidv4() + ".tmp";
     try {
-      if (!fs.existsSync(DATA_DIR)) {
-        fs.mkdirSync(DATA_DIR, { recursive: true });
-      }
-      fs.writeFileSync(DB_FILE, JSON.stringify(dataToSave || this.data, null, 2), "utf-8");
-    } catch (err) {
-      console.error("Failed to persist database file:", err);
+      fs.writeFileSync(temporary, JSON.stringify(dataToSave || this.data, null, 2), "utf-8");
+      fs.renameSync(temporary, DB_FILE);
+    } catch (error) {
+      if (fs.existsSync(temporary)) fs.unlinkSync(temporary);
+      throw error;
     }
+  }
+
+  /** Synchronous local-store unit of work: one atomic file replacement or rollback. */
+  public transaction<T>(operation: () => T): T {
+    if (this.transactionDepth) return operation();
+    const previous = structuredClone(this.data);
+    this.transactionDepth++;
+    try {
+      const result = operation();
+      this.transactionDepth--;
+      this.persist();
+      return result;
+    } catch (error) {
+      this.transactionDepth = 0;
+      this.data = previous;
+      throw error;
+    }
+  }
+
+  public submitWorkflowRequest(complaintId: string, input: {type: WorkflowRequest["type"]; remarks: string; destinationBureauId?: string}, user: Profile) {
+    return this.transaction(()=> {
+      const complaint=this.getComplaintById(complaintId);
+      if (!complaint || !authorize(user,"case.request",complaint,{region:this.getComplaintRegion(complaint)})) throw Object.assign(new Error("Case request access denied."),{status:403});
+      if (!["Transfer","Escalation","Disposal","Coordination"].includes(input.type) || typeof input.remarks!=="string" || !input.remarks.trim() || input.remarks.length>5000) throw new Error("A valid request type and remarks are required.");
+      if (input.type==="Transfer" && (!input.destinationBureauId || input.destinationBureauId===complaint.currentBureauId || !this.getBureaus().some(b=>b.id===input.destinationBureauId))) throw new Error("Select a different configured destination bureau.");
+      if (!this.data.workflowRequests) this.data.workflowRequests=[];
+      if (this.data.workflowRequests.some(r=>r.complaintId===complaint.id && r.type===input.type && r.status==="Pending")) throw Object.assign(new Error("This case already has a pending request of this type."),{status:409});
+      const request: WorkflowRequest={id:uuidv4(),complaintId:complaint.id,complaintRef:complaint.complaintId,institutionName:complaint.institutionName,bureauId:complaint.currentBureauId,type:input.type,status:"Pending",remarks:input.remarks.trim(),destinationBureauId:input.destinationBureauId,requestedBy:user.id,requestedByName:user.fullName,requestedAt:new Date().toISOString(),caseVersion:complaint.updatedAt,assignedOfficerId:complaint.assignedOfficerId};
+      this.data.workflowRequests.push(request);
+      this.addCaseHistory({id:uuidv4(),complaintId:complaint.id,actionType:input.type+" Requested",remarks:request.remarks,performedBy:user.id,performedByName:user.fullName,createdAt:request.requestedAt});
+      this.addAuditLog({userId:user.id,userName:user.fullName,action:"WORKFLOW_REQUEST_SUBMITTED",entityType:"Complaint",entityId:complaint.id,details:{requestId:request.id,type:request.type}});
+      for(const profile of this.getProfiles()) if (profile.id!==user.id && mayRead(profile,complaint,this.getComplaintRegion(complaint)) && ["BUREAU_HEAD","COMPETENT_AUTHORITY"].includes(roleOf(profile.role))) this.addNotification({id:uuidv4(),recipientId:profile.id,title:input.type+" request",message:complaint.complaintId+": "+request.remarks,notificationType:"Status Update",referenceId:complaint.id,referenceType:"complaint",isRead:false,createdAt:request.requestedAt});
+      return request;
+    });
+  }
+
+  public canReviewRequest(user: Profile, request: WorkflowRequest) {
+    const complaint=this.getComplaintById(request.complaintId);
+    if (!complaint || request.status!=="Pending" || request.requestedBy===user.id) return false;
+    const role=roleOf(user.role);
+    if (!mayRead(user,complaint,this.getComplaintRegion(complaint)) || !["BUREAU_HEAD","COMPETENT_AUTHORITY"].includes(role)) return false;
+    return request.type==="Escalation" ? !!user.permissions?.includes("APPROVE_ESCALATIONS") : request.type==="Coordination" ? role==="COMPETENT_AUTHORITY" || !!user.permissions?.includes("COORDINATE_CROSS_BUREAU") : true;
+  }
+
+  public canApproveRequest(user: Profile, request: WorkflowRequest) {
+    const complaint=this.getComplaintById(request.complaintId);
+    if (!complaint || !this.canReviewRequest(user,request) || request.caseVersion!==complaint.updatedAt) return false;
+    const action=request.type==="Disposal"?"case.dispose":request.type==="Escalation"?"case.escalate":request.type==="Transfer"?"transfer.initiate":"overlap.decide";
+    return authorize(user,action,complaint,{region:this.getComplaintRegion(complaint)});
+  }
+  public decideWorkflowRequest(complaintId: string, requestId: string, input: {decision: "Approved" | "Rejected"; remarks: string; caseVersion: string}, user: Profile) {
+    return this.transaction(()=>{
+      const request=this.data.workflowRequests?.find(r=>r.id===requestId && r.complaintId===complaintId);
+      const complaint=this.getComplaintById(complaintId);
+      if (!request || !complaint) throw Object.assign(new Error("Request not found in authorized scope."),{status:404});
+      if (request.status!=="Pending") throw Object.assign(new Error("Request already decided."),{status:409});
+      if (!this.canReviewRequest(user,request)) throw Object.assign(new Error("Supervisory permission and current case scope are required."),{status:403});
+      if (!["Approved","Rejected"].includes(input.decision) || typeof input.remarks!=="string" || !input.remarks.trim()) throw new Error("Decision and official remarks are required.");
+      if (input.caseVersion!==complaint.updatedAt || (input.decision==="Approved" && (request.caseVersion!==complaint.updatedAt || request.bureauId!==complaint.currentBureauId || request.assignedOfficerId!==complaint.assignedOfficerId))) throw Object.assign(new Error("Case changed since submission. Refresh; reject the stale recommendation or submit a new request."),{status:409});
+      if(input.decision==="Approved") {
+        if(request.type==="Transfer") request.transferId=this.transferCase(complaint.id,{toBureauId:request.destinationBureauId!,transferReason:input.remarks},user).id;
+        if(request.type==="Disposal" || request.type==="Escalation") this.updateComplaintStatus(complaint.id,{status:request.type==="Disposal"?"Disposed":"Escalated",remarks:input.remarks},user);
+      }
+      request.status=input.decision; request.reviewedBy=user.id; request.reviewedByName=user.fullName; request.decisionRemarks=input.remarks.trim(); request.decidedAt=new Date().toISOString();
+      this.addCaseHistory({id:uuidv4(),complaintId:complaint.id,actionType:request.type+" Request "+input.decision,remarks:input.remarks.trim(),performedBy:user.id,performedByName:user.fullName,createdAt:request.decidedAt});
+      this.addAuditLog({userId:user.id,userName:user.fullName,action:"WORKFLOW_REQUEST_DECIDED",entityType:"Complaint",entityId:complaint.id,details:{requestId:request.id,decision:input.decision,remarks:input.remarks}});
+      this.addNotification({id:uuidv4(),recipientId:request.requestedBy,title:request.type+" request "+input.decision,message:complaint.complaintId+": "+input.remarks,notificationType:"Status Update",referenceId:complaint.id,referenceType:"complaint",isRead:false,createdAt:request.decidedAt});
+      return request;
+    });
+  }
+
+  public getScopedComplaints() { return this.visibleComplaints().map(c => ({...c})); }
+  public getComplaintRegion(complaint: Complaint) { return this.data.institutions.find(i=>i.id===complaint.institutionId)?.region; }
+  public getWorkflowRequests(): WorkflowRequest[] {
+    const user = requestScope.getStore();
+    return (this.data.workflowRequests || []).filter(r=>{
+      const c=this.data.complaints.find(c=>c.id===r.complaintId);
+      if(user && roleOf(user.role)==="CASE_OFFICER") return r.requestedBy===user.id; // Personal receipt only; never grants case access.
+      return !!c && (!user || mayRead(user,c,this.getComplaintRegion(c)));
+    }).map(r=>({...r}));
   }
 
   private visibleComplaints(): Complaint[] {
@@ -174,6 +267,8 @@ export class Store implements IRepository {
     const ids = new Set(this.visibleComplaints().map(c => c.id));
     return this.data.overlapAlerts.filter(o => ids.has(o.complaintIdA) || ids.has(o.complaintIdB));
   }
+  public getSlaSettings() { return this.data.slaConfig; }
+  public saveSlaSettings(config: EscalationConfig) { this.data.slaConfig={...config};this.persist();return {...config}; }
   public getBureaus() { return this.data.bureaus || BUREAUS; }
   public saveBureau(bureau: typeof BUREAUS[number]) {
     if (!this.data.bureaus) this.data.bureaus = BUREAUS.map(b => ({...b}));
@@ -215,12 +310,18 @@ export class Store implements IRepository {
     search?: string;
     region?: string;
     state?: string;
+    institutionType?: string;
+    complaintStatus?: string;
+    bureau?: string;
     page?: number;
     limit?: number;
     sortBy?: string;
     sortOrder?: "asc" | "desc";
   }) {
-    let result = [...this.data.institutions];
+    const viewer=requestScope.getStore();
+    let result = this.data.institutions.filter(i=>!viewer || mayViewInstitution(viewer,i)).map(i=>({...i}));
+    if(params.institutionType)result=result.filter(i=>i.institutionType===params.institutionType);
+    if(params.complaintStatus || params.bureau)result=result.filter(i=>this.data.complaints.some(c=>c.institutionId===i.id && (!params.complaintStatus || c.status===params.complaintStatus) && (!params.bureau || c.currentBureauId===params.bureau)));
 
     if (params.search) {
       const q = params.search.toLowerCase().trim();
@@ -228,7 +329,7 @@ export class Store implements IRepository {
         i =>
           i.name.toLowerCase().includes(q) ||
           i.aictePermanentId.toLowerCase().includes(q) ||
-          i.city.toLowerCase().includes(q)
+          (i.city || "").toLowerCase().includes(q)
       );
     }
 
@@ -237,17 +338,18 @@ export class Store implements IRepository {
     }
 
     if (params.state) {
-      result = result.filter(i => i.state.toLowerCase() === params.state?.toLowerCase());
+      result = result.filter(i => (i.state || "").toLowerCase() === params.state?.toLowerCase());
     }
 
     // Refresh dynamic counters for institutions
     result.forEach(inst => {
-      const instComplaints = this.visibleComplaints().filter(c => c.institutionId === inst.id);
+      const instComplaints = this.data.complaints.filter(c => c.institutionId === inst.id);
       inst.totalComplaintsCount = instComplaints.length;
       inst.activeComplaintsCount = instComplaints.filter(c =>
         ["Pending", "Under Process", "Escalated"].includes(c.status)
       ).length;
-      inst.overlapCount = this.visibleOverlaps().filter(o => o.institutionId === inst.id).length;
+      inst.overlapCount = this.data.overlapAlerts.filter(o => o.institutionId === inst.id).length;
+      Object.assign(inst,{pendingComplaintsCount:instComplaints.filter(c=>c.status==="Pending").length,handlingBureaus:[...new Set(instComplaints.map(c=>c.currentBureauId))]});
     });
 
     const sortBy = params.sortBy || "name";
@@ -275,8 +377,26 @@ export class Store implements IRepository {
     };
   }
 
+  public getInstitutionOverview(id: string) {
+    const institution=this.data.institutions.find(i=>i.id===id || i.aictePermanentId===id);
+    const viewer=requestScope.getStore();
+    if(!institution || (viewer && !mayViewInstitution(viewer,institution)))return undefined;
+    const cases=this.data.complaints.filter(c=>c.institutionId===institution.id);
+    const overlaps=this.data.overlapAlerts.filter(o=>o.institutionId===institution.id);
+    const count=(status:string)=>cases.filter(c=>c.status===status).length;
+    return {
+      institution:{...institution,totalComplaintsCount:cases.length,activeComplaintsCount:cases.filter(c=>c.status!=="Disposed").length,overlapCount:overlaps.length},
+      kpis:{totalComplaints:cases.length,pendingCount:count("Pending"),underProcessCount:count("Under Process"),resolvedCount:count("Disposed"),escalatedCount:count("Escalated"),transferredCount:count("Transferred"),activeOverlapCount:overlaps.filter(o=>["Pending Review","Confirmed Related","Confirmed Duplicate"].includes(o.alertStatus)).length},
+      bureauInvolvement:[...new Set(cases.map(c=>c.currentBureauId))].map(bureau=>({bureau,total:cases.filter(c=>c.currentBureauId===bureau).length,pending:cases.filter(c=>c.currentBureauId===bureau&&c.status==="Pending").length})),
+      coordination:overlaps.map(o=>({bureauA:o.bureauA,bureauB:o.bureauB,status:o.alertStatus})),
+      visibility:{aggregateScope:"institution within authorized region",caseScope:"existing case-specific RBAC",canReadCases:viewer?roleOf(viewer.role)!=="SYSTEM_ADMIN":true}
+    };
+  }
+
   public getInstitutionById(id: string): Institution | undefined {
     const inst = this.data.institutions.find(i => i.id === id || i.aictePermanentId === id);
+    const viewer=requestScope.getStore();
+    if(inst && viewer && !mayViewInstitution(viewer,inst))return undefined;
     if (inst) {
       const instComplaints = this.visibleComplaints().filter(c => c.institutionId === inst.id);
       inst.totalComplaintsCount = instComplaints.length;
@@ -403,15 +523,15 @@ export class Store implements IRepository {
     if (params.isOverdue) {
       const today = new Date().toISOString().split("T")[0];
       result = result.filter(
-        c => ["Pending", "Under Process", "Escalated"].includes(c.status) && c.expectedDisposalDate < today
+        c => c.status!=="Disposed" && c.expectedDisposalDate < today
       );
     }
 
     if ((params as any).isDueSoon) {
       const today = new Date().toISOString().split("T")[0];
-      const dueSoonTarget = new Date(Date.now() + 5 * 86400000).toISOString().split("T")[0];
+      const dueSoonTarget = new Date(Date.now() + (this.getSlaSettings()?.approachingDeadlineDays || DEFAULT_ESCALATION_CONFIG.approachingDeadlineDays) * 86400000).toISOString().split("T")[0];
       result = result.filter(
-        c => ["Pending", "Under Process"].includes(c.status) && c.expectedDisposalDate >= today && c.expectedDisposalDate <= dueSoonTarget
+        c => c.status!=="Disposed" && c.expectedDisposalDate >= today && c.expectedDisposalDate <= dueSoonTarget
       );
     }
 
@@ -500,13 +620,10 @@ export class Store implements IRepository {
     if (data.assignedOfficerId) {
       const officer = this.getProfileById(data.assignedOfficerId);
       assignedOfficerName = officer?.fullName || "";
-    } else {
-      // Default officer mapping by bureau
-      assignedOfficerName = data.receivingBureauId === "RB" ? "Smt. Sunita Venkataraman" : data.receivingBureauId === "PGRC" ? "Shri Arvind K. Mukhopadhyay" : "Dr. Meenakshi Sundaram";
     }
 
     const newComplaint: Complaint = {
-      id: `comp-${Date.now()}`,
+      id: `comp-${uuidv4()}`,
       complaintId,
       institutionId: institution.id,
       aictePermanentId: institution.aictePermanentId,
@@ -533,6 +650,10 @@ export class Store implements IRepository {
     // Run Overlap Detection Engine across existing cases of this institution
     const detectionResult = await detectOverlapsForComplaint(newComplaint, institution, this.data.complaints);
 
+    return this.transaction(()=> {
+    let nextCount=this.data.complaints.length+101;
+    while(this.data.complaints.some(c=>c.complaintId===`AICTE/${data.receivingBureauId}/2026/${String(nextCount).padStart(5,"0")}`)) nextCount++;
+    newComplaint.complaintId=`AICTE/${data.receivingBureauId}/2026/${String(nextCount).padStart(5,"0")}`;
     if (detectionResult.hasOverlap) {
       newComplaint.hasOverlapAlert = true;
 
@@ -635,9 +756,12 @@ export class Store implements IRepository {
       complaint: newComplaint,
       detectedOverlaps: detectionResult.candidateAlerts.map(candidate => ({...candidate, existingComplaint: this.getComplaintById(candidate.existingComplaint.id) ? candidate.existingComplaint : {...candidate.existingComplaint,title:"Restricted related case",description:""}}))
     };
+    });
   }
 
-  public updateComplaintStatus(
+  public updateComplaintStatus(complaintId: string, updates: Parameters<Store["updateComplaintStatusImpl"]>[1], user: Profile) { return this.transaction(()=>this.updateComplaintStatusImpl(complaintId, updates, user)); }
+
+  private updateComplaintStatusImpl(
     complaintId: string,
     updates: {
       status?: "Pending" | "Under Process" | "Disposed" | "Transferred" | "Escalated";
@@ -699,7 +823,7 @@ export class Store implements IRepository {
       actionType = "Officer Assigned";
     }
 
-    comp.updatedAt = new Date().toISOString();
+    comp.updatedAt = new Date(Math.max(Date.now(),Date.parse(comp.updatedAt)+1)).toISOString();
 
     // Add case history entry
     this.data.caseHistory.push({
@@ -733,7 +857,9 @@ export class Store implements IRepository {
   // ====================================================================
   // CASE TRANSFERS
   // ====================================================================
-  public transferCase(
+  public transferCase(complaintId: string, transferData: Parameters<Store["transferCaseImpl"]>[1], user: Profile) { return this.transaction(()=>this.transferCaseImpl(complaintId, transferData, user)); }
+
+  private transferCaseImpl(
     complaintId: string,
     transferData: {
       toBureauId: string;
@@ -748,8 +874,9 @@ export class Store implements IRepository {
     if (this.data.caseTransfers.some(t => t.complaintId === comp.id && t.acceptanceStatus === "Pending")) throw new Error("A transfer is already pending.");
     if (!this.getBureaus().some(b => b.id === transferData.toBureauId)) throw new Error("Unknown destination bureau.");
     if (transferData.toOfficerId) {
-      const officer = this.getProfileById(transferData.toOfficerId);
-      if (!officer?.isActive || roleOf(officer.role) !== "CASE_OFFICER" || officer.bureauId !== transferData.toBureauId) throw new Error("Invalid destination officer.");
+      const storedOfficer = this.getProfileById(transferData.toOfficerId);
+      const officer = storedOfficer ? effectiveProfile(storedOfficer) : undefined;
+      if (!officer?.isActive || roleOf(officer.role) !== "CASE_OFFICER" || officer.bureauId !== transferData.toBureauId || (officer.region && officer.region!==this.getComplaintRegion(comp))) throw new Error("Invalid destination officer.");
     }
     if (transferData.toBureauId === comp.currentBureauId) {
       throw new Error(`Cannot transfer case to the same bureau (${transferData.toBureauId}). Destination must be different.`);
@@ -781,6 +908,8 @@ export class Store implements IRepository {
       transferredBy: user.id,
       transferredByName: user.fullName,
       transferredAt: new Date().toISOString(),
+      sourceCaseVersion: comp.updatedAt,
+      sourceStatus: comp.status,
       acceptanceStatus: "Pending"
     };
 
@@ -790,10 +919,10 @@ export class Store implements IRepository {
     this.data.caseHistory.push({
       id: `hist-${Date.now()}`,
       complaintId: comp.id,
-      actionType: "Case Transferred",
+      actionType: "Transfer Requested",
       fromStatus,
-      toStatus: "Transferred",
-      remarks: `Transferred from ${fromBureau} to ${transferData.toBureauId}. Reason: ${transferData.transferReason}`,
+      toStatus: fromStatus,
+      remarks: `Transfer requested from ${fromBureau} to ${transferData.toBureauId}. Reason: ${transferData.transferReason}`,
       performedBy: user.id,
       performedByName: user.fullName,
       createdAt: new Date().toISOString()
@@ -816,7 +945,9 @@ export class Store implements IRepository {
     return transfer;
   }
 
-  public respondToTransfer(
+  public respondToTransfer(transferId: string, action: "Accepted" | "Rejected", remarks: string, user: Profile) { return this.transaction(()=>this.respondToTransferImpl(transferId, action, remarks, user)); }
+
+  private respondToTransferImpl(
     transferId: string,
     action: "Accepted" | "Rejected",
     remarks: string,
@@ -830,22 +961,31 @@ export class Store implements IRepository {
     const comp = this.data.complaints.find(c => c.id === transfer.complaintId);
     if (!comp) throw new Error("Associated complaint record not found");
 
+    if (!authorize(user,"transfer.respond",comp,{region:this.getComplaintRegion(comp),receivingBureauId:transfer.toBureauId,pending:transfer.acceptanceStatus==="Pending"})) throw new Error("Transfer decision not authorized.");
+    if (action==="Accepted" && transfer.sourceCaseVersion && transfer.sourceCaseVersion!==comp.updatedAt) throw Object.assign(new Error("Case changed after the transfer request. Refresh and submit a new request."),{status:409});
+    if(action==="Accepted") {
+      const legacyDestination = !transfer.sourceCaseVersion && comp.currentBureauId===transfer.toBureauId && comp.status==="Transferred";
+      if(comp.currentBureauId!==transfer.fromBureauId && !legacyDestination) throw Object.assign(new Error("Current case ownership no longer matches this transfer."),{status:409});
+      if(transfer.toOfficerId) {
+        const storedOfficer=this.getProfileById(transfer.toOfficerId);
+        const officer=storedOfficer?effectiveProfile(storedOfficer):undefined;
+        if(!officer?.isActive || roleOf(officer.role)!=="CASE_OFFICER" || officer.bureauId!==transfer.toBureauId || (officer.region && officer.region!==this.getComplaintRegion(comp))) throw new Error("The destination officer is no longer eligible. Reject and submit a corrected request.");
+      }
+    }
     transfer.acceptanceStatus = action;
+    transfer.decisionRemarks = remarks;
+    transfer.decidedBy = user.id;
+    transfer.decidedByName = user.fullName;
+    transfer.decidedAt = new Date().toISOString();
 
     if (action === "Rejected") {
-      // Revert complaint back to originating bureau and Under Process state
-      comp.currentBureauId = transfer.fromBureauId;
-      comp.assignedOfficerId = transfer.fromOfficerId;
-      comp.assignedOfficerName = transfer.fromOfficerName;
-      comp.status = "Under Process";
-      comp.updatedAt = new Date().toISOString();
-
+      // Rejection retains current ownership, assignment and case status.
       this.data.caseHistory.push({
         id: `hist-${Date.now()}`,
         complaintId: comp.id,
         actionType: "Transfer Rejected",
-        fromStatus: "Transferred",
-        toStatus: "Under Process",
+        fromStatus: comp.status,
+        toStatus: comp.status,
         remarks: `Transfer to ${transfer.toBureauId} rejected by ${user.fullName}. Remarks: ${remarks}. Case jurisdiction retained by ${transfer.fromBureauId}.`,
         performedBy: user.id,
         performedByName: user.fullName,
@@ -889,10 +1029,22 @@ export class Store implements IRepository {
     return transfer;
   }
 
+  public getTransferComplaint(id: string) {
+    const user=requestScope.getStore();
+    if (user && !this.getTransfers().some(t=>t.complaintId===id)) return undefined;
+    return this.data.complaints.find(c=>c.id===id);
+  }
   public getTransfers() {
     const user = requestScope.getStore();
     const ids = new Set(this.visibleComplaints().map(c => c.id));
-    return this.data.caseTransfers.filter(t => !user || ids.has(t.complaintId) || (roleOf(user.role) === "BUREAU_HEAD" && !!user.bureauId && [t.fromBureauId,t.toBureauId].includes(user.bureauId) && (!user.region || this.data.institutions.find(i=>i.id===this.data.complaints.find(c=>c.id===t.complaintId)?.institutionId)?.region===user.region))).sort((a, b) => b.transferredAt.localeCompare(a.transferredAt));
+    return this.data.caseTransfers.filter(t => {
+      const c=this.data.complaints.find(c=>c.id===t.complaintId);
+      if (!c) return false;
+      if (!user) return true;
+      const region=this.getComplaintRegion(c);
+      if (ids.has(c.id)) return true;
+      return ["BUREAU_HEAD","COMPETENT_AUTHORITY"].includes(roleOf(user.role)) && (!user.region || user.region===region) && (roleOf(user.role)==="BUREAU_HEAD" ? !!user.bureauId && [t.fromBureauId,t.toBureauId].includes(user.bureauId) : !user.bureauId || t.toBureauId===user.bureauId);
+    }).sort((a,b)=>b.transferredAt.localeCompare(a.transferredAt));
   }
 
   // ====================================================================
@@ -962,7 +1114,9 @@ export class Store implements IRepository {
     return this.visibleOverlaps().find(o => o.id === id || o.alertId === id);
   }
 
-  public reviewOverlapAlert(
+  public reviewOverlapAlert(alertId: string, reviewData: Parameters<Store["reviewOverlapAlertImpl"]>[1], user: Profile) { return this.transaction(()=>this.reviewOverlapAlertImpl(alertId, reviewData, user)); }
+
+  private reviewOverlapAlertImpl(
     alertId: string,
     reviewData: {
       decision: "Confirmed Related" | "Confirmed Duplicate" | "Marked Unrelated" | "Resolved";
@@ -1124,6 +1278,7 @@ export class Store implements IRepository {
     let result = this.data.notifications.filter(n => {
       if (!user) return true;
       if (n.recipientId && n.recipientId !== user.id) return false;
+      if(n.referenceType==="coordination"){const s=this.data.coordinationSessions?.find(s=>s.id===n.referenceId);return !!s&&coordinationAccess(effectiveProfile(user),s,this.getCoordinationSource(s.primaryComplaintId)).read;}
       if (n.referenceType === "complaint") return !!this.getComplaintById(n.referenceId || "");
       if (n.referenceType === "transfer") return this.getTransfers().some(t=>t.id===n.referenceId || t.complaintRefId===n.referenceId);
       if (n.referenceType === "overlap") return !!this.getOverlapAlertById(n.referenceId || "");
@@ -1184,7 +1339,8 @@ export class Store implements IRepository {
 
   public getCoordinationHistory(alertId: string) {
     if (!this.getOverlapAlertById(alertId)) return [];
-    return this.data.auditLogs.filter(l=>l.entityType === "OverlapAlert" && l.entityId===alertId && l.action.startsWith("COORDINATION_")).sort((a,b)=>a.createdAt.localeCompare(b.createdAt));
+    const viewer=requestScope.getStore();
+    return this.data.auditLogs.filter(l=>l.entityType === "OverlapAlert" && l.entityId===alertId && l.action.startsWith("COORDINATION_") && (!viewer || viewer.id===l.userId || (roleOf(viewer.role)==="COMPETENT_AUTHORITY" && !viewer.bureauId) || !!viewer.bureauId && viewer.bureauId===(l.details?.bureauId||this.getProfileById(l.userId||"")?.bureauId))).sort((a,b)=>a.createdAt.localeCompare(b.createdAt));
   }
   public addAuditLog(log: Omit<AuditLog, "id" | "createdAt">): AuditLog {
     const entry: AuditLog = {

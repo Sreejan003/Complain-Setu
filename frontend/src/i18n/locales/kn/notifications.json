@@ -1,0 +1,20 @@
+{
+  "overdue": "ಗಡುವು ಮೀರಿದೆ",
+  "statusUpdate": "ಸ್ಥಿತಿ ನವೀಕರಣ",
+  "governmentOfIndiaAicteAdministrativeAlerts": "ಭಾರತ ಸರ್ಕಾರ • AICTE ಆಡಳಿತಾತ್ಮಕ ಎಚ್ಚರಿಕೆಗಳು",
+  "officialNotificationCenter": "ಅಧಿಕೃತ ಅಧಿಸೂಚನೆ ಕೇಂದ್ರ",
+  "auditAlertsForNewlyDetectedOverlapsApproachingSlaDeadlines": "ಹೊಸದಾಗಿ ಪತ್ತೆಯಾದ ಅತಿಕ್ರಮಣಗಳಿಗಾಗಿ ಆಡಿಟ್ ಎಚ್ಚರಿಕೆಗಳು, ಸಮೀಪಿಸುತ್ತಿರುವ SLA ಡೆಡ್‌ಲೈನ್‌ಗಳು, ಕೇಸ್ ವರ್ಗಾವಣೆಗಳು ಮತ್ತು ಉಲ್ಬಣಗಳು.",
+  "markAllRead": "ಎಲ್ಲವನ್ನೂ ಓದಿ ಎಂದು ಗುರುತಿಸಿ",
+  "filterByType": "ಪ್ರಕಾರದ ಮೂಲಕ ಫಿಲ್ಟರ್ ಮಾಡಿ:",
+  "allNotificationTypes": "ಎಲ್ಲಾ ಅಧಿಸೂಚನೆ ಪ್ರಕಾರಗಳು",
+  "overdueDeadlines": "ಮಿತಿಮೀರಿದ ಗಡುವುಗಳು",
+  "caseTransfers": "ಕೇಸ್ ವರ್ಗಾವಣೆಗಳು",
+  "statusUpdates": "ಸ್ಥಿತಿ ನವೀಕರಣಗಳು",
+  "unreadOnly": "ಓದದಿರುವುದು ಮಾತ್ರ",
+  "loadingNotifications": "ಅಧಿಸೂಚನೆಗಳನ್ನು ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ...",
+  "noOfficialNotificationsRecorded": "ಯಾವುದೇ ಅಧಿಕೃತ ಅಧಿಸೂಚನೆಗಳನ್ನು ದಾಖಲಿಸಲಾಗಿಲ್ಲ.",
+  "reviewInOverlapCenter": "ಅತಿಕ್ರಮಣ ಕೇಂದ್ರದಲ್ಲಿ ವಿಮರ್ಶೆ →",
+  "inspectCaseFile": "ಕೇಸ್ ಫೈಲ್ ಅನ್ನು ಪರೀಕ್ಷಿಸಿ →",
+  "markAsRead": "ಓದಿದಂತೆ ಗುರುತಿಸಿ",
+  "alerts": " ಎಚ್ಚರಿಕೆಗಳು"
+}

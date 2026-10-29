@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { roleOf } from "../security/rbac.js";
+import { roleOf, authorize, requestScope, effectiveProfile, mayRead } from "../security/rbac.js";
 import { Router, Response } from "express";
 import { store } from "../db/store.js";
 import { requireAuth, requireRole, AuthenticatedRequest } from "../middleware/auth.js";
@@ -7,10 +7,15 @@ import { computeInProcessCosineSimilarity, querySemanticService, extractKeywords
 import { broadcastCaseEvent } from "./complaints.js";
 
 export function scopedOverlap(alert: any) {
+  if(!alert)return {canDecide:false,canCoordinate:false};
   const safe = {...alert};
   if (!store.getComplaintById(alert.complaintIdA)) {safe.complaintTitleA="Restricted related case";safe.complaintDescA="";}
   if (!store.getComplaintById(alert.complaintIdB)) {safe.complaintTitleB="Restricted related case";safe.complaintDescB="";}
   if (!store.getComplaintById(alert.complaintIdA) || !store.getComplaintById(alert.complaintIdB)) {safe.explanation=undefined; safe.matchReasons=["Potential institution overlap across authorized bureaus"];}
+  const complaint=store.getComplaintById(alert.complaintIdA)||store.getComplaintById(alert.complaintIdB);
+  const user=requestScope.getStore();
+  safe.canDecide=!!user&&!!complaint&&authorize(user,"overlap.decide",complaint,{region:store.getComplaintRegion(complaint)});
+  safe.canCoordinate=!!user&&!!complaint&&(safe.canDecide||authorize(user,"case.request",complaint,{region:store.getComplaintRegion(complaint)}));
   return safe;
 }
 export const overlapsRouter = Router();
@@ -18,21 +23,23 @@ overlapsRouter.use(requireAuth, (req: AuthenticatedRequest, res, next) => {
   if (["SYSTEM_ADMIN","Institutional User"].includes(roleOf(req.user!.role))) return res.status(403).json({error:"Overlap access denied."});
   const id = req.path.split("/")[1];
   if (id && id !== "compare-live" && !store.getOverlapAlertById(id)) return res.status(404).json({error:"Overlap not found in authorized scope."});
-  if (req.path.endsWith("/review") && roleOf(req.user!.role) === "BUREAU_HEAD" && !req.user!.permissions?.includes("COORDINATE_CROSS_BUREAU")) return res.status(403).json({error:"Cross-Bureau coordination has not been delegated."});
-  if (req.path.endsWith("/review") && roleOf(req.user!.role) === "CASE_OFFICER") return res.status(403).json({error:"Submit coordination remarks for supervisory review."});
+  if(req.path.endsWith("/review") && !scopedOverlap(store.getOverlapAlertById(id)).canDecide) return res.status(403).json({error:"Overlap decision is not authorized in this scope."});
   next();
 });
 overlapsRouter.get("/:id/coordination", (req,res)=>res.json(store.getCoordinationHistory(req.params.id)));
 overlapsRouter.post("/:id/coordination", (req: AuthenticatedRequest, res) => {
   const alert = store.getOverlapAlertById(req.params.id)!;
-  if (typeof req.body.remarks !== "string" || !req.body.remarks.trim()) return res.status(400).json({error:"Coordination remarks required."});
+  if(!scopedOverlap(alert).canCoordinate) return res.status(403).json({error:"Coordination action is not authorized."});
+  if (typeof req.body.remarks !== "string" || !req.body.remarks.trim() || req.body.remarks.length>5000) return res.status(400).json({error:"Coordination remarks required."});
   const {responsibleOfficerId,state="Requested"} = req.body;
   if (!["Requested","In Progress","Resolved"].includes(state)) return res.status(400).json({error:"Invalid coordination state."});
-  const officer = responsibleOfficerId ? store.getProfileById(responsibleOfficerId) : undefined;
-  if ((responsibleOfficerId || state!=="Requested") && !(req.user!.role==="COMPETENT_AUTHORITY" || (req.user!.role==="BUREAU_HEAD" && req.user!.permissions?.includes("COORDINATE_CROSS_BUREAU")))) return res.status(403).json({error:"Coordination decision permission required."});
-  if (responsibleOfficerId && (!officer?.isActive || !officer.bureauId || ![alert.bureauA,alert.bureauB].includes(officer.bureauId) || (req.user!.role==="BUREAU_HEAD" && officer.bureauId!==req.user!.bureauId))) return res.status(400).json({error:"Responsible officer must belong to an authorized involved bureau."});
-  store.addAuditLog({userId:req.user!.id,userName:req.user!.fullName,action:"COORDINATION_"+state.toUpperCase().replace(" ","_"),entityType:"OverlapAlert",entityId:alert.id,details:{remarks:req.body.remarks.trim(),state,responsibleOfficerId,responsibleOfficerName:officer?.fullName}});
-  store.getProfiles().filter(p=>p.isActive && (p.role==="COMPETENT_AUTHORITY" || (p.role==="BUREAU_HEAD" && !!p.bureauId && [alert.bureauA,alert.bureauB].includes(p.bureauId)))).forEach(p=>store.addNotification({id:randomUUID(),recipientId:p.id,title:"Overlap coordination request",message:req.body.remarks.trim(),notificationType:"Overlap Alert",referenceId:alert.id,referenceType:"overlap",isRead:false,createdAt:new Date().toISOString()}));
+  const storedOfficer=responsibleOfficerId ? store.getProfileById(responsibleOfficerId) : undefined;
+  const officer=storedOfficer?effectiveProfile(storedOfficer):undefined;
+  const scopedCase=store.getComplaintById(alert.complaintIdA)||store.getComplaintById(alert.complaintIdB);
+  if ((responsibleOfficerId || state!=="Requested") && !scopedOverlap(alert).canDecide) return res.status(403).json({error:"Coordination decision permission required."});
+  if (responsibleOfficerId && (!officer?.isActive || !["CASE_OFFICER","BUREAU_HEAD","COMPETENT_AUTHORITY"].includes(officer.role) || (officer.region && scopedCase && officer.region!==store.getComplaintRegion(scopedCase)) || (req.user!.region && officer.region!==req.user!.region) || !officer.bureauId || ![alert.bureauA,alert.bureauB].includes(officer.bureauId) || (req.user!.role==="BUREAU_HEAD" && officer.bureauId!==req.user!.bureauId))) return res.status(400).json({error:"Responsible officer must belong to an authorized involved bureau."});
+  store.addAuditLog({userId:req.user!.id,userName:req.user!.fullName,action:"COORDINATION_"+state.toUpperCase().replace(" ","_"),entityType:"OverlapAlert",entityId:alert.id,details:{remarks:req.body.remarks.trim(),state,bureauId:req.user!.bureauId,responsibleOfficerId,responsibleOfficerName:officer?.fullName}});
+  store.getProfiles().filter(p=>p.isActive && scopedCase && mayRead(p,scopedCase,store.getComplaintRegion(scopedCase)) && ["COMPETENT_AUTHORITY","BUREAU_HEAD"].includes(roleOf(p.role))).forEach(p=>store.addNotification({id:randomUUID(),recipientId:p.id,title:"Overlap coordination request",message:"An authorized overlap coordination record requires review.",notificationType:"Overlap Alert",referenceId:alert.id,referenceType:"overlap",isRead:false,createdAt:new Date().toISOString()}));
   return res.json({success:true});
 });
 
